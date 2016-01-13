@@ -1,0 +1,277 @@
+---
+title: "Prosopography Initial Imports"
+output: pdf_document
+---
+
+# Important Considerations
+
+Life events that ONLY concern Gronovius (his birth etc) have been explicitly dropped from analysis. Only interactions with other individuals are considered.
+
+# People Sheet Import
+
+```{r import.people}
+library(xlsx)
+people.sheet <- read.xlsx("EMLO_Sample_Prosopography_Spreadsheet_Gronovius_150518_version 4.xlsx","people", 
+                                   startRow = 1)
+## Drop empty third column:
+people.sheet <- people.sheet[,c(1,2,4:7)]
+people.sheet.colnames <- c("Person.Name","iperson_id","Person_aliases","other_info","Birth_year","Death_year")
+colnames(people.sheet) <- people.sheet.colnames
+```
+
+# Places Sheet Import
+
+```{r import.places}
+places.sheet <- read.xlsx("EMLO_Sample_Prosopography_Spreadsheet_Gronovius_150518_version 4.xlsx","places", 
+                                   startRow = 1)
+
+colnames(places.sheet)
+str(places.sheet)
+
+## Drop empty third column:
+places.sheet <- places.sheet[,c(1,2,4)]
+places.sheet.colnames <- c("Location_name","Location_id","Copy.of.type.ahead")
+colnames(places.sheet) <- places.sheet.colnames
+```
+
+
+# Life Events Import
+
+The code below imports the life events sheet and fixes column names.
+
+```{r import.gronovius.life.event}
+library(xlsx)
+
+gronovius.life.events <- read.xlsx("EMLO_Sample_Prosopography_Spreadsheet_Gronovius_150518_version 4.xlsx","life events", 
+                                   startRow = 443, # data headings are on row 443
+                                   endRow = 549) # the last data appears in row 549
+
+## Restrict import to data columns:
+gronovius.life.events <- gronovius.life.events[,1:31]
+
+## List correct names:
+correct.life.event.col.names <- c("Event.Label","Category","Event.or.Relationship.Type","Event.Name.or.Description",
+                       "Primary.Participant.Emlo_ID","Primary.Participant.Name","Primary.Participant.Role",
+                       "Secondary.Participant.Emlo_ID","Secondary.Participant.Name","Secondary.Participant.Type",
+                       "Secondary.Participant.Role","DateOne.Year","DateOne.Month","DateOne.Day","DateOne.Uncertainty",
+                       "DateTwo.Year","DateTwo.Month","DateTwo.Day","DateTwo.Uncertainty","Date.Type",
+                       "Location.Name","Location.Details","Location.Type.Ahead","Location.Region","Location.Country",
+                       "Location.Type","Textual.Source.Source","Textual.Source.Details","Who.Entered.Date",
+                       "Whose.Notes","Additional.Notes")
+## Update colnames
+colnames(gronovius.life.events) <- correct.life.event.col.names
+
+nrow(gronovius.life.events)
+```
+
+In the Excel file life events for Gronovius that did not involve other individuals are codified by ommitting a Secondary.Participant.Emlo_ID. For the purposes of this analysis we are simply dropping this data:
+
+```{r}
+gronovius.life.events <- gronovius.life.events[!is.na(gronovius.life.events$Secondary.Participant.Emlo_ID),]
+gronovius.life.events <- droplevels(gronovius.life.events)
+```
+
+
+There `nrow(unique(gronovius.life.events[,c("Primary.Participant.Emlo_ID","Secondary.Participant.Emlo_ID")]))` unique EMLO_ID connections, out of a total of `nrow(gronovius.life.events)` connections.
+
+```{r kable.of.connections}
+# Find unique connections (relying on EMLO_ID)
+unique_Connections <- unique(gronovius.life.events[,c("Primary.Participant.Emlo_ID","Secondary.Participant.Emlo_ID")])
+# Split into a list for easier usage in lapply operations later!
+unique_Connections <- split(unique_Connections, seq(nrow(unique_Connections)))
+
+```
+
+
+
+# Creating a Graph
+
+## Data Prep
+
+I've got 51 unique connections between individuals, but this is a multi-graph! Need to combine all data about connection types into an accessible data.frame that can be attached to the graph.
+
+The graph will be simple graph with each edge containing the number of interactions of each type between the two nodes
+
+So let's tally the interactions of each connected pair.
+
+```{r}
+## TO DO: Make this non-hard coded
+gronovius.edges <- data.frame("Primary.Emlo_ID" = character(),
+                              "Secondary.Emlo_ID" = character(),
+                              "Correspondence" = numeric(),
+                              "DeliverySpeech" = numeric(),
+                              "Employment" = numeric(),
+                              "FamilyRelationships" = numeric(),
+                              "FirstContact"= numeric(),
+                              "HoldingAnEcclesiasticalOffice" = numeric(),
+                              "Meeting" = numeric(),
+                              "PromotionToDegree" = numeric(),
+                              "SocialContact" = numeric(),
+                              "Study" = numeric(),
+                              "TeachingActivity" = numeric(),
+                              "Travel" = numeric()
+)
+## Function lazily creates a table of each Event.or.Relationship.Type and uses dcast to make into a wide df
+tally.connections <- function(partners) {
+  data <-
+  data.frame(data = factor(
+  as.vector(gronovius.life.events[gronovius.life.events$Primary.Participant.Emlo_ID == partners[[1]] &
+  gronovius.life.events$Secondary.Participant.Emlo_ID == partners[[2]],
+  "Event.or.Relationship.Type"]),
+  levels = levels(gronovius.life.events$Event.or.Relationship.Type)
+  ))
+  data <- as.data.frame(table(data))
+  totalConnections <- sum(data$Freq)
+  
+  # Use dcast to make df wide
+  data <- dcast(data, formula = . ~ data , value.var = "Freq", fill = NULL)
+  # Drop the first column which contains useless data
+  data[1] <- NULL
+  # Prepend vertex names
+  data <- cbind(Secondary.Emlo_ID = partners[[2]], data)
+  data <- cbind(Primary.Emlo_ID = partners[[1]], data)
+  data$Total.Connections <- totalConnections
+  data
+}
+
+
+# lapply the function across all unique_Connections with the side affect of populating the gronovius.edges df
+
+invisible(lapply(unique_Connections, function(x){
+  new.edge <- tally.connections(x)
+  gronovius.edges <<- rbind(gronovius.edges, new.edge)
+}))
+```
+
+# Basic Graph
+
+The following graph is output by igraph and is not interactive:
+
+```{r}
+library(igraph)
+library(ggplot2)
+gronovious.nodes <- unique(c(gronovius.edges$Primary.Emlo_ID,gronovius.edges$Secondary.Emlo_ID))
+gronoviusGraph <- graph.data.frame(gronovius.edges, gronovious.nodes, directed = FALSE)
+gronoviusGraph <- plot(gronoviusGraph, vertex.size=2, vertex.label=NA, edge.arrow.size=.2)
+```
+
+
+There are names missing from the people.sheet which make further analysis dubious. The missing names are as follows:
+
+```{r}
+missing.names <- setdiff(gronovious.nodes,people.sheet$iperson_id)
+missing.names <- unique(c(as.character(subset(gronovius.life.events, Primary.Participant.Emlo_ID %in% missing.names)$Primary.Participant.Name),
+  as.character(subset(gronovius.life.events, Secondary.Participant.Emlo_ID %in% missing.names)$Secondary.Participant.Name)
+))
+```
+
+
+# networkD3
+
+Using networkD3 for interactive graph.
+
+## simpleNetwork
+
+```{r}
+library(networkD3)
+# Simple Network:
+simpleNetwork(gronovius.edges)
+```
+
+## forceNetwork
+
+This works, it creates a very very simple force connected network:
+
+```{r}
+## ============  Force-directed Network:
+## Make a data.frame version of the nodes
+gronovious.nodes.df <- data.frame("node_id" = gronovious.nodes, "group" = rep(1, length(gronovious.nodes)))
+
+temp.names.list <- character()
+lapply(gronovious.nodes, function(x){
+  temp.names.list <<- append(temp.names.list,as.character(gronovius.life.events[gronovius.life.events$Secondary.Participant.Emlo_ID == x, "Secondary.Participant.Name"][1]))
+})
+temp.names.list[1] <- "Gronovius, Johann Frederick"
+gronovious.nodes.df$Person.Name <- temp.names.list
+
+## Index edges for use in forceNetwork
+gronovius.edges.indexed <- gronovius.edges
+## Use mapvalues to replace emlo IDs with their relative positions in the node list
+gronovius.edges.indexed$Primary.Emlo_ID <-
+  mapvalues(gronovius.edges.indexed$Primary.Emlo_ID,gronovious.nodes.df$node_id,0:(length(gronovious.nodes.df$node_id)-1))
+
+gronovius.edges.indexed$Secondary.Emlo_ID <-
+  mapvalues(gronovius.edges.indexed$Secondary.Emlo_ID,gronovious.nodes.df$node_id,0:(length(gronovious.nodes.df$node_id)-1))
+
+forceNetwork(Links = gronovius.edges.indexed, Nodes = gronovious.nodes.df,
+             Source = "Primary.Emlo_ID", Target = "Secondary.Emlo_ID",
+             NodeID = "Person.Name",
+             Group = "group",
+             Value = "Total.Connections")
+
+```
+
+Cross-reference EMLO_id with the people sheet, note that 
+
+```{r}
+
+documented.people <- intersect(gronovious.nodes,people.sheet$iperson_id)
+
+## Create data.frame with node names for the documented people.
+gronovius.nodes.documented <- data.frame(matrix(ncol = ncol(people.sheet), nrow = 0))
+colnames(gronovius.nodes.documented) <- colnames(people.sheet)
+
+# lapply to extract the individual's information:
+lapply(documented.people, function(x){
+  gronovius.nodes.documented <<- rbind(gronovius.nodes.documented, people.sheet[people.sheet$iperson_id == x,])
+  })
+
+gronovius.nodes.documented$Group <- rep(1,nrow(gronovius.nodes.documented))
+
+## Recode edges for documented individuals
+gronovius.edges.documented <- subset(gronovius.edges, Primary.Emlo_ID %in% documented.people & Secondary.Emlo_ID %in% documented.people)
+
+## Use mapvalues to replace emlo IDs with their relative positions in the node list
+gronovius.edges.documented$Primary.Emlo_ID <-
+  mapvalues(gronovius.edges.documented$Primary.Emlo_ID,gronovius.nodes.documented$iperson_id,0:(length(gronovius.nodes.documented$Person.Name)-1))
+
+gronovius.edges.documented$Secondary.Emlo_ID <-
+  mapvalues(gronovius.edges.documented$Secondary.Emlo_ID,gronovius.nodes.documented$iperson_id,0:(length(gronovius.nodes.documented$Person.Name)-1))
+
+forceNetwork(Links = gronovius.edges.documented, Nodes = gronovius.nodes.documented,
+             Source = "Primary.Emlo_ID", Target = "Secondary.Emlo_ID",
+             NodeID = "Person.Name",
+             Group = "Group",
+             Value = "Total.Connections")
+```
+
+# visNetwork
+
+Let's experiment with using the visNetwork package!
+
+```{r}
+library(visNetwork)
+## visNetwork depends on specifically labelled dataframes for the edges and nodes
+
+str(gronovius.nodes.documented)
+
+visN_nodes <- data.frame("id" = gronovius.nodes.documented$iperson_id,
+                         "title" = gronovius.nodes.documented$Person.Name)
+visN_edges <- data.frame("from" = gronovius.edges$Primary.Emlo_ID,
+                         "to" = gronovius.edges$Secondary.Emlo_ID)
+
+visNetwork(visN_nodes, visN_edges) %>% visNodes(
+  color = list(
+  background = "lightblue", border = "darkblue"
+  )
+  ) %>%
+  visInteraction(keyboard = TRUE, tooltipDelay = 0)
+
+
+visNetwork(visN_nodes, visN_edges) %>% visOptions(highlightNearest = TRUE) %>% visConfigure(enabled = TRUE)
+
+
+```
+
+
+

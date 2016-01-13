@@ -1,0 +1,232 @@
+---
+title: "Geographics Experiments"
+output: pdf_document
+---
+
+# Four Small French Cities
+
+Load a datafile containing french cities:
+
+```{r}
+four_french_cities <- read.csv("four-french-cities.csv")
+str(four_french_cities)
+```
+
+Add cokumns with numeric and text data:
+
+```{r}
+four_french_cities$Text.Label <- c("Cat","Dog","Horse","Rabbit")
+four_french_cities$Numeric.Label <- c(1,4,6,2)
+```
+
+## Visualise using plotly
+
+Just plot the locations on a map of France with labels:
+
+```{r}
+# map projection
+library(plotly)
+geo <- list(
+  scope = 'europe',
+  projection = list(type = 'Mercator'),
+  showland = TRUE,
+  landcolor = toRGB("gray95"),
+  countrycolor = toRGB("gray80")
+)
+plot_ly(four_french_cities, lon = Longitude.Decimal, lat = Latitude.Decimal, 
+        text = paste0("City: ",City,"<br>","Favourite Animal: ",Text.Label,
+                      "<br>","Favorite Number: ",Numeric.Label), 
+        type = 'scattergeo',
+        locationmode = 'country names', # Used for identifying places
+        marker = list(size = 5, color = 'red'),
+        inherit = FALSE,
+        hoverinfo = "text") %>%
+  layout(title = 'Four Cities in France)',
+         geo = geo, showlegend = FALSE, height=800)
+```
+
+Import journeys
+
+```{r}
+four_french_journeys <- read.csv("four-french-journeys.csv")
+four_french_journeys$Text.Label <- c("Cat","Dog","Horse","Rabbit")
+four_french_journeys$Numeric.Label <- c(1,4,6,2)
+## Add names to rows
+four_french_journeys$Descrip <- c("Flight 1","Flight 2","Flight 3","Flight 4")
+```
+
+Visualise just these journeys:
+
+```{r}
+geo <- list(
+  scope = 'europe',
+  projection = list(type = 'Mercator'),
+  showland = TRUE,
+  landcolor = toRGB("gray95"),
+  countrycolor = toRGB("gray80")
+)
+plot_ly(data = four_french_journeys, lon = list(Start.Longitude.Decimal, End.Longitude.Decimal), 
+        lat = list(Start.Latitude.Decimal, End.Latitude.Decimal), 
+        text = paste0("City: ",City,"<br>","Favourite Animal: ",Text.Label,
+                      "<br>","Favorite Number: ",Numeric.Label), 
+        type = 'scattergeo',
+        # locationmode = 'country names', # Used for identifying places
+        inherit = FALSE,
+        group = Descrip,
+        hoverinfo = "text",
+        mode = 'lines',
+        line = list(width = 1, color = 'red')) %>%
+  layout(title = 'Four Cities in France)',
+         geo = geo, showlegend = FALSE, height=800)
+```
+
+Show markers and lines
+
+```{r}
+geo <- list(
+  scope = 'europe',
+  projection = list(type = 'Mercator'),
+  showland = TRUE,
+  landcolor = toRGB("gray95"),
+  countrycolor = toRGB("gray80")
+)
+plot_ly(
+  four_french_cities, lon = Longitude.Decimal, lat = Latitude.Decimal,
+#   text = paste0(
+#   "City: ",City,"<br>","Favourite Animal: ",Text.Label,
+#   "<br>","Favorite Number: ",Numeric.Label
+#   ),
+  type = 'scattergeo',
+  locationmode = 'country names', # Used for identifying places
+  marker = list(size = 10, color = 'red'),
+  # hoverinfo = "text",
+  showlegend = FALSE
+  ) %>%
+  add_trace(lon = list(Start.Longitude.Decimal, End.Longitude.Decimal), lat = list(Start.Latitude.Decimal, End.Latitude.Decimal),
+            group = Descrip, data = four_french_journeys,
+            mode = 'lines', line = list(width = 2, color = 'red'),
+            type = 'scattergeo', showlegend = TRUE,
+            text = paste0(Descrip),
+            hoverinfo = "text") %>%
+  layout(
+  title = 'Four Cities in France)',
+  geo = geo, height = 800
+  )
+```
+
+Using GeoBoundingBox from the Wolfram Language:
+
+
+```{r}
+geo <- list(
+  lonaxis = list(range = list(-8.17751, 9.56036)),
+  lataxis = list(range = list(41.3657, 60.6396)),
+  projection = list(type = 'Mercator'),
+  showland = TRUE,
+  landcolor = "#EAEAAE",
+  countrycolor = toRGB("gray80"),
+  showcountries = TRUE,
+  showsubunits = TRUE,
+  subunitcolor = '#0000FF',
+  showrivers = TRUE,
+  showland = TRUE,
+  resolution = 50
+)
+plot_ly(
+  four_french_cities, lon = Longitude.Decimal, lat = Latitude.Decimal,
+  text = paste0(
+  "City: ",City,"<br>","Favourite Animal: ",Text.Label,
+  "<br>","Favorite Number: ",Numeric.Label
+  ),
+  type = 'scattergeo',
+  locationmode = 'country names', # Used for identifying places
+  marker = list(size = 10, color = 'red'),
+  hoverinfo = "text",
+  showlegend = FALSE
+  ) %>%
+  add_trace(lon = list(Start.Longitude.Decimal, End.Longitude.Decimal), lat = list(Start.Latitude.Decimal, End.Latitude.Decimal),
+            group = Descrip, data = four_french_journeys,
+            mode = 'lines', line = list(width = 2, color = 'red'),
+            type = 'scattergeo', showlegend = TRUE,
+            text = paste0(Descrip),
+            hoverinfo = "text") %>%
+  layout(
+  title = 'Four Cities in France)',
+  geo = geo, height = 800
+  )
+```
+
+# googVis
+
+Need to add a column contained formatted lat:long
+
+```{r}
+four_french_cities$LatLong <- paste0(four_french_cities$Latitude.Decimal,":",four_french_cities$Longitude.Decimal)
+
+str(four_french_cities)
+
+str(Andrew)
+
+M1 <- gvisMap(four_french_cities, locationvar = "LatLong", tipvar = "Text.Label",
+              options=list(showTip=TRUE, showLine=TRUE, enableScrollWheel=TRUE,
+                           mapType='hybrid',
+                           width=800,height=400))
+
+plot(M1)
+
+```
+
+
+# Dragons
+
+```{r}
+G2 <- gvisGeoMap(CityPopularity, locationvar='City', numvar='Popularity',
+                 options=list(region='US', height=350,
+                              dataMode='markers',
+                              colors='[0xFF8747, 0xFFB581, 0xc06000]'))
+plot(G2)
+```
+
+```{r}
+## Example with latitude and longitude information
+## Show Hurricane Andrew (1992) storm track
+G4 <- gvisGeoMap(Andrew, locationvar="LatLong", numvar="Speed_kt",
+                 hovervar="Category",
+                 options=list(height=350, region="US", dataMode="markers"))
+
+plot(G4)
+```
+
+# Plotly
+
+```{r}
+library(plotly)
+# airport locations
+air <- read.csv('https://raw.githubusercontent.com/plotly/datasets/master/2011_february_us_airport_traffic.csv')
+# flights between airports
+flights <- read.csv('https://raw.githubusercontent.com/plotly/datasets/master/2011_february_aa_flight_paths.csv')
+flights$id <- seq_len(nrow(flights))
+
+str(flights)
+
+# map projection
+geo <- list(
+  scope = 'north america',
+  projection = list(type = 'azimuthal equal area'),
+  showland = TRUE,
+  landcolor = toRGB("gray95"),
+  countrycolor = toRGB("gray80")
+)
+
+plot_ly(air, lon = long, lat = lat, text = airport, type = 'scattergeo',
+        locationmode = 'USA-states', marker = list(size = 2, color = 'red'),
+        inherit = FALSE) %>%
+  add_trace(lon = list(start_lon, end_lon), lat = list(start_lat, end_lat),
+            group = id, opacity = cnt/max(cnt), data = flights,
+            mode = 'lines', line = list(width = 1, color = 'red'),
+            type = 'scattergeo', locationmode = 'USA-states') %>%
+  layout(title = 'Feb. 2011 American Airline flight paths<br>(Hover for airport names)',
+         geo = geo, showlegend = FALSE, height=800)
+```
+
+

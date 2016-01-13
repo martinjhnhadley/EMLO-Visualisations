@@ -1,0 +1,168 @@
+---
+title: "EMLO Network Stats"
+output: pdf_document
+---
+
+## Import Data
+
+```{r import_data}
+library(shiny) # Some advanced functionality depends on the shiny package being loaded server-side, including plot.ly
+library(xlsx) # for reading excel file
+library(reshape2) # for dcast, count and others
+library(visNetwork) # for interactive graph
+library(plyr) # for data processing
+library(dplyr) # for data processing
+library(DT) # for nice tables
+library(igraph) # for network analysis
+library(ggplot2)
+
+### ============= Import People Sheet ========================= ###
+people.df <- read.csv("data/master_people_sheet.csv")
+## Sort by name
+people.df <- people.df[order(people.df$Person.Name),]
+
+
+### ============= Import Places Sheet =========================
+places.df <- read.csv("data/master_places_sheet.csv")
+
+### ============= Import All Life Events ========================= 
+
+life.events.df <- read.csv("data/master_life_events_sheet.csv")
+life.events.df$Primary.Participant.Emlo_ID <- as.character(life.events.df$Primary.Participant.Emlo_ID)
+life.events.df$Secondary.Participant.Emlo_ID <- as.character(life.events.df$Secondary.Participant.Emlo_ID)
+
+
+
+### ============= Non-self Referential Events (i.e. not births) =============
+
+multiparty.interactions <- life.events.df[!is.na(life.events.df$Secondary.Participant.Emlo_ID),]
+multiparty.interactions <- droplevels(multiparty.interactions)
+
+
+# ### ============== Old =========================
+# 
+# # find the individuals that are documented in the people sheet
+# documented.people <- intersect(c(multiparty.interactions$Primary.Participant.Emlo_ID,
+#                                  multiparty.interactions$Secondary.Participant.Emlo_ID),people.df$iperson_id)
+# # All 148 documented people exist in the multiparty.interactions, 245 undocumented people are included!
+# # Remove undocumented individuals from the multiparty.interactions
+# # Only 272 interactions survive out of a total of 555 multiparty interactions in the original dataset.
+# # For now re-assign multiparty.interactions to these documented interactions:
+# 
+# multiparty.interactions <- subset(multiparty.interactions,
+#                                   Primary.Participant.Emlo_ID %in% documented.people &
+#                                     Secondary.Participant.Emlo_ID %in% documented.people)
+
+### ============= Documented Interactions (including individuals with only self-referential events) ============= ###
+
+all.documented.interactions <- subset(life.events.df,
+       Primary.Participant.Emlo_ID %in% documented.people &
+         Secondary.Participant.Emlo_ID %in% documented.people)
+all.documented.interactions <- droplevels(all.documented.interactions)
+```
+
+# Show Network
+
+```{r all_interactions_edges}
+network.edges.function <- function(selected.interactions){
+  
+  edges.of.network <- data.frame("Primary.Emlo_ID" = character(),
+                                 "Secondary.Emlo_ID" = character(),
+                                 "Connected.Events" = character(),
+                                 "Correspondence" = numeric(),
+                                 "DeliverySpeech" = numeric(),
+                                 "Employment" = numeric(),
+                                 "FamilyRelationships" = numeric(),
+                                 "FirstContact"= numeric(),
+                                 "HoldingAnEcclesiasticalOffice" = numeric(),
+                                 "Meeting" = numeric(),
+                                 "PromotionToDegree" = numeric(),
+                                 "SocialContact" = numeric(),
+                                 "Study" = numeric(),
+                                 "TeachingActivity" = numeric(),
+                                 "Travel" = numeric()
+  )
+  # Find unique connections (relying on EMLO_ID)
+  unique_Connections <- unique(selected.interactions[,c("Primary.Participant.Emlo_ID","Secondary.Participant.Emlo_ID")])
+  # Split into a list for easier usage in lapply operations later!
+  unique_Connections <- split(unique_Connections, seq(nrow(unique_Connections)))
+  
+  tally.connections <- function(partners) {
+    paired.events <-
+      selected.interactions[selected.interactions$Primary.Participant.Emlo_ID == partners[[1]] &
+                              selected.interactions$Secondary.Participant.Emlo_ID == partners[[2]],]
+    tally.event.type <-
+      data.frame(data = factor(
+        as.vector(paired.events[,"Event.or.Relationship.Type"]),
+        levels = levels(selected.interactions$Event.or.Relationship.Type)
+      ))
+    tally.event.type <- as.data.frame(table(tally.event.type))
+    totalConnections <- sum(tally.event.type$Freq)
+    # Use dcast to make df wide
+    tally.event.type <-
+      dcast(
+        tally.event.type, formula = . ~ tally.event.type , value.var = "Freq", fill = NULL
+      )
+    # Drop the first column which contains useless data
+    tally.event.type[1] <- NULL
+    tally.event.type$Primary.Emlo_ID <- partners[[1]]
+    tally.event.type$Secondary.Emlo_ID <- partners[[2]]
+    tally.event.type$Total.Connections <- totalConnections
+    tally.event.type
+  }
+  
+  invisible(lapply(unique_Connections, function(x){
+    new.edge <- tally.connections(x)
+    edges.of.network <<- rbind(edges.of.network, new.edge)
+  }))
+  
+  # Remove edges where the secondary emlo id is NA
+  edges.of.network <- edges.of.network[!is.na(edges.of.network$Secondary.Emlo_ID),]
+  
+  # Return edges.of.network to the symbol whole.network_edges.of.network
+  edges.of.network
+}
+
+all_interactions <- network.edges.function(life.events.df)
+```
+
+```{r compute_graph_all_nodes}
+edges <- all_interactions[,c("Primary.Emlo_ID","Secondary.Emlo_ID")]
+nodes <- people.df$iperson_id
+
+str(life.events.df)
+
+nodes_in_edges <- unique(c(edges$Primary.Emlo_ID,edges$Secondary.Emlo_ID))
+length(nodes_in_edges)
+length(nodes)
+
+length(setdiff(nodes_in_edges,nodes))
+
+graph_with_all_nodes <- graph.data.frame(edges, nodes, directed = FALSE)
+```
+
+There are a total of `r nrow(people.df)` unique EMLO ids across the people sheets and detailed in the life events sheets, these can be converted directly into edges for a simple network visualisation. The graph below contains `r ecount(graph_with_all_nodes)` edges and `r vcount(graph_with_all_nodes)` unique individuals - the graph is highly sparse as most individuals are not related to one another.
+
+```{r show_graph_all_nodes}
+plot(graph_with_all_nodes, vertex.size=2, vertex.label=NA, edge.arrow.size=.2)
+```
+
+```{r compute_multiparty_interactions_graph}
+multiparty.interactions <- life.events.df[!is.na(life.events.df$Secondary.Participant.Emlo_ID),]
+multiparty.interactions <- droplevels(multiparty.interactions)
+multiparty.interactions.edges <- network.edges.function(multiparty.interactions)
+nodes <-unique(c(multiparty.interactions.edges$Primary.Emlo_ID,multiparty.interactions.edges$Secondary.Emlo_ID))
+
+graph_with_multiparty_edges <- graph.data.frame(edges, nodes, directed = FALSE)
+
+vcount(graph_with_multiparty_edges)
+```
+
+We can drop the life events which concern only one individual and visualise only the connected components:
+
+```{r show_multiparty_interactions_graph}
+plot(graph_with_multiparty_edges, vertex.size=2, vertex.label=NA, edge.arrow.size=.2)
+```
+
+
+
