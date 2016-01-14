@@ -6,6 +6,7 @@ people.df$Person.Name <- as.character(people.df$Person.Name)
 ## Sort by name
 people.df <- people.df[order(people.df$Person.Name),]
 
+
 ## ===== Add surnames
 ## Empty character vector
 surnames.list <- as.character()

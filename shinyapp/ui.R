@@ -2,7 +2,7 @@
 
 library(shiny) # Some advanced functionality depends on the shiny package being loaded client-side, including plot.ly
 library(visNetwork)
-
+library(networkD3)
 
 ## ==== Global Variables (client-side)
 
@@ -24,8 +24,9 @@ shinyUI(fluidPage(
   navbarPage(
     "", id = 'someID',
     source("ui/landing-tab.R", local = TRUE)$value,
+    source("ui/networkD3-wholeNetwork.R", local = TRUE)$value,
 #     # source("ui/select-individual.R", local = TRUE)$value,
-    source("ui/wholeNetworkVisualisation.R", local = TRUE)$value,
+    # source("ui/wholeNetworkVisualisation.R", local = TRUE)$value,
     source("ui/select-two-individuals.R", local = TRUE)$value
 #     source("ui/navbar-menu-tab.R", local = TRUE)$value
   ))
