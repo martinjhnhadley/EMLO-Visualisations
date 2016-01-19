@@ -161,10 +161,6 @@ output$networkD3_wholeNetwork_NumberOfExcluded <- renderUI({
   
   selected.people <- unique(c(selected.interactions$Primary.Participant.Emlo_ID, selected.interactions$Secondary.Participant.Emlo_ID))
   
-  print(paste0("Excluded: ", input$networkD3_wholeNetwork_ExcludedCategory))
-  print(paste0("length selected: ", nrow(selected.interactions)))
-
-  
   
   HTML(
     paste0(
@@ -176,69 +172,190 @@ output$networkD3_wholeNetwork_NumberOfExcluded <- renderUI({
   
 })
 
+### ==== WORKING AREA =====
 
-output$networkD3_wholeNetwork <- renderForceNetwork({
-  
-  ## If not loaded yet, stop
-  
-  if (is.null(input$networkD3_wholeNetwork_highlightedCategory))
-    return()
-  
+networkD3_wholeNetwork_nodes <- reactive({
   ## Set selected.interactions as all multiparty.interactions
   selected.interactions <- multiparty.interactions
   
   ## Drop excluded categoties from multiparty interactions
-  selected.interactions <- selected.interactions[selected.interactions$Event.or.Relationship.Type != input$networkD3_wholeNetwork_ExcludedCategory,]
+  selected.interactions <-
+    selected.interactions[selected.interactions$Event.or.Relationship.Type != input$networkD3_wholeNetwork_ExcludedCategory,]
   
   
   ## Apply network.edges.function to selected.interactions
   edges <- network.edges.function(selected.interactions)
   ## Get nodes from edges
-  nodes.of.network <- unique(c(edges$Primary.Emlo_ID,edges$Secondary.Emlo_ID))
-
+  nodes.of.network <-
+    unique(c(edges$Primary.Emlo_ID,edges$Secondary.Emlo_ID))
+  
   ## Subset people.df by nodes in edges
   nodes <- subset(people.df, iperson_id %in% nodes.of.network)
+  
+  networkD3_nodes <- data.frame(
+    "name" = 0:(nrow(nodes) - 1),
+    "group" = rep(1,nrow(nodes)),
+    "size" = rep(1,nrow(nodes)),
+    "surname" = nodes$Surname,
+    "emlo_id" = nodes$iperson_id
+  )
+  ## Return for use
+  
+  networkD3_nodes
+})
 
-  ## Click script
+networkD3_wholeNetwork_edges <- reactive({
+  ## Set selected.interactions as all multiparty.interactions
+  selected.interactions <- multiparty.interactions
   
-  MyClickScript <- 
-    "      d3.select(this).select('circle').transition().duration(750).attr('r', 30);
-    Shiny.onInputChange('current_node_id', nodes)"
+  ## Drop excluded categoties from multiparty interactions
+  selected.interactions <-
+    selected.interactions[selected.interactions$Event.or.Relationship.Type != input$networkD3_wholeNetwork_ExcludedCategory,]
   
-  ## Provide facility to highlight edges
   
-  networkD3_wholeNetwork_highlightedCategory <- "FamilyRelationship"
+  ## Apply network.edges.function to selected.interactions
+  edges <- network.edges.function(selected.interactions)
+  ## Get nodes from edges
+  nodes.of.network <-
+    unique(c(edges$Primary.Emlo_ID,edges$Secondary.Emlo_ID))
   
-  ## Create df for networkD3
+  ## Subset people.df by nodes in edges
+  nodes <- subset(people.df, iperson_id %in% nodes.of.network)
   
-  ## Map node ids to numbers, recalling nodes MUST go from 0 to nrow(data)-1
-  networkD3_nodes <- data.frame("name" = 0:(nrow(nodes)-1),
-                                "group" = rep(1,nrow(nodes)),
-                                "size" = rep(1,nrow(nodes)),
-                                "surname" = nodes$Surname)
+  networkD3_edges <-
+    data.frame(
+      "source" = as.numeric(
+        mapvalues(
+          edges$Primary.Emlo_ID, from = nodes$iperson_id, to = 0:(nrow(nodes) - 1),warn_missing = FALSE
+        )
+      ),
+      "target" = as.numeric(
+        mapvalues(
+          edges$Secondary.Emlo_ID, from = nodes$iperson_id, to = 0:(nrow(nodes) -
+                                                                      1),warn_missing = FALSE
+        )
+      ),
+      
+      
+      ## Times the total number of connections by 10 and add 1 if of the highlighted category type
+      ## Allows for testing off oddness for colour and size for the edge width
+      "value" = 20 * edges$Total.Connections + edges[,c(input$networkD3_wholeNetwork_highlightedCategory)],
+      "LinkColor" = c(rep("lightblue",100),rep("red",nrow(edges) -
+                                                 100))
+    )
+  ## return for use
   
-  ## Create vector encoding colours for selected event type:
-  
-  networkD3_wholeNetwork_highlightedCategory <- "FamilyRelationship"
-  
-  networkD3_edges <- data.frame("source" = as.numeric(mapvalues(edges$Primary.Emlo_ID, from = nodes$iperson_id, to = 0:(nrow(nodes)-1),warn_missing = FALSE)),
-                                "target" = as.numeric(mapvalues(edges$Secondary.Emlo_ID, from = nodes$iperson_id, to = 0:(nrow(nodes)-1),warn_missing = FALSE)),
+  networkD3_edges
+})
 
-                                
-                                ## Times the total number of connections by 10 and add 1 if of the highlighted category type
-                                ## Allows for testing off oddness for colour and size for the edge width
-                                "value" = 10*edges$Total.Connections+edges[,c(input$networkD3_wholeNetwork_highlightedCategory)],
-                                "LinkColor" = c(rep("lightblue",100),rep("red",nrow(edges)-100)))
+output$networkD3_wholeNetwork <- renderForceNetwork({
+  ## If not loaded yet, stop
   
-  forceNetwork(Links = networkD3_edges, Nodes = networkD3_nodes, Source = "source",
-               Target = "target", Value = "value", NodeID = "surname",zoom = TRUE,
-               Group = "group",
-               fontSize = 10,
-               # linkColour = rep("#bf3eff",nrow(networkD3_edges)),
-               # linkColour = linkColors.by.highlight,
-               linkColour = JS('function(l) { return l.value % 2 == 0 ? "#ff6666" : "lightblue" }'),
-               opacityNoHover = FALSE)
-  })
+  if (is.null(input$networkD3_wholeNetwork_highlightedCategory))
+    return()
+  
+    networkD3_wholeNetwork_click_script <- "d3.select(this).select('circle').transition().duration(750).attr('r', 30);
+      Shiny.onInputChange('current_node_id', d.index + 1)"
+  
+  
+  ## Script gets row:
+#   networkD3_wholeNetwork_click_script <- 'alert("You clicked " + d.name + " which is in row " +
+#         (d.index + 1) +  " of your original R data frame");'
+  
+  networkD3_edges <- networkD3_wholeNetwork_edges()
+  
+  networkD3_nodes <- networkD3_wholeNetwork_nodes()
+  
+  forceNetwork(
+    Links = networkD3_edges, Nodes = networkD3_nodes, Source = "source",
+    Target = "target", Value = "value", NodeID = "surname", zoom = TRUE,
+    Group = "group",
+    fontSize = 10,
+    # linkColour = rep("#bf3eff",nrow(networkD3_edges)),
+    # linkColour = linkColors.by.highlight,
+    linkColour = JS('function(l) { return l.value % 2 == 0 ? "#ff6666" : "lightblue" }'),
+    opacityNoHover = TRUE,
+    clickAction = networkD3_wholeNetwork_click_script
+  )
+})
+
+output$network3D_wholeNetwork_selected_individual_name <- renderText({
+  
+  nodes <- networkD3_wholeNetwork_nodes()
+  
+  selected.emlo.id <- nodes[input$current_node_id,"emlo_id"]
+  
+  people.df[people.df$iperson_id == selected.emlo.id,"Person.Name"]
+  
+})
+
+### ==== WORKING AREA END ======
+
+
+# ## ==== OLD: Working
+#
+# output$networkD3_wholeNetwork <- renderForceNetwork({
+#   
+#   ## If not loaded yet, stop
+#   
+#   if (is.null(input$networkD3_wholeNetwork_highlightedCategory))
+#     return()
+#   
+#   ## Set selected.interactions as all multiparty.interactions
+#   selected.interactions <- multiparty.interactions
+#   
+#   ## Drop excluded categoties from multiparty interactions
+#   selected.interactions <- selected.interactions[selected.interactions$Event.or.Relationship.Type != input$networkD3_wholeNetwork_ExcludedCategory,]
+#   
+#   
+#   ## Apply network.edges.function to selected.interactions
+#   edges <- network.edges.function(selected.interactions)
+#   ## Get nodes from edges
+#   nodes.of.network <- unique(c(edges$Primary.Emlo_ID,edges$Secondary.Emlo_ID))
+# 
+#   ## Subset people.df by nodes in edges
+#   nodes <- subset(people.df, iperson_id %in% nodes.of.network)
+# 
+#   ## Click script
+#   
+#   MyClickScript <- 
+#     "      d3.select(this).select('circle').transition().duration(750).attr('r', 30);
+#     Shiny.onInputChange('current_node_id', nodes)"
+#   
+#   ## Provide facility to highlight edges
+#   
+#   networkD3_wholeNetwork_highlightedCategory <- "FamilyRelationship"
+#   
+#   ## Create df for networkD3
+#   
+#   ## Map node ids to numbers, recalling nodes MUST go from 0 to nrow(data)-1
+#   networkD3_nodes <- data.frame("name" = 0:(nrow(nodes)-1),
+#                                 "group" = rep(1,nrow(nodes)),
+#                                 "size" = rep(1,nrow(nodes)),
+#                                 "surname" = nodes$Surname)
+#   
+#   ## Create vector encoding colours for selected event type:
+#   
+#   networkD3_wholeNetwork_highlightedCategory <- "FamilyRelationship"
+#   
+#   networkD3_edges <- data.frame("source" = as.numeric(mapvalues(edges$Primary.Emlo_ID, from = nodes$iperson_id, to = 0:(nrow(nodes)-1),warn_missing = FALSE)),
+#                                 "target" = as.numeric(mapvalues(edges$Secondary.Emlo_ID, from = nodes$iperson_id, to = 0:(nrow(nodes)-1),warn_missing = FALSE)),
+# 
+#                                 
+#                                 ## Times the total number of connections by 10 and add 1 if of the highlighted category type
+#                                 ## Allows for testing off oddness for colour and size for the edge width
+#                                 "value" = 10*edges$Total.Connections+edges[,c(input$networkD3_wholeNetwork_highlightedCategory)],
+#                                 "LinkColor" = c(rep("lightblue",100),rep("red",nrow(edges)-100)))
+#   
+#   forceNetwork(Links = networkD3_edges, Nodes = networkD3_nodes, Source = "source",
+#                Target = "target", Value = "value", NodeID = "surname", zoom = TRUE,
+#                Group = "group",
+#                fontSize = 10,
+#                # linkColour = rep("#bf3eff",nrow(networkD3_edges)),
+#                # linkColour = linkColors.by.highlight,
+#                linkColour = JS('function(l) { return l.value % 2 == 0 ? "#ff6666" : "lightblue" }'),
+#                opacityNoHover = FALSE)
+#   })
 
 
 ### ====================================== Whole Network Page: visNetwork ============================================

@@ -23,20 +23,6 @@ tabPanel("networkD3 - Whole Network",
                   h2("Categories to Exclude from Visualisation"),
                   uiOutput("networkD3_wholeNetwork_ExcludedCategoriesUI"),
                   uiOutput("networkD3_wholeNetwork_NumberOfExcluded")
-                  #                          a(id = "toggleDateOptions", "Date Options", href = "#"),
-                  #                          shinyjs::hidden(
-                  #                            div(id = "dateOptions",
-                  #                                uiOutput("include_interactions_without_dates_UI")
-                  #                            )
-                  #                          ),
-                  #                          HTML("<br>"),
-                  #                          a(id = "toggleAdditionalOptions", "Exclude Categories Options", href = "#"),
-                  #                          shinyjs::hidden(
-                  #                            div(id = "additionalOptions",
-                  #                                "Insert stuff here",
-                  #                                "Insert other stuff here"
-                  #                            )
-                  #                          )
            ),
            column(width = 8,
                   forceNetworkOutput("networkD3_wholeNetwork",width = "100%", height = "600px"))
@@ -44,7 +30,7 @@ tabPanel("networkD3 - Whole Network",
          conditionalPanel("typeof input.current_node_id !== 'undefined'",
                           wellPanel(HTML(
                             paste0(
-                              "<h2>",textOutput("selected.individual.name", inline = TRUE),"'s Connections</h2>",
+                              "<h2>",textOutput("network3D_wholeNetwork_selected_individual_name", inline = TRUE),"'s Connections</h2>",
                               "<p>The table below shows all life events involving the selected individual, 
                               note the controller allows columns to be added and removed easily.</p>"
                             ))),
