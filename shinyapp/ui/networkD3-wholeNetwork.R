@@ -19,8 +19,9 @@ tabPanel("networkD3 - Whole Network",
          
          fluidRow(
            column(width = 4, 
+                  uiOutput("networkD3_wholeNetwork_show_timeslider_UI"),
+                  uiOutput("networkD3_wholeNetwork_time_period_of_interest_UI"),
                   uiOutput("networkD3_wholeNetwork_HighlightedCategoryUI"),
-                  h2("Categories to Exclude from Visualisation"),
                   uiOutput("networkD3_wholeNetwork_ExcludedCategoriesUI"),
                   uiOutput("networkD3_wholeNetwork_NumberOfExcluded")
            ),
@@ -34,8 +35,8 @@ tabPanel("networkD3 - Whole Network",
                               "<p>The table below shows all life events involving the selected individual, 
                               note the controller allows columns to be added and removed easily.</p>"
                             ))),
-                          uiOutput("connected_life_events_columns_to_show_UI"),
-                          DT::dataTableOutput("selected_node")
+                          uiOutput("networkD3_whole_network_connected_life_events_columns_to_show_UI"),
+                          DT::dataTableOutput("networkD3_whole_network_selected_node")
                             )
          
          
