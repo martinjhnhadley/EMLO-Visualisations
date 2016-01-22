@@ -1,5 +1,5 @@
 
-tabPanel("networkD3 - Whole Network",
+tabPanel("visNetwork - Whole Network",
          wellPanel(HTML(
            paste(
              "<h1>Proof of Concept</h1>",
@@ -19,24 +19,20 @@ tabPanel("networkD3 - Whole Network",
          
          fluidRow(
            column(width = 4, 
-                  uiOutput("networkD3_wholeNetwork_show_timeslider_UI"),
-                  uiOutput("networkD3_wholeNetwork_time_period_of_interest_UI"),
-                  uiOutput("networkD3_wholeNetwork_HighlightedCategoryUI"),
-                  uiOutput("networkD3_wholeNetwork_ExcludedCategoriesUI"),
-                  uiOutput("networkD3_wholeNetwork_NumberOfExcluded")
+                  uiOutput("visNetwork_wholeNetwork_show_timeslider_UI"),
+                  uiOutput("visNetwork_wholeNetwork_time_period_of_interest_UI"),
+                  uiOutput("visNetwork_wholeNetwork_HighlightedCategoryUI"),
+                  uiOutput("visNetwork_wholeNetwork_ExcludedCategoriesUI"),
+                  uiOutput("visNetwork_wholeNetwork_NumberOfExcluded")
            ),
            column(width = 8,
-                  forceNetworkOutput("networkD3_wholeNetwork",width = "100%", height = "600px"))
+                  visNetworkOutput("visNetwork_wholeNetwork",width = "100%", height = "600px"))
          ),
+         
          conditionalPanel("typeof input.current_node_id !== 'undefined'",
-                          wellPanel(HTML(
-                            paste0(
-                              "<h2>",textOutput("networkD3_wholeNetwork_selected_individual_name", inline = TRUE),"'s Connections</h2>",
-                              "<p>The table below shows all life events involving the selected individual, 
-                              note the controller allows columns to be added and removed easily.</p>"
-                            ))),
-                          uiOutput("networkD3_whole_network_connected_life_events_columns_to_show_UI"),
-                          DT::dataTableOutput("networkD3_whole_network_selected_node")
+                          uiOutput("visNetwork_wholeNetwork_selected_node_info"),
+                          uiOutput("visNetwork_whole_network_connected_life_events_columns_to_show_UI"),
+                          DT::dataTableOutput("visNetwork_whole_network_selected_node")
                             )
          
          

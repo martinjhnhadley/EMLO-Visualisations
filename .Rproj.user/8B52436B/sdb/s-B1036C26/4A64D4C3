@@ -1,0 +1,17 @@
+{
+    "contents" : "### ============= Import People Sheet ========================= ###\n\npeople.df <- read.csv(\"data/master_people_sheet.csv\")\n## Convert name to character vector for simplicity later\npeople.df$Person.Name <- as.character(people.df$Person.Name)\n## Sort by name\npeople.df <- people.df[order(people.df$Person.Name),]\n\n\n## ===== Add surnames\n## Empty character vector\nsurnames.list <- as.character()\n## If there's a comma assume first word is surname, otherwise keep whole name\nadd.surname.fn <- function(name){\n  if(grepl(\",\",name)){\n    surnames.list <<- append(surnames.list, sapply(strsplit(name, \",\"), \"[[\", 1))\n  } else {\n    surnames.list <<- append(surnames.list,name)\n  }\n}\n## lapply invisibly\ninvisible(lapply(people.df$Person.Name,function(x)add.surname.fn(x)))\n## Append surname column to people.df\npeople.df$Surname <- surnames.list\n\n### ============= Import Places Sheet =========================\nplaces.df <- read.csv(\"data/master_places_sheet.csv\")\n\n### ============= Import All Life Events ========================= \n\nlife.events.df <- read.csv(\"data/master_life_events_sheet.csv\")\nlife.events.df$Primary.Participant.Emlo_ID <- as.character(life.events.df$Primary.Participant.Emlo_ID)\nlife.events.df$Secondary.Participant.Emlo_ID <- as.character(life.events.df$Secondary.Participant.Emlo_ID)\n\n### ============= Non-self Referential Events (i.e. not births) =============\n\nmultiparty.interactions <- life.events.df[!is.na(life.events.df$Secondary.Participant.Emlo_ID),]\nmultiparty.interactions <- droplevels(multiparty.interactions)\n\n\n# ### ============== Old =========================\n# \n# # find the individuals that are documented in the people sheet\n# documented.people <- intersect(c(multiparty.interactions$Primary.Participant.Emlo_ID,\n#                                  multiparty.interactions$Secondary.Participant.Emlo_ID),people.df$iperson_id)\n# # All 148 documented people exist in the multiparty.interactions, 245 undocumented people are included!\n# # Remove undocumented individuals from the multiparty.interactions\n# # Only 272 interactions survive out of a total of 555 multiparty interactions in the original dataset.\n# # For now re-assign multiparty.interactions to these documented interactions:\n# \n# multiparty.interactions <- subset(multiparty.interactions,\n#                                   Primary.Participant.Emlo_ID %in% documented.people &\n#                                     Secondary.Participant.Emlo_ID %in% documented.people)\n\n# ### ============= Documented Interactions (including individuals with only self-referential events) ============= ###\n# \n# all.documented.interactions <- subset(life.events.df,\n#        Primary.Participant.Emlo_ID %in% documented.people &\n#          Secondary.Participant.Emlo_ID %in% documented.people)\n# \n# all.documented.interactions <- droplevels(all.documented.interactions)\n\n\n",
+    "created" : 1453375851302.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3004313776",
+    "id" : "4A64D4C3",
+    "lastKnownWriteTime" : 1452784124,
+    "path" : "~/Github/EMLO-Visualisations/shinyapp/server/data-processing.R",
+    "project_path" : "shinyapp/server/data-processing.R",
+    "properties" : {
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

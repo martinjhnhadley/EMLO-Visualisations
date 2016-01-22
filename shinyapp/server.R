@@ -9,6 +9,7 @@ library(DT) # for nice tables
 library(igraph) # for network analysis
 library(ggplot2)
 library(networkD3)
+library(scales)
 # library(shinyjs) could be useful for hiding content but appears to cause other issues
 
 

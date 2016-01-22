@@ -1,0 +1,17 @@
+{
+    "contents" : "## ==== Packages to load for server\n\nlibrary(shiny) # Some advanced functionality depends on the shiny package being loaded server-side, including plot.ly\nlibrary(reshape2) # for dcast, count and others\nlibrary(visNetwork) # for interactive graph\nlibrary(plyr) # for data processing\nlibrary(dplyr) # for data processing\nlibrary(DT) # for nice tables\nlibrary(igraph) # for network analysis\nlibrary(ggplot2)\nlibrary(networkD3)\nlibrary(scales)\n# library(shinyjs) could be useful for hiding content but appears to cause other issues\n\n\n## ==== Global Variables (server-side)\n\n## ==== Tab selection variables (these are required to support anchor links, see within shinyServer)\nurl1 <- url2 <- \"\"\n\n## ==== shinyServer\n\nshinyServer(function(input, output, session){\n  \n  \n  source(\"server/data-processing.R\",local = TRUE)\n  source(\"server/visualisations-and-ui.R\",local = TRUE)\n\n  \n  \n## ===== Allow for linking to individual tabPanels, code provided by daattali here https://github.com/rstudio/shiny/issues/772#issuecomment-112919149\n## ===== If you find this useful then consider upvoting his answer on SE http://stackoverflow.com/a/33025000/1659890\n  \n  values <- reactiveValues(myurl = c(), parent_tab = \"\")\n  \n  observe({\n    # make sure this is called on pageload (to look at the query string)\n    # and whenever any tab is successfully changed.\n    # If you want to stop running this code after the initial load was\n    # successful so that further manual tab changes don't run this,\n    # maybe just have some boolean flag for that.\n    \n    input$someID\n    input$tab_sub_tabs\n    query <- parseQueryString(session$clientData$url_search)\n    url <- query$url\n    if (is.null(url)) {\n      url <- \"\"\n    }\n    \n    # \"depth\" is how many levels the url in the query string is\n    depth <- function(x) length(unlist(strsplit(x,\"/\")))\n    \n    # if we reached the end, done!\n    if (length(values$myurl) == depth(url)) {\n      return()\n    }\n    # base case - need to tell it what the first main nav name is\n    else if (length(values$myurl) == 0) {\n      values$parent_tab <- \"someID\"\n    }\n    # if we're waiting for a tab switch but the UI hasn't updated yet\n    else if (is.null(input[[values$parent_tab]])) {\n      return()\n    }\n    # same - waiting for a tab switch\n    else if (tail(values$myurl, 1) != input[[values$parent_tab]]) {\n      return()\n    }\n    # the UI is on the tab that we last switched to, and there are more\n    # tabs to switch inside the current tab\n    # make sure the tabs follow the naming scheme\n    else {\n      values$parent_tab <- paste0(tail(values$myurl, 1), \"_tabs\")\n    }\n    \n    # figure out the id/value of the next tab\n    new_tab <- unlist(strsplit(url, \"/\"))[length(values$myurl)+1]\n    \n    # easy peasy.\n    updateTabsetPanel(session, values$parent_tab, new_tab)\n    values$myurl <- c(values$myurl, new_tab)\n  })\n  \n})",
+    "created" : 1453373333363.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "827854615",
+    "id" : "1599088A",
+    "lastKnownWriteTime" : 1453373343,
+    "path" : "~/Github/EMLO-Visualisations/shinyapp/server.R",
+    "project_path" : "shinyapp/server.R",
+    "properties" : {
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "type" : "r_source"
+}
