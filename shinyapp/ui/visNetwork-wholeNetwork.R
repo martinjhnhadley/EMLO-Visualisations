@@ -10,9 +10,6 @@ tabPanel("visNetwork - Whole Network",
              "<li>The controls on the left allow the user to select the categories/event types they are interested in</li>",
              "<li>Click a node highlights connected individuals, scroll down to see information</li>",
              "</ul>",
-             "<p>Please note no effort has been made to catch errors and while loading error messages
-             may show - this can be fixed with minimal effort.</p>",
-             "<p><em>Note:</em> Disabling 'hierarchical layout' is likely to create a mess at present</p>",
              sep = ""
            )
          )),
