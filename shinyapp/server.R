@@ -19,11 +19,11 @@ library(scales)
 url1 <- url2 <- ""
 
 ## ==== shinyServer
-
+source("server/data-processing.R",local = TRUE)
 shinyServer(function(input, output, session){
   
   
-  source("server/data-processing.R",local = TRUE)
+  
   source("server/visualisations-and-ui.R",local = TRUE)
 
   
