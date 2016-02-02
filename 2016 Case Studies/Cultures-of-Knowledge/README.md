@@ -1,7 +1,3 @@
-# Early Modern Letters Online
+# Cultures of Knowledge
 
-This case 
-
-Visualisations of a subset of data included in the Early Modern Letters Online (EMLO) project funded by Cultures of Knowledge Project at Oxford University - http://emlo.bodleian.ox.ac.uk/
-
-This repository provides a version control system for a proof of concept Shiny App for exploring a subset of data that is excluded via the .gitignore file. For questions about the visualisation contact martin.hadley(at)it.ox.ac.uk, in the case of questions about EMLO please contact emlo(at)bodleian.ox.ac.uk
+This case study considers a subset of the [Culture's of Knowlege](http://www.culturesofknowledge.org/) data, specifically 1695 individuals from the [Early Modern Letters Online](emlo.bodleian.ox.ac.uk) repository.
