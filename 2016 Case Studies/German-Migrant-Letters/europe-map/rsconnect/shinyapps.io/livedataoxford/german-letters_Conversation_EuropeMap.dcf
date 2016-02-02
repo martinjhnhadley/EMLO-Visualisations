@@ -1,0 +1,9 @@
+name: german-letters_Conversation_EuropeMap
+account: livedataoxford
+server: shinyapps.io
+bundleId: 358901
+url:
+        https://livedataoxford.shinyapps.io/german-letters_Conversation_EuropeMap/
+when: 1453807865.84967
+asMultiple: FALSE
+asStatic: FALSE
