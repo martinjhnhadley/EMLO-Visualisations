@@ -1,8 +1,8 @@
 name: emlo-test
 account: livedataoxford
 server: shinyapps.io
-bundleId: 354173
+bundleId: 364723
 url: https://livedataoxford.shinyapps.io/emlo-test/
-when: 1453373908.93829
+when: 1454453154.52746
 asMultiple: FALSE
 asStatic: FALSE
