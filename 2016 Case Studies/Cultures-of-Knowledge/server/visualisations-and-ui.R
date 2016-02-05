@@ -282,7 +282,7 @@ visNetwork_wholeNetwork_edges <- reactive({
       ## Times the total number of connections by 10 and add 1 if of the highlighted category type
       ## Allows for testing off oddness for colour and size for the edge width
       "Value" = 20 * edges$Total.Connections + edges[,c(input$visNetwork_wholeNetwork_highlightedCategory)],
-      "EdgeColor" = mapvalues(edges[,c(input$visNetwork_wholeNetwork_highlightedCategory)] > 0,c(TRUE,FALSE),c("darkblue","#ff6666"))
+      "EdgeColor" = mapvalues(edges[,c(input$visNetwork_wholeNetwork_highlightedCategory)] > 0,c(TRUE,FALSE),c("#ff6666","lightblue"))
     )
   
   ## return for use
