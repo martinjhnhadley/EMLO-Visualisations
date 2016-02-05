@@ -12,8 +12,14 @@ colnames(cruk.nodes.df) <- tolower(colnames(cruk.nodes.df))
 colnames(cruk.edges.df)[colnames(cruk.edges.df) == c("source", "target")] <- c("from","to")
 ## the vertex tooltip is added by way of the title column:
 cruk.nodes.df$title <- cruk.nodes.df$label
+
+## Extract only people
+cruk.nodes.df <- cruk.nodes.df[cruk.nodes.df$type == "Person",]
+## Extract only edges that concern people
+cruk.edges.df <- subset(cruk.edges.df, from %in% cruk.nodes.df$id & to %in% cruk.nodes.df$id)
 ## edge width is specified by value
 cruk.edges.df$value <- (cruk.edges.df$weight == 10) + 1
+
 
 # ## Circle is very dense
 # visNetwork(node = cruk.nodes.df, edges = cruk.edges.df) %>% 
