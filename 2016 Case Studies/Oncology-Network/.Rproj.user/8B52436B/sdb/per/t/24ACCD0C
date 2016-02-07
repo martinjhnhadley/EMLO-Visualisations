@@ -1,0 +1,18 @@
+{
+    "contents" : "library(igraph)\nlibrary(visNetwork)\nlibrary(dplyr)\nlibrary(shiny)\n\ncruk.nodes.df <- read.csv(\"data/CRUK-oxford-nodes.csv\")\ncruk.edges.df <- read.csv(\"data/CRUK-oxford-edges.csv\")\n## colnames need to be lower case\ncolnames(cruk.edges.df) <- tolower(colnames(cruk.edges.df))\ncolnames(cruk.nodes.df) <- tolower(colnames(cruk.nodes.df))\n## visNetwork wants from and to not source and target\ncolnames(cruk.edges.df)[colnames(cruk.edges.df) == c(\"source\", \"target\")] <- c(\"from\",\"to\")\n## the vertex tooltip is added by way of the title column:\ncruk.nodes.df$title <- cruk.nodes.df$label\n\n## Extract only people\ncruk.nodes.df <- cruk.nodes.df[cruk.nodes.df$type == \"Person\",]\n## Extract only edges that concern people\ncruk.edges.df <- subset(cruk.edges.df, from %in% cruk.nodes.df$id & to %in% cruk.nodes.df$id)\n## edge width is specified by value\ncruk.edges.df$value <- (cruk.edges.df$weight == 10) + 1\n\n\n# ## Circle is very dense\n# visNetwork(node = cruk.nodes.df, edges = cruk.edges.df) %>% \n#   visNodes(label = FALSE) %>%\n#   visIgraphLayout(layout = \"layout_in_circle\", type = \"full\") %>%\n#   visInteraction(tooltipDelay = 0.2, hideEdgesOnDrag = TRUE, dragNodes = FALSE, dragView = FALSE, zoomView = TRUE) %>%\n#   visOptions(highlightNearest = TRUE)\n#   \n\nshinyServer(\n  function(input, output, sessions){\n    \n    output$layout_control_UI <- renderUI({\n      selectInput(\"layout_control\", \n                  choices = c(\"layout_nicely\",\"layout_as_tree\", \"layout_in_circle\",\"layout.grid\"),\n                  selected = \"layout_nicely\", multiple = FALSE,\n                  label = \"Layout\")\n    })\n    \n    \n    \n    output$crukNetwork <- renderVisNetwork({\n      \n      if(is.null(input$layout_control)){\n        return()\n      }\n      \n      visNetwork(node = cruk.nodes.df, edges = cruk.edges.df, width = \"100%\") %>% \n        visNodes(label = FALSE) %>%\n        visIgraphLayout(layout = input$layout_control) %>%\n        visInteraction(tooltipDelay = 0.2, hideEdgesOnDrag = TRUE, dragNodes = TRUE, dragView = FALSE, zoomView = TRUE) %>%\n        visOptions(highlightNearest = TRUE) %>%\n        visInteraction(navigationButtons = TRUE)\n      \n    })\n    \n  }\n)",
+    "created" : 1454680741553.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2893722428",
+    "id" : "24ACCD0C",
+    "lastKnownWriteTime" : 1454685290,
+    "path" : "~/Github/Live-Data_Case-Studies/2016 Case Studies/Oncology-Network/server.R",
+    "project_path" : "server.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

@@ -1,0 +1,18 @@
+{
+    "contents" : "library(shiny)\nlibrary(igraph)\nlibrary(visNetwork)\n\nshinyUI(\n  fluidPage(\n    wellPanel(\"Extreme Proof of Concept of the CRUK Network at Oxford University\"),\n    uiOutput(\"layout_control_UI\"),\n    visNetworkOutput(\"crukNetwork\", width = \"100%\")\n  )\n)",
+    "created" : 1454680724444.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2069810439",
+    "id" : "F4AA162C",
+    "lastKnownWriteTime" : 1454684722,
+    "path" : "~/Github/Live-Data_Case-Studies/2016 Case Studies/Oncology-Network/ui.R",
+    "project_path" : "ui.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "type" : "r_source"
+}
