@@ -1,0 +1,18 @@
+{
+    "contents" : "nodes <- data.frame(id = 1:3,\n                    color = c(\"lightblue\",\"red\",\"blue\"))\nedges <- data.frame(from = c(1,2), to = c(1,3))\n\n\nvisNetwork(nodes, edges) %>% visNodes(color = list(border = \"black\"))\n\nnodes <- data.frame(id = 1:3)\nedges <- data.frame(from = c(1,2), to = c(1,3))\n\nvisNetwork(nodes, edges) %>% visNodes(color = list(background = c(\"lightblue\",\"red\",\"blue\"), border = \"black\"))\n\n\nvisNetwork(nodes, edges) %>% visNodes(color = list(background = c(\"green\",\"blue\",\"yellow\")), shape = \"square\", title = \"I'm a node\", borderWidth = 3)\n\nvisNetwork(nodes, edges) %>% visNodes(color = list(\n  background = c(\"green\",\"blue\",\"yellow\")), \n  shape = \"square\", title = \"I'm a node\", \n  borderWidth = 3)\n",
+    "created" : 1454880979968.000,
+    "dirty" : true,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "2672234682",
+    "id" : "205AA6AC",
+    "lastKnownWriteTime" : 1454432999,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled2"
+    },
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

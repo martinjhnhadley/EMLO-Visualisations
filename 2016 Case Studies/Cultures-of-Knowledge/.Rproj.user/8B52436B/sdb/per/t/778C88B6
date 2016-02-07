@@ -1,0 +1,17 @@
+{
+    "contents" : "\ntabPanel(\"Select Two Individuals\",\n         wellPanel(HTML(\n           paste(\n             \"<h1>Proof of Concept</h1>\",\n             \"<p>This is a proof of concept for selecting an individual and seeing their connections.</p>\",\n             \"<p>The following features are provided:</p>\",\n             \"<ul>\",\n             \"<li>Select a name from the drop down menu (note additional fields may be added)</li>\",\n             \"<li>The individuals person details are displayed beneath</li>\",\n             \"<li>The network below includes only those individuals connected to the selected individual</li>\",\n             \"<li>Hovering over nodes displays the individual's name</li>\",\n             \"</ul>\",\n             \"<p>Please note no effort has been made to catch errors and while loading error messages\n             may show - this can be fixed with minimal effort.</p>\",\n             \"<p><em>Note:</em> It would be possible to modify this screen to allow n-degree neighbours of the selected\n             individual to be displayed, this would require ~1 hour development time</p>\",\n             sep = \"\"\n           )\n         )),\n         fluidRow(\n           column(uiOutput(\"select.individual.1_UI\"),width=4),\n           column(uiOutput(\"select.individual.2_UI\"),width=4),\n           column(uiOutput(\"select.individual.3_UI\"),width=4)),\n         fluidRow(\n           column(uiOutput(\"selected.individual.network_no_graph\"),\n                  visNetworkOutput(\"select.individual.network_graph\",width = \"100%\"),width = 9),\n           column(uiOutput(\"visNetwork_selected_individual_show_timeslider_UI\"), \n                  uiOutput(\"visNetwork_selected_individual_time_period_of_interest_UI\"),\n                  uiOutput(\"neighbor.degree.UI\"),width = 3)\n         )\n         )",
+    "created" : 1454875103604.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1327708407",
+    "id" : "778C88B6",
+    "lastKnownWriteTime" : 1454879206,
+    "path" : "~/Github/Live-Data_Case-Studies/2016 Case Studies/Cultures-of-Knowledge/ui/select-two-individuals.R",
+    "project_path" : "ui/select-two-individuals.R",
+    "properties" : {
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

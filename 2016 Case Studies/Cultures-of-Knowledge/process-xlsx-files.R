@@ -185,6 +185,9 @@ people.df <- read.csv(file = "data/master_people_sheet.csv",na = "")
 
 life.events.df <- read.csv(file = "data/master_life_events_sheet.csv", na = "")
 
+## Extract only those entries where the Secondary.Participant.Type is "Person"
+life.events.df <- life.events.df[life.events.df$Secondary.Participant.Type == "Person",]
+
 ##  ==== Get unique EMLO ids from life.events 
 primaries <- life.events.df[,c("Primary.Participant.Emlo_ID","Primary.Participant.Name")]
 secondaries <- life.events.df[,c("Secondary.Participant.Emlo_ID","Secondary.Participant.Name")]

@@ -1,0 +1,17 @@
+{
+    "contents" : "\ntabPanel(\"visNetwork - Whole Network\",\n         wellPanel(HTML(\n           paste(\n             \"<h1>Proof of Concept</h1>\",\n             \"<p>The graph below is a proof of concept for visualising EMLO data.</p>\",\n             \"<p>The following features are provided:</p>\",\n             \"<ul>\",\n             \"<li>Tooltips on vertices (showing name of individual, this can be customised)</li>\",\n             \"<li>The controls on the left allow the user to select the categories/event types they are interested in</li>\",\n             \"<li>Click a node highlights connected individuals, scroll down to see information</li>\",\n             \"</ul>\",\n             sep = \"\"\n           )\n         )),\n         \n         fluidRow(\n           column(width = 4, \n                  uiOutput(\"visNetwork_wholeNetwork_highlighted_node_UI\"),\n                  uiOutput(\"visNetwork_wholeNetwork_show_timeslider_UI\"),\n                  uiOutput(\"visNetwork_wholeNetwork_time_period_of_interest_UI\"),\n                  uiOutput(\"visNetwork_wholeNetwork_HighlightedCategoryUI\"),\n                  uiOutput(\"visNetwork_wholeNetwork_ExcludedCategoriesUI\"),\n                  uiOutput(\"visNetwork_wholeNetwork_NumberOfExcluded\")\n           ),\n           column(width = 8,\n                  visNetworkOutput(\"visNetwork_wholeNetwork\",width = \"100%\", height = \"600px\"))\n         ),\n         \n         conditionalPanel(\"typeof input.current_node_id !== 'undefined'\",\n                          uiOutput(\"visNetwork_wholeNetwork_selected_node_info\"),\n                          uiOutput(\"visNetwork_whole_network_connected_life_events_columns_to_show_UI\"),\n                          DT::dataTableOutput(\"visNetwork_whole_network_selected_node\")\n                            )\n         \n         \n)",
+    "created" : 1454880517058.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "566195866",
+    "id" : "2A553F9C",
+    "lastKnownWriteTime" : 1454880634,
+    "path" : "~/Github/Live-Data_Case-Studies/2016 Case Studies/Cultures-of-Knowledge/ui/visNetwork-wholeNetwork.R",
+    "project_path" : "ui/visNetwork-wholeNetwork.R",
+    "properties" : {
+    },
+    "relative_order" : 6,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

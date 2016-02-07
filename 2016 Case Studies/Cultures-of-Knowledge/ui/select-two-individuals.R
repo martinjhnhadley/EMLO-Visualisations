@@ -18,37 +18,15 @@ tabPanel("Select Two Individuals",
              sep = ""
            )
          )),
-         uiOutput("neighbor.degree.UI"),
          fluidRow(
-           column(uiOutput("select.individual.1_UI"), width = 6),
-           column(uiOutput("select.individual.2_UI"), width = 6)
-         ),
-         visNetworkOutput("select.individual.network_graph",width = "100%", height = "800px")
-         
-         
-         
-         #          
-         #          
-         #          fluidRow(
-         #            column(width = 4, 
-         #                   checkboxInput("hierachical_layout_option", label = "Hierarchical Layout?",
-         #                                 value = TRUE),
-         #                   uiOutput("event_category_selection_UI"),
-         #                   uiOutput("event_type_selection_UI")
-         #            ),
-         #            column(width = 8,
-         #                   visNetworkOutput("visNetwork_example",width = "100%", height = "600px"))
-         #          ),
-         #          conditionalPanel("typeof input.current_node_id !== 'undefined'",
-         #                           wellPanel(HTML(
-         #                             paste0(
-         #                               "<h2>",textOutput("selected.individual.name", inline = TRUE),"'s Connections</h2>",
-         #                               "<p>The table below shows all life events involving the selected individual, 
-         #                               note the controller allows columns to be added and removed easily.</p>"
-         #                             ))),
-         #                           uiOutput("connected_life_events_columns_to_show_UI"),
-         #                           DT::dataTableOutput("selected_node")
-         #                             )
-         
-         
+           column(uiOutput("select.individual.1_UI"),width=4),
+           column(uiOutput("select.individual.2_UI"),width=4),
+           column(uiOutput("select.individual.3_UI"),width=4)),
+         fluidRow(
+           column(uiOutput("selected.individual.network_no_graph"),
+                  visNetworkOutput("select.individual.network_graph",width = "100%"),width = 9),
+           column(uiOutput("visNetwork_selected_individual_show_timeslider_UI"), 
+                  uiOutput("visNetwork_selected_individual_time_period_of_interest_UI"),
+                  uiOutput("neighbor.degree.UI"),width = 3)
+         )
          )

@@ -16,6 +16,7 @@ tabPanel("visNetwork - Whole Network",
          
          fluidRow(
            column(width = 4, 
+                  uiOutput("visNetwork_wholeNetwork_highlighted_node_UI"),
                   uiOutput("visNetwork_wholeNetwork_show_timeslider_UI"),
                   uiOutput("visNetwork_wholeNetwork_time_period_of_interest_UI"),
                   uiOutput("visNetwork_wholeNetwork_HighlightedCategoryUI"),
