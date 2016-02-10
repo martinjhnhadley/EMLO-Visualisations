@@ -7,4 +7,4 @@
 
 # Ignore RStudio project files
 *.Rproj
-.RPproj.User/
+.Rproj.User/
