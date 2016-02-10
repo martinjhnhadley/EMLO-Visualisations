@@ -4,3 +4,7 @@
 #Ignore all xlsx files
 *.xlsx
 *.xls
+
+# Ignore RStudio project files
+*.Rproj
+.RPproj.User/

@@ -714,6 +714,7 @@ output$select.individual.network_graph <- renderVisNetwork({
   ## Visualise
   
   visNetwork(visN_nodes, visN_edges) %>% 
+    visEdges(selectable = FALSE) %>%
     visNodes(color = list(background = "lightblue", border = "darkblue"),size = 10) %>% 
     visIgraphLayout() %>%
     visInteraction(tooltipDelay = 0.2, hideEdgesOnDrag = TRUE, dragNodes = FALSE, dragView = FALSE, zoomView = TRUE) %>%
@@ -722,6 +723,7 @@ output$select.individual.network_graph <- renderVisNetwork({
     visEvents(selectNode = "function(nodes) {
                 Shiny.onInputChange('current_node_id', nodes);
                 ;}")
+  
 })
 
 
