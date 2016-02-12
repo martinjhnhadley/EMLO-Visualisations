@@ -23,7 +23,7 @@ gg_color_hue <- function(n) {
 usefulCols_life_events <- c("Primary.Participant.Name","Secondary.Participant.Name","Event.or.Relationship.Type",
                             "Category","DateOne.Year", "DateOne.Month", "DateOne.Day","DateOne.Uncertainty","DateTwo.Year",                 
                             "DateTwo.Month", "DateTwo.Day","DateTwo.Uncertainty","Date.Type","Location.Details","Location.Region",
-                            "Location.Country","Textual.Source.Source")
+                            "Location.Country","Textual.Source.Source","Primary.Participant.Emlo_ID","Secondary.Participant.Emlo_ID")
 
 ### ========= show/hide advanced options for the whole network
 
@@ -419,6 +419,8 @@ output$visNetwork_whole_network_selected_node <- DT::renderDataTable({
   # Drop levels that are empty (as a result of above subsetting)
   selected.interactions <- droplevels(selected.interactions)
   
+  # Append a column with the URLS
+ 
   ## Get selected individual from click
   nodes <- visNetwork_wholeNetwork_nodes()
   selectedIndividual <- as.numeric(input$current_node_id$nodes[[1]])
@@ -446,12 +448,32 @@ output$visNetwork_whole_network_selected_node <- DT::renderDataTable({
   invisible(lapply(connectedIndividuals, function(x)get.connected.life.events(selectedIndividual, x)))
   
   
+  ## Start Experiment
+  
+  # connected_life_events <- selected.interactiozns[1:5,]
+  
+  connected_life_events$Primary.Participant.Name <- 
+    paste0("<a href=http://emlo.bodleian.ox.ac.uk/profile?type=person&id=",
+           connected_life_events$Primary.Participant.Emlo_ID,
+           ">",
+           connected_life_events$Primary.Participant.Name,
+           "</a>")
+  
+  connected_life_events$Secondary.Participant.Name <- 
+    paste0("<a href=http://emlo.bodleian.ox.ac.uk/profile?type=person&id=",
+           connected_life_events$Secondary.Participant.Emlo_ID,
+           ">",
+           connected_life_events$Secondary.Participant.Name,
+           "</a>")
+  
+  ## End Experiment
+  
   # Drop empty rows:
   connected_life_events <- connected_life_events[!!rowSums(!is.na(connected_life_events)),]
   # Return
   connected_life_events[,input$connected_life_events_Cols, drop = FALSE]
   
-})
+},escape = FALSE, rownames= FALSE)
 
 ### ====================================== Selected Two Individuals Prosopography ============================================
 ### =================================================================================================================
