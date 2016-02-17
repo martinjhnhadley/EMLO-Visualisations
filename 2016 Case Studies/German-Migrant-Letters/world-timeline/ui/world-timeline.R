@@ -16,6 +16,13 @@
 #
 
 fluidPage(
+  
+  ## from
+  
+
+  
+  ## actual body
+  
     HTML(
       "<h2>What does immigrant integration (not) mean? Reconsidering integration through the eyes of German immigrants in the US </h2>"
     ),
@@ -47,5 +54,6 @@ The project is funded through the Leverhulme Trust (Ref-No RPG-338) and based at
        felix.krawatzek(at)politics.ox.ac.uk.
        </p>")
   ),
-  plotlyOutput("world_map", width = "100%", height = "1400px")
+  # plotlyOutput("world_map", width = "100%", height = "1200px")
+  uiOutput("worldmap_via_renderUI")
   )

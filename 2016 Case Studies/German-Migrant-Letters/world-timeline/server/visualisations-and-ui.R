@@ -270,62 +270,96 @@ route_tallies <- reactive({
   route_tallies
 })
 
-legend_position <- list(x = 1.1, y = 0.5)
 
 output$world_map <- renderPlotly({
   
-  if(is.null(input$show_timeslider)){
+  
+  if (is.null(input$show_timeslider)) {
     return()
   }
   
-  if(input$show_timeslider & is.null(input$time_period_of_interest)){
+  if (input$show_timeslider &
+      is.null(input$time_period_of_interest)) {
     return()
   }
   
   route_tallies <- route_tallies()
   location_tallies <- location_tallies()
   
-geo_layout <- list(
-  scope = "world",
-  showland = TRUE,
-  landcolor = toRGB("gray85"),
-  #   subunitwidth = 1,
-  #   countrywidth = 1,
-  subunitcolor = toRGB("white"),
-  countrycolor = toRGB("white"),
-  showlakes = TRUE,
-  lakecolor = "#999999")
+  geo_layout <- list(
+    scope = "world",
+    showland = TRUE,
+    landcolor = toRGB("gray85"),
+    #   subunitwidth = 1,
+    #   countrywidth = 1,
+    subunitcolor = toRGB("white"),
+    countrycolor = toRGB("white"),
+    showlakes = TRUE,
+    lakecolor = "#999999"
+  )
+  
+  
+  ## locations first
+  plot_ly(
+    location_tallies, lon = lon, lat = lat, marker = list(size = rescale(
+      Letters.Sent + Letters.Received, to = c(7,20)
+    )),
+    type = "scattergeo", locationmode = "country",
+    text = paste0(
+      "Location Name: ",Name,"<br>",
+      "Letters sent from location: ",Letters.Sent,"<br>",
+      "Letters received at location: ",Letters.Received,"<br>",
+      "Letter Series: ",Letter.Series
+    ),
+    hoverinfo = "text",inherit = FALSE,
+    group = Letter.Series, showlegend = TRUE
+  ) %>%
+    add_trace(
+      data = route_tallies, lon = list(send.lon, receive.lon),
+      lat = list(send.lat, receive.lat),
+      # text = paste0("Messages addressed to/from location: ",Freq,"<br>"),
+      type = 'scattergeo',
+      # locationmode = 'country names', # Used for identifying places
+      inherit = FALSE,
+      group = ID,
+      # hoverinfo = "text",
+      mode = 'lines',
+      line = list(
+        width = 0.4, color = "#6db8de", opacity = 1
+      ),
+      marker = list(size = rescale(Freq, to = c(7,20)), opacity = 0.4), showlegend = FALSE
+    ) %>%
+    layout(
+      #          title = "The ‘New’ Germans: Rethinking Integration by understanding the <br>
+      #          Historical Experience of German Migrants in the US",
+      geo = geo_layout,
+      legend = list(x = 1.1, y = 0.5),
+      legend = list(xanchor = "right",
+                    yanchor = "top")
+    )
+})
 
+scaled_height <- reactive({
+  ## Get location_tallies to scale height of output
+  location_tallies <- location_tallies()
+  
+  # print(length(unique(location_tallies$Letter.Series)))
+  
+  ## Get number of unique letter series
+  unique_letter_series <- unique(location_tallies$Letter.Series)
+  
+  ## Add number of <br> to calculate number of lines in legend
+  lines_in_legend <-
+    sum(grepl("<br>",unique(unique_letter_series))) + length(unique_letter_series)
+  
+  ## There are a maximum of 61 letter series combinations which fit well with height 1200px
+  scaled_height <- paste0(20 * lines_in_legend + 40,"px")
+  
+  scaled_height
+})
 
-## locations first
-plot_ly(location_tallies, lon = lon, lat = lat, marker = list(size = rescale(Letters.Sent + Letters.Received, to = c(7,20))),
-        type = "scattergeo", locationmode = "country",
-        text = paste0("Location Name: ",Name,"<br>",
-                      "Letters sent from location: ",Letters.Sent,"<br>",
-                      "Letters received at location: ",Letters.Received,"<br>",
-                      "Letter Series: ",Letter.Series),
-        hoverinfo = "text",inherit = FALSE,
-        group = Letter.Series, showlegend = TRUE) %>%
-  add_trace(data = route_tallies, lon = list(send.lon, receive.lon), 
-            lat = list(send.lat, receive.lat), 
-            # text = paste0("Messages addressed to/from location: ",Freq,"<br>"), 
-            type = 'scattergeo',
-            # locationmode = 'country names', # Used for identifying places
-            inherit = FALSE,
-            group = ID,
-            # hoverinfo = "text",
-            mode = 'lines',
-            line = list(width = 0.4, color = "#6db8de", opacity = 1),
-            marker = list(size = rescale(Freq, to = c(7,20)), opacity = 0.4), showlegend = FALSE) %>%
-  layout(
-#          title = "The ‘New’ Germans: Rethinking Integration by understanding the <br>
-#          Historical Experience of German Migrants in the US", 
-         geo = geo_layout,
-         legend = list(x = 1.1, y = 0.5),
-         legend = list(
-           xanchor = "auto",
-           yanchor = "top"
-         )
-         )
+output$worldmap_via_renderUI <- renderUI({
+  
+  plotlyOutput("world_map", width = "100%", height = scaled_height())
 })
 
