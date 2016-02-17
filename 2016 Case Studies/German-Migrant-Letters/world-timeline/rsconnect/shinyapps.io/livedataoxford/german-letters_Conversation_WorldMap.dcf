@@ -1,9 +1,9 @@
 name: german-letters_Conversation_WorldMap
 account: livedataoxford
 server: shinyapps.io
-bundleId: 360194
+bundleId: 374722
 url:
         https://livedataoxford.shinyapps.io/german-letters_Conversation_WorldMap/
-when: 1453938599.45999
+when: 1455713156.23056
 asMultiple: FALSE
 asStatic: FALSE

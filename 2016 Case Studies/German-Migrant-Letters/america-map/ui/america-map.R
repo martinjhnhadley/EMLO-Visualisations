@@ -27,5 +27,5 @@ fluidPage(
          felix.krawatzek(at)politics.ox.ac.uk.
          </p>")
     ),
-  plotlyOutput("america_map", width = "100%", height = "1200px")
+  uiOutput("americamap_via_renderUI")
     )

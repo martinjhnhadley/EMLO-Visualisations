@@ -353,7 +353,12 @@ scaled_height <- reactive({
     sum(grepl("<br>",unique(unique_letter_series))) + length(unique_letter_series)
   
   ## There are a maximum of 61 letter series combinations which fit well with height 1200px
-  scaled_height <- paste0(20 * lines_in_legend + 40,"px")
+  ## Minimum height of 400 is sensible
+  if(lines_in_legend * 20 > 400){
+    scaled_height <- paste0(20 * lines_in_legend + 40,"px")
+  } else {
+    scaled_height <- 400
+  }
   
   scaled_height
 })
