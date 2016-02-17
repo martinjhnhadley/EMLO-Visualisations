@@ -1,30 +1,16 @@
-
-
-# fluidPage(
-#   fluidRow(
-#     wellPanel(HTML(
-#       "<h2>The ‘New’ Germans: Rethinking Integration by understanding the
-#          Historical Experience of German Migrants in the US</h2>"
-#     )),
-#     column(uiOutput("show_timeslider_UI"),
-#            width = 2),
-#     column(uiOutput("time_period_of_interest_UI"),
-#            width = 10)
-#   ),
-#   plotlyOutput("world_map", width = "100%", height = "800px")
-# )
-#
+## =============================== License ========================================
+## ================================================================================
+## This work is distributed under the MIT license, included in the parent directory
+## Copyright Owner: University of Oxford
+## Date of Authorship: 2016
+## Author: Martin John Hadley (orcid.org/0000-0002-3039-6849)
+## Academic Contact: Felix Krawatzek
+## Data Source: local file
+## ================================================================================
 
 fluidPage(
-  
-  ## from
-  
-
-  
-  ## actual body
-  
     HTML(
-      "<h2>What does immigrant integration (not) mean? Reconsidering integration through the eyes of German immigrants in the US </h2>"
+      "<h2>Writing home: how German immigrants found their place in the US</h2>"
     ),
   #     fluidRow(
   #     column(HTML("Filter letters by date sent?"), width = 3),
