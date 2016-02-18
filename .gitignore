@@ -1,3 +1,7 @@
+.Rproj.user
+.Rhistory
+.RData
+
 # CSV files
 *.csv
 
@@ -5,6 +9,3 @@
 *.xlsx
 *.xls
 
-.Rproj.user
-.Rhistory
-.RData
