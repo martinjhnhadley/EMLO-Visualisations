@@ -312,6 +312,7 @@ output$europe_map <- renderPlotly({
 geo_layout <- list(
   scope = "europe",
   showland = TRUE,
+  showrivers = TRUE,
   showcountries = FALSE,
   landcolor = toRGB("gray85"),
   #   subunitwidth = 1,
