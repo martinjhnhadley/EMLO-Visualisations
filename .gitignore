@@ -1,7 +1,7 @@
 # Ignore RProject files
-.Rproj.user
-.Rhistory
-.RData
+*.Rproj.user
+*.Rhistory
+*.RData
 
 # CSV files
 *.csv
