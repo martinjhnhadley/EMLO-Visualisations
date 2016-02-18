@@ -5,19 +5,6 @@
 *.xlsx
 *.xls
 
-# Ignore RStudio project files
-**.Rproj
-**.Rhistory
-**.RData
-**.Rproj.User/
-
-*.Rproj
-*.Rhistory
-*.RData
-*.Rproj.User/
-
-.Rproj
+.Rproj.user
 .Rhistory
 .RData
-.Rproj.User/
-
