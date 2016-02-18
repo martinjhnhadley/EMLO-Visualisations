@@ -6,7 +6,9 @@
 *.xls
 
 # Ignore RStudio project files
-*.Rproj
+.Rproj
+
+.Rhistory
+.RData
 .Rproj.User/
-*.RHistory
-*.RData
+
