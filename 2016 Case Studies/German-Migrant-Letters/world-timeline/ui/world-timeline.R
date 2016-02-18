@@ -31,7 +31,7 @@ The project is funded through the Leverhulme Trust (Ref-No RPG-338) and based at
        </p>",
        "<p>The right-hand side column displays the different places from which letters of a particular series were sent. You can unselect any single or multiple series by clicking on 
        the name of the series. You can also get an understanding of the frequency of letters over time by clicking the above “Filter letters by date sent”. 
-       An article in “The Conversation” (HYPERLINK) allows you to gain some insight into the research linked to this visualisation.
+       An article in <a href='https://theconversation.com/writing-home-how-german-immigrants-found-their-place-in-the-us-53342'>The Conversation</a> allows you to gain some insight into the research linked to this visualisation.
        </p>",
        "These links provide detailed maps of send locations: 
        <a href=https://livedataoxford.shinyapps.io/german-letters_Conversation_EuropeMap/>Europe</a> and 

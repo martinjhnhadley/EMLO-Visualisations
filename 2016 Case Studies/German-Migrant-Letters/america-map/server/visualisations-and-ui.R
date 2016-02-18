@@ -82,6 +82,10 @@ output$map_size_numeric <- renderText({
 
 location_tallies <- reactive({
   
+  if(is.null(input$show_timeslider)){
+    return()
+  }
+  
   if(input$show_timeslider == TRUE){
     subset_entries <- subset(letters.for.analysis(),
                              Date >= as.POSIXct(paste0(input$time_period_of_interest[1],"/01/01")) &
@@ -207,81 +211,6 @@ location_tallies <- reactive({
   location_tallies
 })
 
-### ===== Route Tallies
-
-# route_tallies <- reactive({
-#   
-#   if(input$show_timeslider == TRUE){
-#     subset_entries <- subset(letters.for.analysis(),
-#                              Date >= as.POSIXct(paste0(input$time_period_of_interest[1],"/01/01")) &
-#                                Date <= as.POSIXct(paste0(input$time_period_of_interest[2],"/12/31")))
-#   } else {
-#     subset_entries <- letters.for.analysis()
-#   }
-# 
-#   ## Drop routes where latlong strings are "NA NA"
-#   subset_entries <- subset_entries[subset_entries$Receiver.LatLong.String != "NA NA" & 
-#                                      subset_entries$Sender.LatLong.String != "NA NA",]
-#   
-#   send_receive_pairs <- data.frame("send" = subset_entries$Sender.LatLong.String,
-#                                    "receive" = subset_entries$Receiver.LatLong.String, stringsAsFactors = FALSE)
-#   unique_routes <- send_receive_pairs[!duplicated(apply(send_receive_pairs,1,function(x) paste(sort(x),collapse=''))),]
-# 
-#   
-#   ## ==== Route Tallies
-#   
-#   route_tallies <- table(paste(send_receive_pairs$send,send_receive_pairs$receive))
-#   route_tallies <- as.data.frame(route_tallies)
-#   # as.character(var1) for string splitting
-#   route_tallies$Var1 <- as.character(route_tallies$Var1)
-# 
-#   ### ============= Split route tallies back to send/receive locations
-#   route_tallies <- data.frame("send.lat" = sapply(strsplit(route_tallies$Var1, " "), "[[", 1),
-#                               "send.lon" = sapply(strsplit(route_tallies$Var1, " "), "[[", 2),
-#                               "receive.lat" = sapply(strsplit(route_tallies$Var1, " "), "[[", 3),
-#                               "receive.lon" = sapply(strsplit(route_tallies$Var1, " "), "[[", 4),
-#                               "Freq" = route_tallies$Freq)
-#   
-#   ## =====  Get letter series for each route
-#   
-#   ## create empty vector
-#   letter.series.per.route <- as.character()
-#   
-#   get.letter.series <- function(route){
-#     
-#     send <- paste(route$send.lat, route$send.lon)
-#     receive <- paste(route$receive.lat, route$receive.lon)
-#     
-#     
-#     entries <<- letters.for.analysis()[letters.for.analysis()$Sender.LatLong.String == send &
-#                                          letters.for.analysis()$Receiver.LatLong.String == receive, ]
-#     letter.series.for.route <- as.character(entries$Letter.Series)
-#     
-#     if(length(unique(letter.series.for.route)) > 1){
-#       letter.series.per.route <<- append(letter.series.per.route, "multiple series")
-#     } else {
-#       letter.series.per.route <<- append(letter.series.per.route, unique(letter.series.for.route))
-#     }
-#   }
-#   
-#   ## populate letter.series.per.route vector
-#   for (i in 1:nrow(route_tallies)) {
-#     get.letter.series(route_tallies[i,])
-#   }
-#   ## Add letter.series.per.route to route_tallies
-#   route_tallies$Letter.Series <-letter.series.per.route
-#   ## A unique id is required per trace
-#   route_tallies$ID <- 1:nrow(route_tallies)
-# 
-#   # as.numeric for plotting
-#   route_tallies$send.lat <- as.numeric(as.character(route_tallies$send.lat))
-#   route_tallies$send.lon <- as.numeric(as.character(route_tallies$send.lon))
-#   route_tallies$receive.lat <- as.numeric(as.character(route_tallies$receive.lat))
-#   route_tallies$receive.lon <- as.numeric(as.character(route_tallies$receive.lon))
-#   
-#   # Return object
-#   route_tallies
-# })
 
 legend_position <- list(x = 1.1, y = 0.5)
 
@@ -359,6 +288,10 @@ scaled_height <- reactive({
 
 
 output$americamap_via_renderUI <- renderUI({
+  
+  if(is.null(input$time_period_of_interest)){
+    return()
+  }
   
   plotlyOutput("america_map", width = "100%", height = scaled_height())
 })

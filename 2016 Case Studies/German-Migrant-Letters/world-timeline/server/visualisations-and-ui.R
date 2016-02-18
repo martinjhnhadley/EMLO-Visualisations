@@ -374,6 +374,9 @@ scaled_height <- reactive({
 })
 
 output$worldmap_via_renderUI <- renderUI({
+  if(is.null(input$time_period_of_interest)){
+    return()
+  }
   
   plotlyOutput("world_map", width = "100%", height = scaled_height())
 })

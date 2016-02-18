@@ -31,7 +31,7 @@ fluidPage(
          </p>",
          "<p>The right-hand side column displays the different places from which letters of a particular series were sent. You can unselect any single or multiple series by clicking on 
          the name of the series. You can also get an understanding of the frequency of letters over time by clicking the above “Filter letters by date sent”. 
-         An article in “The Conversation” (HYPERLINK) allows you to gain some insight into the research linked to this visualisation.
+         An article in <a href='https://theconversation.com/writing-home-how-german-immigrants-found-their-place-in-the-us-53342'>The Conversation</a> allows you to gain some insight into the research linked to this visualisation.
          </p>",
          "<p>Note that this map is a first working version on ways to visualise the overall corpus. Any comments or suggestions you may have are very welcome. Please get in touch with 
          felix.krawatzek(at)politics.ox.ac.uk.

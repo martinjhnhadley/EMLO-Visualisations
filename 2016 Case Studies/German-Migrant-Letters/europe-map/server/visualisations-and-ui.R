@@ -371,6 +371,10 @@ scaled_height <- reactive({
 
 output$europemap_via_renderUI <- renderUI({
   
+  if(is.null(input$time_period_of_interest)){
+    return()
+  }
+  
   plotlyOutput("europe_map", width = "100%", height = scaled_height())
 })
 
