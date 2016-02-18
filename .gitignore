@@ -8,3 +8,5 @@
 # Ignore RStudio project files
 *.Rproj
 .Rproj.User/
+*.RHistory
+*.RData
