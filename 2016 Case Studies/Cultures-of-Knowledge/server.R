@@ -23,8 +23,10 @@ source("server/data-processing.R",local = TRUE)
 shinyServer(function(input, output, session){
   
   
-  
-  source("server/visualisations-and-ui.R",local = TRUE)
+  source("server/shared-data-and-functions.R",local = TRUE)
+  source("server/whole-network-visualisation.R",local = TRUE)
+  source("server/select-three-individuals.R",local = TRUE)
+  # source("server/visualisations-and-ui.R",local = TRUE)
 
   
   
