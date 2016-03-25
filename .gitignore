@@ -10,3 +10,4 @@
 *.xlsx
 *.xls
 
+.Rproj.user
