@@ -18,6 +18,6 @@ Code is made available subject to a MIT license, the following copyright and att
 
 - Date of Authorship: 2016
 
-- Developer: Martin John Hadley (orcid.org/0000-0002-3039-6849)
+- Developer: Martin John Hadley (http://orcid.org/0000-0002-3039-6849)
 
-- Academic Contact: Felix Krawatzek ([http://www.politics.ox.ac.uk/academic-staff/felix-krawatzek.html](http://www.politics.ox.ac.uk/academic-staff/felix-krawatzek.html))
+- Academic Contact: Felix Krawatzek (http://orcid.org/0000-0002-1108-6087)
