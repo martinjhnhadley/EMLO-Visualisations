@@ -14,6 +14,8 @@
 library(shiny) # Some advanced functionality depends on the shiny package being loaded client-side, including plot.ly
 library(visNetwork)
 library(networkD3)
+library(lubridate)
+library(htmltools) # Need for htmlDependency used by custom date picker 
 
 ## ==== Global Variables (client-side)
 
