@@ -26,12 +26,8 @@ shinyServer(function(input, output, session){
   
   
   source("server/shared-data-and-functions.R",local = TRUE)
-  source("server/whole-network-visualisation.R",local = TRUE)
   source("server/select-three-individuals.R",local = TRUE)
-  # source("server/visualisations-and-ui.R",local = TRUE)
 
-  
-  
 ## ===== Allow for linking to individual tabPanels, code provided by daattali here https://github.com/rstudio/shiny/issues/772#issuecomment-112919149
 ## ===== If you find this useful then consider upvoting his answer on SE http://stackoverflow.com/a/33025000/1659890
   

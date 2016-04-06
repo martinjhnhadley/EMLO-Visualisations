@@ -17,7 +17,9 @@
 
 
 output$visNetwork_wholeNetwork_show_timeslider_UI <- renderUI({
-  checkboxInput("visNetwork_wholeNetwork_show_timeslider", label = "Remove undated interactions and filter by date?", value = FALSE)
+  checkboxInput("visNetwork_wholeNetwork_show_timeslider",
+                label = "Remove undated interactions and filter by date?",
+                value = FALSE)
 })
 
 
@@ -29,18 +31,22 @@ output$visNetwork_wholeNetwork_time_period_of_interest_UI <-
     
     if (input$visNetwork_wholeNetwork_show_timeslider == TRUE) {
       dates <-
-        c(multiparty.interactions$DateOne.Year,multiparty.interactions$DateTwo.Year)
+        c(multiparty.interactions$DateOne.Year,
+          multiparty.interactions$DateTwo.Year)
       dates <- dates[!is.na(dates)]
       
       # Remove an incorrect date
       dates <- dates[dates > 1000]
       
       sliderInput(
-        "visNetwork_wholeNetwork_time_period_of_interest", "Time period of interest:",
-        min = as.POSIXct(paste0(min(dates) - 1,"-01-01")),
-        max = as.POSIXct(paste0(max(dates),"-01-01")),
+        "visNetwork_wholeNetwork_time_period_of_interest",
+        "Time period of interest:",
+        min = as.POSIXct(paste0(min(dates) - 1, "-01-01")),
+        max = as.POSIXct(paste0(max(dates), "-01-01")),
         step = 1,
-        value = as.POSIXct(c(paste0(min(dates),"-01-01"), paste0(max(dates),"-01-01"))),
+        value = as.POSIXct(c(
+          paste0(min(dates), "-01-01"), paste0(max(dates), "-01-01")
+        )),
         timeFormat = "%Y"
       )
     }
@@ -48,7 +54,10 @@ output$visNetwork_wholeNetwork_time_period_of_interest_UI <-
 
 output$visNetwork_wholeNetwork_HighlightedCategoryUI <- renderUI({
   selectInput(
-    'visNetwork_wholeNetwork_highlightedCategory', 'Event/Relationship Type to highlight', choices = c("None",all_event_categories()), selected = "None",
+    'visNetwork_wholeNetwork_highlightedCategory',
+    'Event/Relationship Type to highlight',
+    choices = c("None", all_event_categories()),
+    selected = "None",
     multiple = FALSE
   )
 })
@@ -59,57 +68,14 @@ output$visNetwork_wholeNetwork_ExcludedCategoriesUI <- renderUI({
   }
   
   selectInput(
-    'visNetwork_wholeNetwork_ExcludedCategory', 'Event/Relation Type to exclude', choices = c(
-      "Include all",setdiff(
-        all_event_types(),
-        input$visNetwork_wholeNetwork_highlightedCategory
-      )
+    'visNetwork_wholeNetwork_ExcludedCategory',
+    'Event/Relation Type to exclude',
+    choices = c(
+      "Include all",
+      all_event_types()
     ),
     multiple = FALSE
   )
-})
-
-## Function for filtering interactions by date
-filter_interactions <- reactive({
-  
-  if(is.null(input$visNetwork_wholeNetwork_ExcludedCategory)){
-    return()
-  }
-  
-  selected.interactions <- multiparty.interactions
-  #  Test suite
-  #   visNetwork_wholeNetwork_ExcludedCategory <- "PeerRelationships"
-  
-  ## Drop excluded categoties from multiparty interactions
-  selected.interactions <-
-    selected.interactions[selected.interactions$Event.or.Relationship.Type != input$visNetwork_wholeNetwork_ExcludedCategory,]
-  
-  if (is.null(input$visNetwork_wholeNetwork_show_timeslider)){
-    return(selected.interactions)
-  }
-  
-  if (input$visNetwork_wholeNetwork_show_timeslider == TRUE) {
-    slider_date_list <- input$visNetwork_wholeNetwork_time_period_of_interest
-    earliest_year <- year(input$visNetwork_wholeNetwork_time_period_of_interest[1])
-    latest_year <- year(input$visNetwork_wholeNetwork_time_period_of_interest[2])
-    
-    ## Filter out rows where DateOne.Year is NA or outside of date range
-    selected.interactions <-
-      selected.interactions[{
-        selected.interactions$DateOne.Year >= earliest_year
-      } %in% TRUE &
-      {
-        selected.interactions$DateOne.Year <= latest_year
-      } %in% TRUE ,]
-    ## Filter out rows where DateTwo.Year is greater than the max date allowd
-    selected.interactions <-
-      selected.interactions[selected.interactions$DateTwo.Year <= latest_year |
-                              is.na(selected.interactions$DateTwo.Year),]
-    ## Return data
-    selected.interactions
-  } else {
-    selected.interactions
-    }
 })
 
 output$visNetwork_wholeNetwork_NumberOfExcluded <- renderUI({
@@ -117,41 +83,50 @@ output$visNetwork_wholeNetwork_NumberOfExcluded <- renderUI({
     return()
   }
   
-  if(is.null(input$visNetwork_wholeNetwork_ExcludedCategory)){
+  if (is.null(input$visNetwork_wholeNetwork_ExcludedCategory)) {
     return()
   }
   
   ## if timeslider is to be shown but the controller variable is null do not return anything
-  if (input$visNetwork_wholeNetwork_show_timeslider & is.null(input$visNetwork_wholeNetwork_time_period_of_interest)){
+  if (input$visNetwork_wholeNetwork_show_timeslider &
+      is.null(input$visNetwork_wholeNetwork_time_period_of_interest)) {
     return()
   }
   
   selected.interactions <- filter_interactions()
-
+  
   multiparty.people <-
     unique(
       c(
-        multiparty.interactions$Primary.Participant.Emlo_ID,multiparty.interactions$Secondary.Participant.Emlo_ID
+        multiparty.interactions$Primary.Participant.Emlo_ID,
+        multiparty.interactions$Secondary.Participant.Emlo_ID
       )
     )
   
   selected.people <-
     unique(
       c(
-        selected.interactions$Primary.Participant.Emlo_ID, selected.interactions$Secondary.Participant.Emlo_ID
+        selected.interactions$Primary.Participant.Emlo_ID,
+        selected.interactions$Secondary.Participant.Emlo_ID
       )
     )
   
   HTML(
     paste0(
-      "<p>Included interactions: ",nrow(selected.interactions),"</p>",
-      "<p>Included individuals: ",length(selected.people),"</p>",
-      "<p>Excluded interactions: ",nrow(multiparty.interactions) - nrow(selected.interactions),"</p>",
-      "<p>Excluded individuals: ",length(multiparty.people) - length(selected.people),"</p>"
+      "<p>Included Interactions: ",
+      nrow(selected.interactions),
+      "</p>",
+      "<p>Included People/Organisations: ",
+      length(selected.people),
+      "</p>",
+      "<p>Excluded Interactions: ",
+      nrow(multiparty.interactions) - nrow(selected.interactions),
+      "</p>",
+      "<p>Excluded People/Organisations: ",
+      length(multiparty.people) - length(selected.people),
+      "</p>"
     )
   )
-  
-  
 })
 
 ### ====================================== Generate Network Data =====================================
@@ -165,7 +140,7 @@ visNetwork_wholeNetwork_nodes <- reactive({
   edges <- network.edges.function(selected.interactions)
   ## Get nodes from edges
   nodes.of.network <-
-    unique(c(edges$Primary.Emlo_ID,edges$Secondary.Emlo_ID))
+    unique(c(edges$Primary.Emlo_ID, edges$Secondary.Emlo_ID))
   
   ### ==== Start Experiment
   
@@ -198,7 +173,7 @@ visNetwork_wholeNetwork_edges <- reactive({
   edges <- network.edges.function(selected.interactions)
   ## Get nodes from edges
   nodes.of.network <-
-    unique(c(edges$Primary.Emlo_ID,edges$Secondary.Emlo_ID))
+    unique(c(edges$Primary.Emlo_ID, edges$Secondary.Emlo_ID))
   
   ## Subset people.df by nodes in edges
   nodes <- subset(people.df, iperson_id %in% nodes.of.network)
@@ -231,13 +206,13 @@ visNetwork_wholeNetwork_edges <- reactive({
       } else {
         20 * edges$Total.Connections + edges[, c(input$visNetwork_wholeNetwork_highlightedCategory)]
       },
-      "EdgeColor" = if(input$visNetwork_wholeNetwork_highlightedCategory == "None"){
+      "EdgeColor" = if (input$visNetwork_wholeNetwork_highlightedCategory == "None") {
         rep("lightblue", nrow(edges))
       } else {
         mapvalues(edges[, c(input$visNetwork_wholeNetwork_highlightedCategory)] > 0, c(TRUE, FALSE), c("#ff6666", "lightblue"))
       }
     )
-
+  
   ## return for use
   
   visNetwork_edges
@@ -245,27 +220,43 @@ visNetwork_wholeNetwork_edges <- reactive({
 
 output$visNetwork_wholeNetwork_highlighted_node_UI <- renderUI({
   ## If not loaded yet, stop
+  if (is.null(input$visNetwork_wholeNetwork_show_timeslider)) {
+    return()
+  }
+  
   if (is.null(input$visNetwork_wholeNetwork_highlightedCategory)) {
     return()
   }
-
+  
+  if (is.null(input$visNetwork_wholeNetwork_ExcludedCategory)) {
+    return()
+  }
+  ## if timeslider is to be shown but the controller variable is null do not return anything
+  if (input$visNetwork_wholeNetwork_show_timeslider &
+      is.null(input$visNetwork_wholeNetwork_time_period_of_interest)) {
+    return()
+  }
+  
   edges <- visNetwork_wholeNetwork_edges()
-
+  
   if (is.null(edges)) {
     return()
   }
-
+  
   visNetwork_nodes <- visNetwork_wholeNetwork_nodes()
-
+  
   labels.list <- as.character(visNetwork_nodes$Person.Name)
   values.list <-
     as.list(unlist(as.character(visNetwork_nodes$emlo_id)))
-
+  
   names(values.list) <- labels.list
-
+  
   selectInput(
-    "highlighted.node", label = "Highlight node",
-    choices = values.list, selected = as.character(values.list[1]), multiple = FALSE
+    "highlighted.node",
+    label = "Highlight node",
+    choices = values.list,
+    selected = as.character(values.list[1]),
+    multiple = FALSE
   )
 })
 
@@ -275,7 +266,7 @@ output$visNetwork_wholeNetwork_highlighted_node_UI <- renderUI({
 ## show warning if no edges to display
 output$whole.network_no_graph <- renderUI({
   ## If not loaded yet, stop
-  if(is.null(input$visNetwork_wholeNetwork_ExcludedCategory)){
+  if (is.null(input$visNetwork_wholeNetwork_ExcludedCategory)) {
     return()
   }
   
@@ -292,19 +283,20 @@ output$whole.network_no_graph <- renderUI({
 output$visNetwork_wholeNetwork <- renderVisNetwork({
   ## If not loaded yet, stop
   
-  if (is.null(input$visNetwork_wholeNetwork_show_timeslider)){
+  if (is.null(input$visNetwork_wholeNetwork_show_timeslider)) {
     return()
   }
   
-  if (is.null(input$visNetwork_wholeNetwork_highlightedCategory)){
+  if (is.null(input$visNetwork_wholeNetwork_highlightedCategory)) {
     return()
   }
   
-  if(is.null(input$visNetwork_wholeNetwork_ExcludedCategory)){
+  if (is.null(input$visNetwork_wholeNetwork_ExcludedCategory)) {
     return()
   }
   ## if timeslider is to be shown but the controller variable is null do not return anything
-  if (input$visNetwork_wholeNetwork_show_timeslider & is.null(input$visNetwork_wholeNetwork_time_period_of_interest)){
+  if (input$visNetwork_wholeNetwork_show_timeslider &
+      is.null(input$visNetwork_wholeNetwork_time_period_of_interest)) {
     return()
   }
   
@@ -325,26 +317,27 @@ output$visNetwork_wholeNetwork <- renderVisNetwork({
     "from" = visNetwork_edges$source.emlo.id,
     "to" = visNetwork_edges$target.emlo.id,
     "color" = visNetwork_edges$EdgeColor,
-    "value" = rescale(visNetwork_edges$Value, to = c(2,10))
+    "value" = rescale(visNetwork_edges$Value, to = c(2, 10))
   )
   
   ## Drop duplicate node:
   visN_nodes <- visN_nodes[!duplicated(visN_nodes$id),]
   
-#   visN_nodes[visN_nodes$id == input$highlighted.node,]$color <-
-#     "red"
+  visN_nodes[visN_nodes$id == input$highlighted.node,]$color <-
+    "red"
   
   ## Make background colour vector
-  node.background.color <- rep("lightblue",nrow(visN_nodes))
+  node.background.color <- rep("lightblue", nrow(visN_nodes))
   ## Set highlighted.node to be red
   node.background.color[visN_nodes$id == input$highlighted.node] <-
     "red"
-
+  
   ## Drop edges with nodes not in the node list
   non.conflicting.nodes <-
     intersect(unique(c(visN_edges$from, visN_edges$to)), visN_nodes$id)
   visN_edges <-
-    subset(visN_edges, from %in% non.conflicting.nodes &
+    subset(visN_edges,
+           from %in% non.conflicting.nodes &
              to %in% non.conflicting.nodes)
   
   ## Make network
@@ -354,7 +347,11 @@ output$visNetwork_wholeNetwork <- renderVisNetwork({
     # visEdges(value = round(rescale(visNetwork_edges$Value, to = c(2,10)))) %>%
     # visEdges(width = 4) %>%
     visInteraction(
-      tooltipDelay = 0.2, hideEdgesOnDrag = FALSE, dragNodes = FALSE, dragView = TRUE, zoomView = TRUE
+      tooltipDelay = 0.2,
+      hideEdgesOnDrag = FALSE,
+      dragNodes = FALSE,
+      dragView = TRUE,
+      zoomView = TRUE
     ) %>%
     visOptions(highlightNearest = TRUE) %>% visLayout(hierarchical = FALSE, randomSeed = 1) %>%
     # visInteraction(navigationButtons = TRUE) %>%
@@ -364,22 +361,40 @@ output$visNetwork_wholeNetwork <- renderVisNetwork({
   
   })
 
+### ====================================== Selected Individuals =====================================
+### ==================================================================================================
+
 output$visNetwork_wholeNetwork_selected_node_info <- renderUI({
   if (is.null(input$current_node_id)) {
     return()
   }
   
   selected.person.name <-
-    people.df[people.df$iperson_id == as.numeric(input$current_node_id$nodes[[1]]),"Person.Name"]
+    people.df[people.df$iperson_id == as.numeric(input$current_node_id$nodes[[1]]), "Person.Name"]
   selected.person.name <-
     selected.person.name[!is.na(selected.person.name)]
   
+  selected_emlo_id <-
+    as.numeric(input$current_node_id$nodes[[1]])
+  
+  # Load connected individuals
+  connected_life_events <- connections_to_selected_individual()
+  
+  print(length(setdiff(unique(c(connected_life_events$Primary.Participant.Emlo_ID,connected_life_events$Secondary.Participant.Emlo_ID)),selected_emlo_id)))
+
   wellPanel(HTML(
-    paste0(
-      "<h2>",selected.person.name,"'s Connections</h2>",
-      "<p>The table below shows all life events involving the selected individual,
-      note the controller allows columns to be added and removed easily.</p>", sep =
-        ""
+      paste0(
+        "<p><strong>Selected Person/Organisation: ",
+        "<a target='_blank' href=http://emlo.bodleian.ox.ac.uk/profile?type=person&id=",
+        selected_emlo_id,
+        ">",
+        selected.person.name,
+        "</a></strong></p>",
+        "<p>Number of Unique Connections: ",
+        length(setdiff(unique(c(connected_life_events$Primary.Participant.Emlo_ID,connected_life_events$Secondary.Participant.Emlo_ID)),selected_emlo_id)),
+        "</p>",
+      "<p>Scroll down for more information about ",selected.person.name,"'s connections", "</p>",
+      sep = ""
     )
   ))
   
@@ -388,68 +403,40 @@ output$visNetwork_wholeNetwork_selected_node_info <- renderUI({
 
 output$visNetwork_whole_network_connected_life_events_columns_to_show_UI <-
   renderUI({
-    tagList(
+    fluidRow(column(tagList(
       selectInput(
-        'connected_life_events_Cols', 'Columns to show:',
-        usefulCols_life_events, selected = c(
-          "Primary.Participant.Name","Secondary.Participant.Name","Event.or.Relationship.Type","DateOne.Year"
+        'connected_life_events_Cols',
+        'Columns to show:',
+        usefulCols_life_events,
+        selected = c(
+          "Category",
+          "Event.or.Relationship.Type",
+          "Primary.Participant.Name",
+          "Primary.Participant.Role",
+          "Secondary.Participant.Name",
+          "Secondary.Participant.Role",
+          "DateOne.Year",
+          "DateTwo.Year",
+          "Date.Type",
+          "Location.Type.Ahead"
         ),
         multiple = TRUE
-      ),tags$style(
-        type = "text/css", "select#selCategories + .selectize-control{width: 800px}"
+      ),
+      tags$style(
+        type = "text/css",
+        "select#connected_life_events_Cols + .selectize-control{width: 700px}"
       )
-    )
+    ), width = 12))
   })
 
 output$visNetwork_whole_network_selected_node <-
   DT::renderDataTable({
-    #   if(is.null(input$include_interactions_without_dates)){
-    #     return()
-    #   }
-    
-    ## Set selected.interactions as all multiparty.interactions
-    selected.interactions <- filter_interactions()
-    
-    # Drop levels that are empty (as a result of above subsetting)
-    selected.interactions <- droplevels(selected.interactions)
-    
-    # Append a column with the URLS
-    
-    ## Get selected individual from click
-    nodes <- visNetwork_wholeNetwork_nodes()
-    selectedIndividual <- as.numeric(input$current_node_id$nodes[[1]])
-    
-    # Get edges of network
-    edges <- visNetwork_wholeNetwork_edges()
-    
-    connectedIndividuals <-
-      c(as.character(edges[edges$source.emlo.id == selectedIndividual, "target.emlo.id"]),
-        as.character(edges[edges$target.emlo.id == selectedIndividual, "source.emlo.id"]))
-    
-    # Create an empty data.frame with life.event.columns
-    connected_life_events <- selected.interactions[0,]
-    # Function to extract connected events
-    get.connected.life.events <-
-      function(selectedNode, connectedNode) {
-        connections <- rbind(selected.interactions[selected.interactions$Primary.Participant.Emlo_ID == selectedNode &
-                                                     selected.interactions$Secondary.Participant.Emlo_ID == connectedNode,],
-                             selected.interactions[selected.interactions$Primary.Participant.Emlo_ID == connectedNode &
-                                                     selected.interactions$Secondary.Participant.Emlo_ID == selectedNode,])
-        connected_life_events <<-
-          rbind(connected_life_events, connections)
-      }
-    # lapply function
-    invisible(lapply(connectedIndividuals, function(x)
-      get.connected.life.events(selectedIndividual, x)))
-    
-    
-    ## Start Experiment
-    
-    # connected_life_events <- selected.interactiozns[1:5,]
+    # Load connected individuals
+    connected_life_events <- connections_to_selected_individual()
     
     connected_life_events$Primary.Participant.Name <-
       paste0(
-        "<a href=http://emlo.bodleian.ox.ac.uk/profile?type=person&id=",
+        "<a target='_blank' href=http://emlo.bodleian.ox.ac.uk/profile?type=person&id=",
         connected_life_events$Primary.Participant.Emlo_ID,
         ">",
         connected_life_events$Primary.Participant.Name,
@@ -458,19 +445,42 @@ output$visNetwork_whole_network_selected_node <-
     
     connected_life_events$Secondary.Participant.Name <-
       paste0(
-        "<a href=http://emlo.bodleian.ox.ac.uk/profile?type=person&id=",
+        "<a target='_blank' href=http://emlo.bodleian.ox.ac.uk/profile?type=person&id=",
         connected_life_events$Secondary.Participant.Emlo_ID,
         ">",
         connected_life_events$Secondary.Participant.Name,
         "</a>"
       )
     
-    ## End Experiment
-    
     # Drop empty rows:
     connected_life_events <-
       connected_life_events[!!rowSums(!is.na(connected_life_events)),]
-    # Return
-    connected_life_events[,input$connected_life_events_Cols, drop = FALSE]
+    # Return only selected columns
+    connected_life_events <-
+      connected_life_events[, input$connected_life_events_Cols, drop = FALSE]
+    # Replace "." with " " in colnames
+    colnames(connected_life_events) <-
+      gsub("[.]", " ", colnames(connected_life_events))
+    # Convert factors to characters for sorting:
+    factor_columns <- sapply(connected_life_events, is.factor)
+    connected_life_events[factor_columns] <-
+      lapply(connected_life_events[factor_columns], as.character)
     
-  },escape = FALSE, rownames = FALSE)
+    # Find position of names to make these columns non-orderable
+    name_columns <<-
+      which(
+        colnames(connected_life_events) %in% c("Primary Participant Name", "Secondary Participant Name")
+      )
+    
+    
+    # Return to datatable
+    connected_life_events
+    
+  }, escape = FALSE, rownames = FALSE,
+  # only make name column non-orderable
+  options = if (length(name_columns) > 0) {
+    print(name_columns)
+    list(columnDefs = list(list(
+      targets = name_columns - 1, orderable = FALSE
+    )))
+  })

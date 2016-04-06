@@ -1,5 +1,6 @@
 
 
+
 tabPanel(
   "visNetwork - Whole Network",
   wellPanel(HTML(
@@ -28,6 +29,10 @@ tabPanel(
         uiOutput("visNetwork_wholeNetwork_HighlightedCategoryUI"),
         uiOutput("visNetwork_wholeNetwork_ExcludedCategoriesUI"),
         uiOutput("visNetwork_wholeNetwork_NumberOfExcluded")
+      ),
+      conditionalPanel(
+        "typeof input.current_node_id !== 'undefined'",
+        uiOutput("visNetwork_wholeNetwork_selected_node_info")
       )
     ),
     column(
@@ -42,7 +47,6 @@ tabPanel(
   
   conditionalPanel(
     "typeof input.current_node_id !== 'undefined'",
-    uiOutput("visNetwork_wholeNetwork_selected_node_info"),
     uiOutput(
       "visNetwork_whole_network_connected_life_events_columns_to_show_UI"
     ),
