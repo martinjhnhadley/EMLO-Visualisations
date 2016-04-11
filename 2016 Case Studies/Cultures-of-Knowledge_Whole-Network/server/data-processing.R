@@ -29,6 +29,11 @@ add.surname.fn <- function(name){
   }
 }
 
+## lapply invisibly
+invisible(lapply(people.df$Person.Name,function(x)add.surname.fn(x)))
+## Append surname column to people.df
+people.df$Surname <- surnames.list
+
 ## ==== Handle duplicates with different names
 ## Some people are included multiple times this code identifies them but is commented out
 # unique_emlos_people_df <- unique(people.df$iperson_id)
@@ -49,11 +54,6 @@ names_to_remove <- c("nat: philosopher. Boyle / Boyle Robert. 1627-91.",
                      "Tossanus, Maria, also Toussaint")
 people.df <- people.df[!people.df$Person.Name %in% names_to_remove,]
 
-
-## lapply invisibly
-invisible(lapply(people.df$Person.Name,function(x)add.surname.fn(x)))
-## Append surname column to people.df
-people.df$Surname <- surnames.list
 
 ### ============= Import Places Sheet =========================
 places.df <- read.csv("data/master_places_sheet.csv")
