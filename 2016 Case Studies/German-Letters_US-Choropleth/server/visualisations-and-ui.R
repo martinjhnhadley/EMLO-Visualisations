@@ -1,21 +1,26 @@
-### ============= Useful Visualisations Tools ========================= ###
+## =============================== License ========================================
+## ================================================================================
+## This work is distributed under the MIT license, included in the parent directory
+## Copyright Owner: University of Oxford
+## Date of Authorship: 2016
+## Author: Martin John Hadley (orcid.org/0000-0002-3039-6849)
+## Academic Contact: Arno Bosse (http://orcid.org/0000-0003-3681-1289)
+## Data Source: emlo.bodleian.ox.ac.uk
+## ================================================================================
 
-## ggplot Color Function from http://stackoverflow.com/a/8197703/1659890
-gg_color_hue <- function(n) {
-  hues = seq(15, 375, length = n + 1)
-  hcl(h = hues, l = 65, c = 100)[1:n]
-}
-
-### ============= Main Map Section ========================= ###
-
+## ================ Timeline UI Elements ==========================================
+## ================================================================================
 
 output$time_period_of_interest_UI <- renderUI({
   if (is.null(input$show_timeslider)) {
     return()
   }
   
-  dates <-
-    letters.for.analysis()$Date[!is.na(letters.for.analysis()$Date)]
+  if (is.null(input$show_letters_where_receive_unknown)) {
+    return()
+  }
+  
+  dates <- entries_with_locations$Date[!is.na(entries_with_locations$Date)]
   
   if (input$show_timeslider == TRUE) {
     sliderInput(
