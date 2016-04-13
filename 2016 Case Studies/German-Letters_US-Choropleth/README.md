@@ -1,30 +1,23 @@
-# Large Shiny Apps with NavbarPage Layout
+# German migrants integration in the USA
 
-![Screenshot of app](https://raw.githubusercontent.com/martinjhnhadley/Rmd-and-Shiny-Templates/master/Shiny-Templates/Large-Apps/navbarMenu/screenshot.png "Optional Title")
+This case study is an interactive visualisation of the correspondance network between German migrants in the 19th and 20th Century, primarily in the Americas. The case study comprises of three Shiny apps that a provide an overview of how the migrant population dispersed over time using plot.ly cartograms.
 
-This template is useful for the development of large Shiny apps utilising the `navbarPage` layout, the features are as follows:
+The academic behind this case study, Felix Krawatzek from Politics, was interested interested in building a visualisation to accompany his article on theconversation.com: https://theconversation.com/writing-home-how-german-immigrants-found-their-place-in-the-us-53342
 
-- `navbarMenu` items are contained within distinct `.R` files
-- Visualisations/UI and data processing are separated into distinct folders
-- Anchor links to individual pages (requires javascript and takes ~3 second to redirect) thanks to https://github.com/rstudio/shiny/issues/772#issuecomment-112919149
+A screenshot of one of the applications is provided below:
 
+<img src="https://raw.githubusercontent.com/ox-it/Live-Data_Case-Studies/master/2016%20Case%20Studies/German-Migrant-Letters/GemanMigrants_screenshot.png" width = "400px"/>
 
-# Structure
+Should you have questions about the project or wish to find out more about this dataset, please contact Felix Krawatzek from the Politics Department at Oxford University.
 
-```R
-== ShinyApp
-| - ui.R # calls shinyUI and pulls in contents of ./ui
-| - server.R # calls shinyServer and pulls in contents of ./server
-| -- ui
-    | -- landing-tab.R # tabPanel containing information about the Shiny app
-    | -- navbar-menu-tab.R # navbarMenu with children, including anchor link
-| -- server
-    | -- data-processing.R # load external data and process data.frame columns
-    | -- visualisations-and-ui.R # include all output* expressions and renderUI here 
-```
+# Attribution 
 
-# Ownership
+Code is made available subject to a MIT license, the following copyright and attribution should be respected when reusing the code
 
-This layout was inspired by the [Alaska/Western Canada and Historical and Projected Climate Shiny App](http://shiny.snap.uaf.edu/akcan_climate/) built by [Matthew Leonawicz](http://leonawicz.github.io/).
+- Copyright Owner: University of Oxford
 
+- Date of Authorship: 2016
 
+- Developer: Martin John Hadley (http://orcid.org/0000-0002-3039-6849)
+
+- Academic Contact: Felix Krawatzek (http://orcid.org/0000-0002-1108-6087)
