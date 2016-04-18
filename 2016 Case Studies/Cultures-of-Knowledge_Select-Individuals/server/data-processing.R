@@ -63,6 +63,12 @@ life.events.df <- read.csv("data/master_life_events_sheet.csv")
 life.events.df$Primary.Participant.Emlo_ID <- as.character(life.events.df$Primary.Participant.Emlo_ID)
 life.events.df$Secondary.Participant.Emlo_ID <- as.character(life.events.df$Secondary.Participant.Emlo_ID)
 
+## =========================== Remove Organsisations etc ========================
+## ==============================================================================
+
+
+life.events.df <- life.events.df[life.events.df$Secondary.Participant.Type == "Person",]
+
 ### ============= Non-self Referential Events (i.e. not births) =============
 
 multiparty.interactions <- life.events.df[!is.na(life.events.df$Secondary.Participant.Emlo_ID),]
