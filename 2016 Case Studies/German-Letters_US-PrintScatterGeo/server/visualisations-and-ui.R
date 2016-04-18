@@ -69,17 +69,9 @@ letters_sent_between_dates <-
     
     letters.for.analysis$Date <- as.POSIXct(letters.for.analysis$Date)
     
-    # print(paste0("class of date: ",class(letters.for.analysis$Date)))
-    
-    
-    
     letters.for.analysis <- subset(letters.for.analysis,
            Date >= as.POSIXct(paste0(as.character(start.year), "/01/01")) &
              Date <= as.POSIXct(paste0(as.character(end.year), "/12/31")))
-    # print("internal 1")
-    # print(paste0("value of start.year in letters_sent_between_dates:",start.year))
-    # print(paste0("ncol of data",ncol(data)))
-    # print(paste0("greater than start date",letters.for.analysis$Date > as.POSIXct(paste0(as.character(start.year), "/01/01"))))
     
     letters.for.analysis
     
