@@ -15,6 +15,7 @@ library(shiny) # Some advanced functionality depends on the shiny package being 
 library(visNetwork)
 library(networkD3)
 library(lubridate)
+# library(DT) # for nice tables
 library(htmltools) # Need for htmlDependency used by custom date picker 
 
 ## ==== Global Variables (client-side)

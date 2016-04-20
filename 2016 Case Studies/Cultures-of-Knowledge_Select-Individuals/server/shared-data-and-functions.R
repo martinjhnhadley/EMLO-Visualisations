@@ -215,14 +215,12 @@ filter_interactions <- reactive({
 
   if (input$visNetwork_selected_individual_show_timeslider == TRUE) {
     
-    
     slider_date_list <-
       input$visNetwork_selected_individual_time_period_of_interest
     earliest_year <-
       year(input$visNetwork_selected_individual_time_period_of_interest[1])
     latest_year <-
       year(input$visNetwork_selected_individual_time_period_of_interest[2])
-    
     
     ## Filter out rows where DateOne.Year is NA or outside of date range
     selected.interactions <-
@@ -236,17 +234,20 @@ filter_interactions <- reactive({
     selected.interactions <-
       selected.interactions[selected.interactions$DateTwo.Year <= latest_year |
                               is.na(selected.interactions$DateTwo.Year), ]
+    
     ## Return data
     selected.interactions
   } else {
     selected.interactions
   }
+
 })
 
 ### ====================================== Generate Edges Function ============================================
 ### ===========================================================================================================
 
 network.edges.function <- function(selected.interactions) {
+  
   edges.of.network <- data.frame(
     "Primary.Emlo_ID" = character(),
     "Secondary.Emlo_ID" = character(),

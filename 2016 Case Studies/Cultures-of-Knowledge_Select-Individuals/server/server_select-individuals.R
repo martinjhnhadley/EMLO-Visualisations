@@ -27,78 +27,11 @@ output$select_individuals_ui <- renderUI({
     width = "100%",
     options = list(
       maxItems = 3,
-      placeholder = 'Please select at least one individual by tying their name here...',
+      placeholder = 'Please select at least one individual by typing their name here...',
       onInitialize = I('function() { this.setValue("empty"); }')
     )
   )
 })
-
-# output$select.individual.1_UI <- renderUI({
-#   if (is.null(input$visNetwork_selected_individual_show_timeslider)) {
-#     return()
-#   }
-#
-#   # Get people_with_connections
-#   people_with_connections <- people_with_connections()
-#
-#   print(as.character(people_with_connections[1]))
-#
-#   selectInput(
-#     "select.individual.1",
-#     label = "Select individual 1 for prosopography analysis",
-#     choices = people_with_connections,
-#     selected = as.character(people_with_connections[1]),
-#     multiple = FALSE
-#   )
-# })
-#
-# ## Select second individual
-# output$select.individual.2_UI <- renderUI({
-#   if (is.null(input$select.individual.1)) {
-#     return()
-#   }
-#
-#   # Get people_with_connections
-#   people_with_connections <- people_with_connections()
-#
-#   if(input$select.individual.1 != "None"){
-#     # Drop the individual selected in the first controller
-#     people_with_connections <-
-#       people_with_connections[!as.character(people_with_connections) %in% input$select.individual.1]
-#   }
-#
-#   selectInput(
-#     "select.individual.2",
-#     label = "Select individual 2 for prosopography analysis",
-#     choices = people_with_connections,
-#     selected = as.character(people_with_connections[1]),
-#     multiple = FALSE
-#   )
-# })
-#
-# ## Select third individual
-# output$select.individual.3_UI <- renderUI({
-#   if (is.null(input$select.individual.2)) {
-#     return()
-#   }
-#
-#   # Get people_with_connections
-#   people_with_connections <- people_with_connections()
-#
-#   if(input$select.individual.2 != "None"){
-#     # Drop the individual selected in the first controller
-#     people_with_connections <-
-#       people_with_connections[!as.character(people_with_connections) %in% input$select.individual.2]
-#   }
-#
-#   selectInput(
-#     "select.individual.3",
-#     label = "Select individual 3 for prosopography analysis",
-#     choices = people_with_connections,
-#     selected = as.character(people_with_connections[1]),
-#     multiple = FALSE
-#   )
-# })
 
 ### ====================================== Time Filters etc   ==============================
 ### ========================================================================================
@@ -153,20 +86,6 @@ output$neighbor.degree.UI <- renderUI({
     value = 1,
     step = 1
   )
-})
-
-output$test_output_UI <- renderDataTable({
-  if(is.null(input$select_individuals)){
-    return()
-  }
-  # HTML(
-  # paste0("<p>",
-  #        "nrow(connections_to_selected_individual): ",
-  #        connections_to_selected_individual(),
-  #        "</p>"
-  # )
-  # )
-  visNetwork_select_individuals_neighboring_nodes()
 })
 
 ### ====================================== Generate Network Data =====================================
@@ -278,7 +197,6 @@ visNetwork_select_individuals_neighboring_nodes <- reactive({
   
   edges <- visNetwork_select_individuals_edges()
   
-  
   edges <- edges[, c("source.emlo.id", "target.emlo.id")]
   ## Extract nodes
   nodes <- unique(c(edges$source.emlo.id, edges$target.emlo.id))
@@ -290,8 +208,8 @@ visNetwork_select_individuals_neighboring_nodes <- reactive({
   # ## plot igraph
   # # plot(igraph.for.computation, vertex.size=2, vertex.label=NA, edge.arrow.size=.2)
   # 
-  # ## Set graph.union.fail to FALSE
-  graph.union.fail <<- FALSE
+  # ## Set graph.union.passed to TRUE
+  graph.union.passed <<- TRUE
 
   ## Use tryCatch for errors when no connected edges found!
   tryCatch(
@@ -305,12 +223,12 @@ visNetwork_select_individuals_neighboring_nodes <- reactive({
         )
       ),
     error = function(e) {
-      graph.union.fail <<- TRUE
+      graph.union.passed <<- FALSE
     }
   )
-  if (graph.union.fail) {
-    graph.union.fail <<- TRUE
-    graph.union.fail
+  if (!graph.union.passed) {
+    graph.union.passed <<- FALSE
+    graph.union.passed
   } else
     visNetwork_select_individuals_neighboring_nodes
 })
@@ -352,13 +270,19 @@ subgraph_edges <- reactive({
 ### ========================================================================================
 
 output$visNetwork_select_individuals_NumberOfExcluded <- renderUI({
-  if (is.null(input$visNetwork_selected_individual_show_timeslider)) {
+  if (is.null(input$visNetwork_selected_individuals_show_timeslider)) {
     return()
   }
   
   if (is.null(input$select_individuals)) {
     return()
   }
+  
+  if (input$visNetwork_selected_individual_show_timeslider &
+      is.null(input$visNetwork_selected_individual_time_period_of_interest)) {
+    return()
+  }
+  
   # 
   # ## if timeslider is to be shown but the controller variable is null do not return anything
   # if (input$visNetwork_select_individual_show_timeslider &
@@ -386,22 +310,26 @@ output$visNetwork_select_individuals_NumberOfExcluded <- renderUI({
       )
     )
   
-  HTML(
-    paste0(
-      "<p>Included Interactions: ",
-      nrow(selected.interactions),
-      "</p>",
-      "<p>Included People/Organisations: ",
-      length(selected.people),
-      "</p>",
-      "<p>Excluded Interactions: ",
-      nrow(multiparty.interactions) - nrow(selected.interactions),
-      "</p>",
-      "<p>Excluded People/Organisations: ",
-      length(multiparty.people) - length(selected.people),
-      "</p>"
+  if(is.igraph(visNetwork_select_individuals_neighboring_nodes())){
+    HTML(
+      paste0(
+        "<p>Included Interactions: ",
+        nrow(selected.interactions),
+        "</p>",
+        "<p>Included People/Organisations: ",
+        length(selected.people),
+        "</p>",
+        "<p>Excluded Interactions: ",
+        nrow(multiparty.interactions) - nrow(selected.interactions),
+        "</p>",
+        "<p>Excluded People/Organisations: ",
+        length(multiparty.people) - length(selected.people),
+        "</p>"
+      )
     )
-  )
+  } else {
+    HTML("There is no data to display")
+  }
 })
 
 ### ====================================== Generate visNetwork ========================
@@ -410,17 +338,26 @@ output$visNetwork_select_individuals_NumberOfExcluded <- renderUI({
 ## show warning if no edges to display
 output$selected.individual.network_no_graph <- renderUI({
   ## If not loaded yet, stop
+  
+  if (input$visNetwork_selected_individual_show_timeslider &
+      is.null(input$visNetwork_selected_individual_time_period_of_interest)) {
+    wellPanel()
+  }
+  
   if (is.null(input$select_individuals)) {
     wellPanel(
       "Please select at least one individual from the Cultures of Knowledge network by typing into the 'Select Individuals' field."
     )
   }
-
-  if (graph.union.fail) {
+  
+  if(is.igraph(visNetwork_select_individuals_neighboring_nodes())){
+    return()
+  } else {
     wellPanel(
       "There are no known connections between the individuals selected, subject to the current filter conditions."
     )
   }
+  
 })
 
 ## Show connections between selected individuals
@@ -436,10 +373,19 @@ output$select.individual.network_graph <- renderVisNetwork({
     return()
   }
   
+  # if (input$visNetwork_selected_individuals_show_timeslider &
+  #     is.null(input$visNetwork_selected_individuals_time_period_of_interest)) {
+  #   return()
+  # }
+  
+  if(!is.igraph(visNetwork_select_individuals_neighboring_nodes())){
+    return()
+  }
+  
   ## load visN_edges
   visN_edges <- subgraph_edges()
   
-  ## If graph.union.fail then the visN_edges is null
+  ## If graph.union.passed then the visN_edges is null
   if (is.null(visN_edges)) {
     return()
   }
@@ -462,9 +408,22 @@ output$select.individual.network_graph <- renderVisNetwork({
   )
   
   ## Highlight the selected nodes as red
-  node_colors <- rep("lightblue", nrow(visN_nodes))
+  node_colors <- rep("#7570b3", nrow(visN_nodes))
   node_colors[match(input$select_individuals,
                     visN_nodes$id)] <- "red"
+  
+  ## Highlight first degree edges as red
+  edge_colors <-
+    mapvalues(
+      visN_edges$from %in% input$select_individuals |
+        visN_edges$to %in% input$select_individuals,
+      from = c(TRUE, FALSE),
+      to = c("#d95f02", "#7570b3")
+      # to = c("#d95f02", "lightblue")
+    )
+  visN_edges$color <- edge_colors
+  
+  print(visN_edges[visN_edges$from %in% input$select_individuals | visN_edges$to %in% input$select_individuals,])
   
   visN_nodes$color <- node_colors
   ## Remove duplicated nodes
@@ -480,15 +439,15 @@ output$select.individual.network_graph <- renderVisNetwork({
   
   ## Visualise
   visNetwork(visN_nodes, visN_edges) %>%
-    visNodes(color = list(border = "lightblue", border = "darkblue"),
+    visNodes(color = list(border = "darkblue"),
              size = 10) %>%
-    visEdges(width = 3, color = "lightblue") %>%
+    visEdges(width = 4) %>%
     visIgraphLayout() %>%
     visInteraction(
       tooltipDelay = 0.2,
-      hideEdgesOnDrag = TRUE,
+      hideEdgesOnDrag = FALSE,
       dragNodes = FALSE,
-      dragView = FALSE,
+      dragView = TRUE,
       zoomView = TRUE
     ) %>%
     visOptions(highlightNearest = TRUE) %>%
@@ -498,11 +457,34 @@ output$select.individual.network_graph <- renderVisNetwork({
               ;}")
   })
 
+output$select.individual.network_graph_UI <- renderUI({
+  
+  if (is.null(input$select_individuals)) {
+    return()
+  }
+  
+  ## if timeslider is to be shown but the controller variable is null do not return anything
+  if (input$visNetwork_selected_individual_show_timeslider &
+      is.null(input$visNetwork_selected_individual_time_period_of_interest)) {
+    return()
+  }
+  
+  if(!is.igraph(visNetwork_select_individuals_neighboring_nodes())){
+    return()
+  }
+  
+  wellPanel(visNetworkOutput("select.individual.network_graph"))
+})
+
 ### ====================================== Selected Individuals =====================================
 ### ==================================================================================================
 
 output$visNetwork_select_individual_selected_node_info <- renderUI({
   if (is.null(input$current_node_id)) {
+    return()
+  }
+  
+  if(!is.igraph(visNetwork_select_individuals_neighboring_nodes())){
     return()
   }
   
@@ -519,7 +501,7 @@ output$visNetwork_select_individual_selected_node_info <- renderUI({
   
   wellPanel(HTML(
     paste0(
-      "<p><strong>Selected FOOO Person/Organisation: ",
+      "<p><strong>Selected Person: ",
       "<a target='_blank' href=http://emlo.bodleian.ox.ac.uk/profile?type=person&id=",
       selected_emlo_id,
       ">",
@@ -538,6 +520,11 @@ output$visNetwork_select_individual_selected_node_info <- renderUI({
 
 output$visNetwork_selected_individual_connected_life_events_columns_to_show_UI <-
   renderUI({
+    
+    if(!is.igraph(visNetwork_select_individuals_neighboring_nodes())){
+      return()
+    }
+    
     fluidRow(column(tagList(
       selectInput(
         'connected_life_events_Cols',
@@ -566,6 +553,10 @@ output$visNetwork_selected_individual_connected_life_events_columns_to_show_UI <
 
 connections_to_selected_individual <- reactive({
   if (is.null(input$current_node_id)) {
+    return()
+  }
+  
+  if(!is.igraph(visNetwork_select_individuals_neighboring_nodes())){
     return()
   }
   
@@ -624,58 +615,71 @@ connections_to_selected_individual <- reactive({
   # connections_to_selected_individual
 })
 
+connected_individuals_events <- reactive({
+  if(!is.igraph(visNetwork_select_individuals_neighboring_nodes())){
+    return()
+  }
+  
+  # Load connected individuals
+  connected_life_events <- connections_to_selected_individual()
+  
+  connected_life_events$Primary.Participant.Name <-
+    paste0(
+      "<a target='_blank' href=http://emlo.bodleian.ox.ac.uk/profile?type=person&id=",
+      connected_life_events$Primary.Participant.Emlo_ID,
+      ">",
+      connected_life_events$Primary.Participant.Name,
+      "</a>"
+    )
+  
+  connected_life_events$Secondary.Participant.Name <-
+    paste0(
+      "<a target='_blank' href=http://emlo.bodleian.ox.ac.uk/profile?type=person&id=",
+      connected_life_events$Secondary.Participant.Emlo_ID,
+      ">",
+      connected_life_events$Secondary.Participant.Name,
+      "</a>"
+    )
+  
+  # Drop empty rows:
+  connected_life_events <-
+    connected_life_events[!!rowSums(!is.na(connected_life_events)),]
+  # Return only selected columns
+  connected_life_events <-
+    connected_life_events[, input$connected_life_events_Cols, drop = FALSE]
+  # Replace "." with " " in colnames
+  colnames(connected_life_events) <-
+    gsub("[.]", " ", colnames(connected_life_events))
+  # Convert factors to characters for sorting:
+  factor_columns <- sapply(connected_life_events, is.factor)
+  connected_life_events[factor_columns] <-
+    lapply(connected_life_events[factor_columns], as.character)
+  
+  # Find position of names to make these columns non-orderable
+  name_columns <-
+    which(
+      colnames(connected_life_events) %in% c("Primary Participant Name", "Secondary Participant Name")
+    )
+
+  # Return to datatable
+  connected_life_events
+})
+
 output$visNetwork_selected_individual_selected_node <-
-  DT::renderDataTable({
-    # Load connected individuals
-    connected_life_events <- connections_to_selected_individual()
+  renderDataTable({
     
-    connected_life_events$Primary.Participant.Name <-
-      paste0(
-        "<a target='_blank' href=http://emlo.bodleian.ox.ac.uk/profile?type=person&id=",
-        connected_life_events$Primary.Participant.Emlo_ID,
-        ">",
-        connected_life_events$Primary.Participant.Name,
-        "</a>"
-      )
+    connected_individuals_events()
     
-    connected_life_events$Secondary.Participant.Name <-
-      paste0(
-        "<a target='_blank' href=http://emlo.bodleian.ox.ac.uk/profile?type=person&id=",
-        connected_life_events$Secondary.Participant.Emlo_ID,
-        ">",
-        connected_life_events$Secondary.Participant.Name,
-        "</a>"
-      )
-    
-    # Drop empty rows:
-    connected_life_events <-
-      connected_life_events[!!rowSums(!is.na(connected_life_events)),]
-    # Return only selected columns
-    connected_life_events <-
-      connected_life_events[, input$connected_life_events_Cols, drop = FALSE]
-    # Replace "." with " " in colnames
-    colnames(connected_life_events) <-
-      gsub("[.]", " ", colnames(connected_life_events))
-    # Convert factors to characters for sorting:
-    factor_columns <- sapply(connected_life_events, is.factor)
-    connected_life_events[factor_columns] <-
-      lapply(connected_life_events[factor_columns], as.character)
-    
-    # Find position of names to make these columns non-orderable
-    name_columns <<-
-      which(
-        colnames(connected_life_events) %in% c("Primary Participant Name", "Secondary Participant Name")
-      )
-    
-    
-    # Return to datatable
-    connected_life_events
-    
-  }, escape = FALSE, rownames = FALSE,
+  }, escape = FALSE,
+  # rownames = FALSE,
   # only make name column non-orderable
-  options = if (length(name_columns) > 0) {
+  options = if (length(which(
+    colnames(connected_individuals_events()) %in% c("Primary Participant Name", "Secondary Participant Name")
+  )) > 0) {
     list(columnDefs = list(list(
-      targets = name_columns - 1, orderable = FALSE
+      targets = which(
+        colnames(connected_individuals_events()) %in% c("Primary Participant Name", "Secondary Participant Name")
+      ) - 1, orderable = FALSE
     )))
   })
 

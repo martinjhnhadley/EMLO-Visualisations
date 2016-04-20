@@ -20,7 +20,6 @@ tabPanel(
       sep = ""
     )
   )),
-  dataTableOutput("test_output_UI"),
   uiOutput("select_individuals_ui"),
   # fluidRow(
   #   column(uiOutput("select.individual.1_UI"),width=4),
@@ -29,7 +28,7 @@ tabPanel(
   fluidRow(
     column(
       uiOutput("selected.individual.network_no_graph"),
-      visNetworkOutput("select.individual.network_graph", width = "100%"),
+      uiOutput("select.individual.network_graph_UI", width = "100%"),
       width = 9
     ),
     column(
@@ -50,6 +49,6 @@ tabPanel(
     uiOutput(
       "visNetwork_selected_individual_connected_life_events_columns_to_show_UI"
     ),
-    DT::dataTableOutput("visNetwork_selected_individual_selected_node")
+    dataTableOutput("visNetwork_selected_individual_selected_node")
   )
   )
