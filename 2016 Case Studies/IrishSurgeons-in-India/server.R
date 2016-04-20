@@ -1,9 +1,11 @@
 library(shiny)
 library(leaflet)
-library(DT)
+library(lubridate)
+library(stringr)
+library(plyr)
+library(scales)
 
 shinyServer(function(input, output) {
-  source("data-processing.R", local = T)
-  source("visualisation-and-ui.R", local = T)
-  
+  source("data-processing.R", local = TRUE)
+  source("visualisation-and-ui.R", local = TRUE)
 })

@@ -1,0 +1,10 @@
+name: IrishSurgoens
+account: livedataoxford
+server: shinyapps.io
+appId: 95813
+bundleId: 426186
+url: https://livedataoxford.shinyapps.io/IrishSurgoens/
+when: 1461149795.50388
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: Irish-Surgeons.html|Irish-Surgeons.Rmd|location-summaries.R|scattergeo_leaflet.R|scattergeo_plotly.R|data/Place of Birth_MartinHadley.xlsx|data/original-data/Contributions to medical print culture - IMG (1896-1920).xlsx|data/original-data/Irish historiography.xlsx

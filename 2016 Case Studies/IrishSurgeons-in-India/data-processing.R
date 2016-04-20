@@ -8,52 +8,96 @@
 ## Data Source: local file
 ## ================================================================================
 
-# library(xlsx)
-# xlsx_import <- read.xlsx("data/Place of Birth_MartinHadley.xlsx", sheetIndex = 1)
-# write.csv(xlsx_import, file = "data/Place of Birth_MartinHadley.csv", row.names = FALSE)
+library(xlsx)
+
+xlsx_import <- read.xlsx("data/Edited_Place of Birth_MartinHadley.xlsx", sheetIndex = 1)
+write.csv(xlsx_import, file = "data/Place of Birth_MartinHadley.csv", row.names = FALSE, quote = TRUE)
 
 place_of_birth <-
   read.csv(file = "data/Place of Birth_MartinHadley.csv", stringsAsFactors = FALSE)
 
-## =========================== Drop Missing and Split Locations =================
+## =========================== Add combined Lat Long Column =====================
 ## ==============================================================================
-library(stringr)
 
-place_of_birth <- place_of_birth[!is.na(place_of_birth$Lat.Long), ]
-place_of_birth$Lat.Long <- trimws(place_of_birth$Lat.Long)
-## Kill commas
-place_of_birth$Lat.Long <-
-  str_replace(place_of_birth$Lat.Long,
-              pattern = ",",
-              replacement = "")
+combined_lat_long <- paste(place_of_birth$Latitude,place_of_birth$Longitude)
 
-lat_long_splittings <- strsplit(place_of_birth$Lat.Long, "\\s+")
-place_of_birth$Lat <- sapply(lat_long_splittings, "[[", 1)
-place_of_birth$Lon <- sapply(lat_long_splittings, "[[", 2)
+combined_lat_long[combined_lat_long == "NA NA"] <- NA
+
+place_of_birth$Combined.Lat.Long <- combined_lat_long
+
+## Drop missing locations:
+
+place_of_birth <- place_of_birth[!is.na(place_of_birth$Combined.Lat.Long),]
+
+# ## =========================== Drop Missing and Split Locations =================
+# ## ==============================================================================
+# 
+# 
+# place_of_birth <- place_of_birth[!is.na(place_of_birth$Lat.Long), ]
+# print("before trimws")
+# place_of_birth$Lat.Long <- trimws(place_of_birth$Lat.Long)
+# print("after trimws")
+# ## Kill commas
+# place_of_birth$Lat.Long <-
+#   str_replace(place_of_birth$Lat.Long,
+#               pattern = ",",
+#               replacement = "")
+# print("after str_replace")
+# 
+# place_of_birth$Lat.Long
+# 
+# 
+# 
+# lat_long_splittings <- strsplit(place_of_birth$Lat.Long, "\\s+")
+# print("after strsplit")
+# 
+# 
+# #
+# # place_of_birth[grepl("28.61", place_of_birth$Lat.Long),]$Lat.Long %>% dput()
+# #
+# # grepl("51.861667", place_of_birth$Lat.Long)
+# # lat_long_splittings[grepl("51.861667", lat_long_splittings)]
+# #
+# # place_of_birth$Lat.Long
+# 
+# dput(lat_long_splittings)
+# 
+# place_of_birth$Lat <- unlist(lapply(lat_long_splittings, "[[", 1))
+# print("after sapply 1")
+# place_of_birth$Lon <- unlist(lapply(lat_long_splittings, "[[", 2))
+# print("after sapply 2")
+
+## =========================== Trim White Space ====================================
+## ==============================================================================
+
 
 ## Strip white space on columns
 place_of_birth$PoB..Town.or.Parish. <- trimws(place_of_birth$PoB..Town.or.Parish.)
+print("after trimws pob")
 place_of_birth$Name <- trimws(place_of_birth$Name)
+print("after trimws name")
 place_of_birth$Parent.names <- trimws(place_of_birth$Parent.names)
+print("after trimws parentnames")
 
 
 
 ## =========================== Tally Locations ==================================
 ## ==============================================================================
-library(plyr)
-library(scales)
+
 
 latlong_location_tally <-
-  as.data.frame(table(place_of_birth$Lat.Long))
+  as.data.frame(table(place_of_birth$Combined.Lat.Long),stringsAsFactors = FALSE)
 
 place_of_birth$latlong.location.tally <-
   as.numeric(
     mapvalues(
-      place_of_birth$Lat.Long,
+      place_of_birth$Combined.Lat.Long,
       from = latlong_location_tally$Var1,
       to = latlong_location_tally$Freq
     )
   )
+
+
 
 ## ======== Find LatLongs used against multiple locations ======================
 ## ==============================================================================
@@ -64,9 +108,9 @@ latlongs_with_multiple_locations <- data.frame(
   "PoB..Town.or.Parish." = as.character()
 )
 
-invisible(lapply(unique(place_of_birth$Lat.Long), function(x) {
+invisible(lapply(unique(place_of_birth$Combined.Lat.Long), function(x) {
   locations_with_latlong <-
-    unique(place_of_birth[place_of_birth$Lat.Long == x, "PoB..Town.or.Parish."])
+    unique(place_of_birth[place_of_birth$Combined.Lat.Long == x, "PoB..Town.or.Parish."])
   if (length(locations_with_latlong) > 1) {
     latlongs_with_multiple_locations <<- rbind(
       latlongs_with_multiple_locations,
@@ -78,21 +122,22 @@ invisible(lapply(unique(place_of_birth$Lat.Long), function(x) {
   }
 }))
 
+
+
 write.csv(file = "data/latlongs_with_multiple_location_names.csv", x = latlongs_with_multiple_locations[!duplicated(latlongs_with_multiple_locations),], row.names = F)
 
 ## =========================== Drop Missing Dates ==============================
 ## ==============================================================================
-library(lubridate)
 
 place_of_birth <- place_of_birth[!is.na(place_of_birth$DoB), ]
 ## Find those entries with (Bapt.) for encoding in a new data column
 place_of_birth$Known_Baptism <- grepl("Bapt.", place_of_birth$DoB)
 ## Function to fix dates with (Bapt.) in
-correct_bapt_dates <- function(date) {
-  if (grepl("Bapt.", date)) {
-    unlist(strsplit(date, "\\s+"))[1]
+correct_bapt_dates <- function(x) {
+  if (grepl("Bapt.", x)) {
+    unlist(strsplit(x, "\\s+"))[1]
   } else
-    date
+    x
 }
 ## Update DoB column
 place_of_birth$DoB <-
