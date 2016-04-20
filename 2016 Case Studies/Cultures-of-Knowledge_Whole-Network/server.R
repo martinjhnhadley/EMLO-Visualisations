@@ -15,7 +15,7 @@ library(reshape2) # for dcast, count and others
 library(visNetwork) # for interactive graph
 library(plyr) # for data processing
 library(dplyr) # for data processing
-library(DT) # for nice tables
+# library(DT) # for nice tables
 library(igraph) # for network analysis
 library(ggplot2)
 library(networkD3)

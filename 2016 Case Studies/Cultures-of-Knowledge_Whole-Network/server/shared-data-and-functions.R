@@ -184,10 +184,10 @@ filter_interactions <- reactive({
       {
         selected.interactions$DateOne.Year <= latest_year
       } %in% TRUE , ]
-    ## Filter out rows where DateTwo.Year is greater than the max date allowd
-    selected.interactions <-
-      selected.interactions[selected.interactions$DateTwo.Year <= latest_year |
-                              is.na(selected.interactions$DateTwo.Year), ]
+    # ## Filter out rows where DateTwo.Year is greater than the max date allowd
+    # selected.interactions <-
+    #   selected.interactions[selected.interactions$DateTwo.Year <= latest_year |
+    #                           is.na(selected.interactions$DateTwo.Year), ]
     ## Return data
     selected.interactions
   } else {
