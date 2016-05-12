@@ -13,7 +13,7 @@
 
 ### =============== Process initial focus documents into CSV files =================================
 
-data.dir <- "./data/initial-focus"
+data.dir <- "./data/small_focus/"
 
 all_xlsx_files <- list.files(data.dir)
 
@@ -55,8 +55,6 @@ master_people_sheet <- master_people_sheet[!is.na(master_people_sheet$iperson_id
 master_people_sheet <- unique(master_people_sheet)
 
 ## There are duplicate person ids... these need fixing
-
-master_people_sheet
 
 ## Export to csv
 write.csv(master_people_sheet,"data/master_people_sheet.csv", na = "", row.names = FALSE)

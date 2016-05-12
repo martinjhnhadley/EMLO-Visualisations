@@ -64,11 +64,24 @@ life.events.df <- read.csv("data/master_life_events_sheet.csv")
 life.events.df$Primary.Participant.Emlo_ID <- as.character(life.events.df$Primary.Participant.Emlo_ID)
 life.events.df$Secondary.Participant.Emlo_ID <- as.character(life.events.df$Secondary.Participant.Emlo_ID)
 
-## =========================== Remove Organsisations etc ========================
+
+## ============= Get list of non-persons in life events and people.df ===========
 ## ==============================================================================
 
+non_people_in_life_events <- life.events.df[life.events.df$Secondary.Participant.Type != "Person",]
 
-life.events.df <- life.events.df[life.events.df$Secondary.Participant.Type == "Person",]
+nrow(non_people_in_life_events)
+
+str(non_people_in_life_events)
+
+non_people_in_life_events_emlo_ids <- unique(non_people_in_life_events$Secondary.Participant.Emlo_ID)
+non_people_in_life_events_emlo_ids <- non_people_in_life_events_emlo_ids[!is.na(non_people_in_life_events_emlo_ids)]
+
+non_people_in_people_df <- intersect(non_people_in_life_events_emlo_ids, people.df$iperson_id)
+
+
+
+# life.events.df <- life.events.df[life.events.df$Secondary.Participant.Type == "Person",]
 
 
 ### ============= Non-self Referential Events (i.e. not births) =============

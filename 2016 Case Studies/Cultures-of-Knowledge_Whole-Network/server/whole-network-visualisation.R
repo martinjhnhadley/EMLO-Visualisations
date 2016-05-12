@@ -55,7 +55,7 @@ output$visNetwork_wholeNetwork_time_period_of_interest_UI <-
 output$visNetwork_wholeNetwork_HighlightedCategoryUI <- renderUI({
   selectInput(
     'visNetwork_wholeNetwork_highlightedCategory',
-    'Event/Relationship Type to highlight',
+    'Event/Relation Type to highlight',
     choices = c("None", all_event_categories()),
     selected = "None",
     multiple = FALSE
@@ -70,7 +70,7 @@ output$visNetwork_wholeNetwork_ExcludedCategoriesUI <- renderUI({
   selectInput(
     'visNetwork_wholeNetwork_ExcludedCategory',
     'Event/Relation Type to exclude',
-    choices = c("Include all",
+    choices = c("None",
                 all_event_types()),
     multiple = FALSE
   )
@@ -198,7 +198,7 @@ visNetwork_wholeNetwork_nodes <- reactive({
     "Person.Name" = nodes$Person.Name,
     "Surname" = nodes$Surname,
     "emlo_id" = nodes$iperson_id,
-    "color" = rep("#7570b3", nrow(nodes))
+    "color" = mapvalues(nodes$iperson_id %in% non_people_in_people_df, from = c(TRUE, FALSE), to = c("#a1d76a","#7570b3"))
   )
   ## Return for use
   
@@ -343,10 +343,23 @@ output$visNetwork_wholeNetwork <- renderVisNetwork({
            from %in% non.conflicting.nodes &
              to %in% non.conflicting.nodes)
   
+  ## =========== Use igraph to remove loops and nodes with edge degree == 0 ===========
+  ## ==================================================================================
+  ## Generate igraph
+  igraph.for.computation <-
+    graph.data.frame(visN_edges[,c(1,2)], visN_nodes[,1], directed = FALSE)
+  ## Simplify to remove self-loops
+  igraph.for.computation <- simplify(igraph.for.computation)
+  
+  isolated_nodes <- V(igraph.for.computation)$name[which(degree(igraph.for.computation) == 0)]
+  
+  ## Drop isolated nodes
+  visN_nodes <- visN_nodes[!visN_nodes$id %in% isolated_nodes,]
+  
   ## Make network
   visNetwork(visN_nodes, visN_edges) %>%
     visNodes(color = list(border = "darkblue"), size = 10) %>%
-    visIgraphLayout() %>%
+    visIgraphLayout(randomSeed = 1) %>%
     # visEdges(value = round(rescale(visNetwork_edges$Value, to = c(2,10)))) %>%
     # visEdges(width = 4) %>%
     visInteraction(
@@ -356,7 +369,7 @@ output$visNetwork_wholeNetwork <- renderVisNetwork({
       dragView = TRUE,
       zoomView = TRUE
     ) %>%
-    visOptions(highlightNearest = TRUE) %>% visLayout(hierarchical = FALSE, randomSeed = 1) %>%
+    visOptions(highlightNearest = TRUE) %>% visLayout(hierarchical = FALSE) %>%
     # visInteraction(navigationButtons = TRUE) %>%
     visEvents(selectNode = "function(nodes) {
               Shiny.onInputChange('current_node_id', nodes);
