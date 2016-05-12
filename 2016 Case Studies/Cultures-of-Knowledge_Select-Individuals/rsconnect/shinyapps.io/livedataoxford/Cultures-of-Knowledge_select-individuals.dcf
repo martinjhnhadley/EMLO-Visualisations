@@ -2,8 +2,8 @@ name: Cultures-of-Knowledge_select-individuals
 account: livedataoxford
 server: shinyapps.io
 appId: 92512
-bundleId: 424936
+bundleId: 448988
 url: https://livedataoxford.shinyapps.io/Cultures-of-Knowledge_select-individuals/
-when: 1461072717.1088
+when: 1463061721.76965
 asMultiple: FALSE
 asStatic: FALSE

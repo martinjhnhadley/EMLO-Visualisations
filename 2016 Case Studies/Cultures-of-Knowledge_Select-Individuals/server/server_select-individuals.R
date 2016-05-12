@@ -96,8 +96,7 @@ network_edges <- reactive({
 })
 
 visNetwork_select_individuals_nodes <- reactive({
-  
-  if(is.null(input$select_individuals)){
+  if (is.null(input$select_individuals)) {
     return()
   }
   
@@ -109,15 +108,6 @@ visNetwork_select_individuals_nodes <- reactive({
   ## Get nodes from edges
   nodes.of.network <-
     unique(c(edges$Primary.Emlo_ID, edges$Secondary.Emlo_ID))
-  
-  ### ==== Start Experiment
-  
-  test_nodes_in_people.df <-
-    subset(people.df, iperson_id %in% nodes.of.network)$iperson_id
-  test_nodes_not_in_people.df <-
-    setdiff(nodes.of.network, test_nodes_in_people.df)
-  
-  ### ==== End Experiment
   
   ## Only include individuals in the people.df data set
   nodes <- subset(people.df, iperson_id %in% nodes.of.network)
@@ -200,17 +190,17 @@ visNetwork_select_individuals_neighboring_nodes <- reactive({
   edges <- edges[, c("source.emlo.id", "target.emlo.id")]
   ## Extract nodes
   nodes <- unique(c(edges$source.emlo.id, edges$target.emlo.id))
-
+  
   ## Generate igraph
   igraph.for.computation <-
     graph.data.frame(edges, nodes, directed = FALSE)
-
+  
   # ## plot igraph
   # # plot(igraph.for.computation, vertex.size=2, vertex.label=NA, edge.arrow.size=.2)
-  # 
+  #
   # ## Set graph.union.passed to TRUE
   graph.union.passed <<- TRUE
-
+  
   ## Use tryCatch for errors when no connected edges found!
   tryCatch(
     visNetwork_select_individuals_neighboring_nodes <-
@@ -234,17 +224,16 @@ visNetwork_select_individuals_neighboring_nodes <- reactive({
 })
 
 subgraph_members <- reactive({
-  
   # plot igraph of neighboring vertices
   # plot(visNetwork_select_individuals_neighboring_nodes,vertex.size=2, vertex.label=V(visNetwork_select_individuals_neighboring_nodes)$name, edge.arrow.size=.2)
   
-  if(is.null(visNetwork_select_individuals_neighboring_nodes())){
+  if (is.null(visNetwork_select_individuals_neighboring_nodes())) {
     return()
   }
   
-  if(is.igraph(visNetwork_select_individuals_neighboring_nodes())){
-    
-    visNetwork_select_individuals_neighboring_nodes <- visNetwork_select_individuals_neighboring_nodes()
+  if (is.igraph(visNetwork_select_individuals_neighboring_nodes())) {
+    visNetwork_select_individuals_neighboring_nodes <-
+      visNetwork_select_individuals_neighboring_nodes()
     
     ## Subset multiparty.interactions by the node names:
     selected.interactions <-
@@ -283,7 +272,7 @@ output$visNetwork_select_individuals_NumberOfExcluded <- renderUI({
     return()
   }
   
-  # 
+  #
   # ## if timeslider is to be shown but the controller variable is null do not return anything
   # if (input$visNetwork_select_individual_show_timeslider &
   #     is.null(input$visNetwork_selected_individual_time_period_of_interest)) {
@@ -291,9 +280,9 @@ output$visNetwork_select_individuals_NumberOfExcluded <- renderUI({
   # }
   
   ## load visN_edges
-
+  
   selected.interactions <- subgraph_members()
-
+  
   multiparty.people <-
     unique(
       c(
@@ -310,7 +299,7 @@ output$visNetwork_select_individuals_NumberOfExcluded <- renderUI({
       )
     )
   
-  if(is.igraph(visNetwork_select_individuals_neighboring_nodes())){
+  if (is.igraph(visNetwork_select_individuals_neighboring_nodes())) {
     HTML(
       paste0(
         "<p>Included Interactions: ",
@@ -350,11 +339,20 @@ output$selected.individual.network_no_graph <- renderUI({
     )
   }
   
-  if(is.igraph(visNetwork_select_individuals_neighboring_nodes())){
+  if (is.igraph(visNetwork_select_individuals_neighboring_nodes())) {
     return()
   } else {
     wellPanel(
-      "There are no known connections between the individuals selected, subject to the current filter conditions."
+      HTML(
+      paste0(
+        "<p>",
+      "This visualisation is designed to depict a 'subgraph' containing all of the selected individuals above.","</p>",
+      "<p>",
+      "The current filter settings mean that such a network cannot be generated from data currently available from EMLO.","</p>",
+      "<p>",
+      "It is likely that you have enabled the time filter for the network and one (or more) of the individuals are only connected ",
+      "to others with (currently) undated interactions.","</p>")
+      )
     )
   }
   
@@ -378,14 +376,14 @@ output$select.individual.network_graph <- renderVisNetwork({
   #   return()
   # }
   
-  if(!is.igraph(visNetwork_select_individuals_neighboring_nodes())){
+  if (!is.igraph(visNetwork_select_individuals_neighboring_nodes())) {
     return()
   }
   
   ## load visN_edges
   visN_edges <- subgraph_edges()
   
-  ## If graph.union.passed then the visN_edges is null
+  ## If graph.union.passed is FALSE then the visN_edges is null
   if (is.null(visN_edges)) {
     return()
   }
@@ -423,11 +421,12 @@ output$select.individual.network_graph <- renderVisNetwork({
     )
   visN_edges$color <- edge_colors
   
-  print(visN_edges[visN_edges$from %in% input$select_individuals | visN_edges$to %in% input$select_individuals,])
+  print(visN_edges[visN_edges$from %in% input$select_individuals |
+                     visN_edges$to %in% input$select_individuals, ])
   
   visN_nodes$color <- node_colors
   ## Remove duplicated nodes
-  visN_nodes <- visN_nodes[!duplicated(visN_nodes$id),]
+  visN_nodes <- visN_nodes[!duplicated(visN_nodes$id), ]
   
   ## Drop edges with nodes not in the node list
   non.conflicting.nodes <-
@@ -458,7 +457,6 @@ output$select.individual.network_graph <- renderVisNetwork({
   })
 
 output$select.individual.network_graph_UI <- renderUI({
-  
   if (is.null(input$select_individuals)) {
     return()
   }
@@ -469,7 +467,7 @@ output$select.individual.network_graph_UI <- renderUI({
     return()
   }
   
-  if(!is.igraph(visNetwork_select_individuals_neighboring_nodes())){
+  if (!is.igraph(visNetwork_select_individuals_neighboring_nodes())) {
     return()
   }
   
@@ -484,7 +482,7 @@ output$visNetwork_select_individual_selected_node_info <- renderUI({
     return()
   }
   
-  if(!is.igraph(visNetwork_select_individuals_neighboring_nodes())){
+  if (!is.igraph(visNetwork_select_individuals_neighboring_nodes())) {
     return()
   }
   
@@ -508,9 +506,12 @@ output$visNetwork_select_individual_selected_node_info <- renderUI({
       selected.person.name,
       "</a></strong></p>",
       "<p>Number of Unique Connections: ",
-      length(setdiff(unique(c(connected_life_events$Primary.Participant.Emlo_ID,connected_life_events$Secondary.Participant.Emlo_ID)),selected_emlo_id)),
+      nrow(connections_to_selected_individual()),
       "</p>",
-      "<p>Scroll down for more information about ",selected.person.name,"'s connections", "</p>",
+      "<p>Scroll down for more information about ",
+      selected.person.name,
+      "'s connections",
+      "</p>",
       sep = ""
     )
   ))
@@ -520,8 +521,7 @@ output$visNetwork_select_individual_selected_node_info <- renderUI({
 
 output$visNetwork_selected_individual_connected_life_events_columns_to_show_UI <-
   renderUI({
-    
-    if(!is.igraph(visNetwork_select_individuals_neighboring_nodes())){
+    if (!is.igraph(visNetwork_select_individuals_neighboring_nodes())) {
       return()
     }
     
@@ -556,7 +556,7 @@ connections_to_selected_individual <- reactive({
     return()
   }
   
-  if(!is.igraph(visNetwork_select_individuals_neighboring_nodes())){
+  if (!is.igraph(visNetwork_select_individuals_neighboring_nodes())) {
     return()
   }
   
@@ -587,13 +587,14 @@ connections_to_selected_individual <- reactive({
   #       subgraph_members[subgraph_members$Primary.Participant.Emlo_ID %in% connectedIndividuals &
   #                          subgraph_members$Secondary.Participant.Emlo_ID == selectedIndividual,]
   # )
-
   
-  connections_to_selected_individual <- subgraph_members[subgraph_members$Primary.Participant.Emlo_ID == selectedIndividual | 
-                     subgraph_members$Secondary.Participant.Emlo_ID == selectedIndividual,]
+  
+  connections_to_selected_individual <-
+    subgraph_members[subgraph_members$Primary.Participant.Emlo_ID == selectedIndividual |
+                       subgraph_members$Secondary.Participant.Emlo_ID == selectedIndividual, ]
   # subgraph_members[subgraph_members$Primary.Participant.Emlo_ID == selectedIndividual,]
   # # subgraph_members$Primary.Participant.Emlo_ID == selectedIndividual
-
+  
   # # Create an empty data.frame with life.event.columns
   # connections_to_selected_individual <- subgraph_members[0,]
   # # Function to extract connected events
@@ -611,12 +612,12 @@ connections_to_selected_individual <- reactive({
   # invisible(lapply(connectedIndividuals, function(x)
   #   get.connected.life.events(selectedIndividual, x)))
   # # return
-  # 
+  #
   # connections_to_selected_individual
 })
 
 connected_individuals_events <- reactive({
-  if(!is.igraph(visNetwork_select_individuals_neighboring_nodes())){
+  if (!is.igraph(visNetwork_select_individuals_neighboring_nodes())) {
     return()
   }
   
@@ -643,7 +644,7 @@ connected_individuals_events <- reactive({
   
   # Drop empty rows:
   connected_life_events <-
-    connected_life_events[!!rowSums(!is.na(connected_life_events)),]
+    connected_life_events[!!rowSums(!is.na(connected_life_events)), ]
   # Return only selected columns
   connected_life_events <-
     connected_life_events[, input$connected_life_events_Cols, drop = FALSE]
@@ -660,26 +661,33 @@ connected_individuals_events <- reactive({
     which(
       colnames(connected_life_events) %in% c("Primary Participant Name", "Secondary Participant Name")
     )
-
+  
   # Return to datatable
   connected_life_events
 })
 
 output$visNetwork_selected_individual_selected_node <-
   renderDataTable({
-    
     connected_individuals_events()
     
   }, escape = FALSE,
   # rownames = FALSE,
+  # filter = list(position = 'top', clear = FALSE),
   # only make name column non-orderable
   options = if (length(which(
     colnames(connected_individuals_events()) %in% c("Primary Participant Name", "Secondary Participant Name")
   )) > 0) {
-    list(columnDefs = list(list(
-      targets = which(
-        colnames(connected_individuals_events()) %in% c("Primary Participant Name", "Secondary Participant Name")
-      ) - 1, orderable = FALSE
-    )))
+    list(
+      dom = 'ft',
+      columnDefs = list(list(
+        targets = which(
+          colnames(connected_individuals_events()) %in% c("Primary Participant Name", "Secondary Participant Name")
+        ) - 1,
+        orderable = FALSE
+      )),
+      search = list(
+        regex = TRUE,
+        caseInsensitive = FALSE
+      )
+    )
   })
-

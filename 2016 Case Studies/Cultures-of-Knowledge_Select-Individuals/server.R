@@ -1,4 +1,4 @@
-## ==== Packages to load for server
+  ## ==== Packages to load for server
 
 library(shiny) # Some advanced functionality depends on the shiny package being loaded server-side, including plot.ly
 library(reshape2) # for dcast, count and others
