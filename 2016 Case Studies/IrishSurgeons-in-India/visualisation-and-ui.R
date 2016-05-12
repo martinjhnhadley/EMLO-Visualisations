@@ -124,7 +124,7 @@ output$irelandmap <- renderLeaflet({
     addTiles() %>%
     setView(lat = 53.347778,
             lng = -6.259722,
-            zoom = 6) %>%
+            zoom = 3) %>%
     addCircleMarkers(
       lng = ~ Longitude,
       lat = ~ Latitude,

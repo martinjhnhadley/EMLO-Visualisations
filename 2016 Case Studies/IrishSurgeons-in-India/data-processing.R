@@ -8,10 +8,10 @@
 ## Data Source: local file
 ## ================================================================================
 
-library(xlsx)
-
-xlsx_import <- read.xlsx("data/Edited_Place of Birth_MartinHadley.xlsx", sheetIndex = 1)
-write.csv(xlsx_import, file = "data/Place of Birth_MartinHadley.csv", row.names = FALSE, quote = TRUE)
+# library(xlsx)
+# 
+# xlsx_import <- read.xlsx("data/Edited_Place of Birth_MartinHadley.xlsx", sheetIndex = 1)
+# write.csv(xlsx_import, file = "data/Place of Birth_MartinHadley.csv", row.names = FALSE, quote = TRUE)
 
 place_of_birth <-
   read.csv(file = "data/Place of Birth_MartinHadley.csv", stringsAsFactors = FALSE)
