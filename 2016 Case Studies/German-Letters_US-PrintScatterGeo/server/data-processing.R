@@ -65,7 +65,7 @@ entries_with_locations$Receiver.Country <- unlist(lapply(entries_with_locations$
 ## Interpret dates as dmy and force as GMT
 entries_with_locations$Date <- force_tz(dmy(entries_with_locations$Date, quiet = TRUE), tzone = "GMT")
 ## Find any dates in the future
-future.test <- entries_with_locations$Date > as.POSIXct("2016/01/01")
+future.test <- entries_with_locations$Date >= as.Date("2016/01/01")
 ## Remove these dates!
 entries_with_locations <- entries_with_locations[!mapvalues(future.test, c(FALSE,NA,TRUE),c(FALSE,FALSE,TRUE)),]
 

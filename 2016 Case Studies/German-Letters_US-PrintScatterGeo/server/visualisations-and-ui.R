@@ -119,9 +119,6 @@ location_tallies_function <- function(start.year = NA,
                                       data = NA){
   letters_for_analysis <- letters_sent_between_dates(start.year, end.year, data)
   
-  print(letters_for_analysis)
-  
-  
   all_locations <-
     unique(
       c(
@@ -351,9 +348,9 @@ output$america_period_1_Map <- renderPlotly({
   # }
   
   # route_tallies <- route_tallies()
-  
-  start_of_period <- 1850
-  end_of_period <- 1870
+  print(min(na.omit(year(entries_with_locations$Date))))
+  start_of_period <- min(na.omit(year(entries_with_locations$Date)))
+  end_of_period <- 1855
   
   location_tallies <- location_tallies_function(start.year = start_of_period, end.year = end_of_period, data = entries_with_locations)
   state_tallies <- state_tallies_function(start.year = start_of_period, end.year = end_of_period, data = entries_with_locations)
@@ -373,8 +370,8 @@ output$america_period_2_Map <- renderPlotly({
   # }
   # 
   
-  start_of_period <- 1870
-  end_of_period <- 1914
+  start_of_period <- 1856
+  end_of_period <- 1916
   
   location_tallies <- location_tallies_function(start.year = start_of_period, end.year = end_of_period, data = entries_with_locations)
   state_tallies <- state_tallies_function(start.year = start_of_period, end.year = end_of_period, data = entries_with_locations)
@@ -393,8 +390,8 @@ output$america_period_3_Map <- renderPlotly({
   #   return()
   # }
   
-  start_of_period <- 1914
-  end_of_period <- 1945
+  start_of_period <- 1917
+  end_of_period <- max(na.omit(year(entries_with_locations$Date)))
   
   location_tallies <- location_tallies_function(start.year = start_of_period, end.year = end_of_period, data = entries_with_locations)
   state_tallies <- state_tallies_function(start.year = start_of_period, end.year = end_of_period, data = entries_with_locations)

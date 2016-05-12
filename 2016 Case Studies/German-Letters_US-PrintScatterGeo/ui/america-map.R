@@ -38,20 +38,52 @@ fluidPage(
          </p>")
     ),
   
-  ## Grid of Four ##
-  
   fluidRow(
     column(
-      plotlyOutput("america_period_1_Map"),
-      plotlyOutput("america_period_2_Map"),
-      width = 6
-    ),
+      plotlyOutput("america_period_1_Map"), width = 4),
     column(
-      plotlyOutput("america_period_3_Map"),
-      plotlyOutput("america_period_4_Map"),
-      width = 6
-    )
+      plotlyOutput("america_period_2_Map"), width = 4),
+    column(
+      plotlyOutput("america_period_3_Map"), width = 4)
   )
+  
+  # fluidRow(
+  #   column(
+  #     "", width = 2, offset = 1),
+  #   column(
+  #     plotlyOutput("america_period_1_Map"), width = 8, offset = 2),
+  #   column(
+  #     "", width = 2, offset = 1)
+  # ),
+  # fluidRow(
+  #   column(
+  #     "", width = 2, offset = 1),
+  #   column(
+  #     plotlyOutput("america_period_2_Map"), width = 8, offset = 2),
+  #   column(
+  #     "", width = 2, offset = 1)
+  # ),
+  # fluidRow(
+  #   column(
+  #     "", width = 2, offset = 1),
+  #   column(
+  #     plotlyOutput("america_period_3_Map"), width = 8, offset = 2),
+  #   column(
+  #     "", width = 2, offset = 1)
+  # )
+  
+  # fluidRow(
+  #   column(
+  #     plotlyOutput("america_period_1_Map"),
+  #     plotlyOutput("america_period_2_Map"),
+  #     width = 6
+  #   ),
+  #   column(
+  #     plotlyOutput("america_period_3_Map"),
+  #     plotlyOutput("america_period_4_Map"),
+  #     width = 6
+  #   )
+  # )
   ## america map ##
   # uiOutput("americamap_via_renderUI")
     )
