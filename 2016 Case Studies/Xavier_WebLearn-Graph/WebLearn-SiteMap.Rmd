@@ -27,7 +27,7 @@ Note that all code is shown for reference purposes, scroll down the page for the
 # write.csv(xlsx_import, file = "xavier-data.csv", row.names = FALSE)
 
 # Import csv as faster than xlsx
-xavier_data <- read.csv("xavier-data.csv")
+xavier_data <- read.csv("edges_11thMay.csv")
 # Drop all columns except Parent and Child
 xavier_data <- xavier_data[,c("Parent","Child")]
 xavier_data$Parent <- as.character(xavier_data$Parent)
