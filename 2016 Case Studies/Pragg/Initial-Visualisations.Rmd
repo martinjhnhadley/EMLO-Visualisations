@@ -11,7 +11,21 @@ knitr::opts_chunk$set(
 )
 ```
 
+# Jonathan's ORCID
+
+
+
 # Livian Distribution
+
+Jonathan would like this to be ordered by book, but with an interactive control that allows users to re-order by % of Adriatic etc.
+
+Book names don't exist, they're just numbered.
+
+Preference for highchart for the cleanness.
+
+Jonathan prefers the highchart version.
+
+Jonathan wants ability to switch betweeen % and number of chapters.
 
 ```{r import_livian}
 livian_dist <- read.csv(file = "livian-distribution.csv")
@@ -23,7 +37,6 @@ livian_dist_long <- gather(livian_dist, key = "Book", value = "Value")
 
 ```
 
-This is a plotly chart of the livian distribution chart you had in Excel
 
 ```{r plotly_Livian_barchart}
 library(plotly)
@@ -53,6 +66,23 @@ This is a highchart chart of the livian dist chart you had in Excel
 
 ```{r highcharter_livian_dist}
 library(highcharter)
+
+selected <- "Rome.and.the.West"
+
+
+order(livian_dist[,"Rome.and.the.West"] / {livian_dist[,"Rome.and.the.West"] + livian_dist[,"East.of.the.Adriatic"]})
+
+
+livian_dist[order(livian_dist[,"Rome.and.the.West"]),]
+
+
+
+livian_order_by <- function(location){
+  livian_dist[rev(order(livian_dist[,location])),]
+}
+
+livian_order_by("Rome.and.the.West")
+
 
 hc <- highchart() %>% 
   hc_xAxis(categories = as.character(livian_dist$Book), title = list(text = "Book")) %>% 
@@ -113,7 +143,7 @@ hc <- highchart() %>%
 hc %>% hc_chart(type = "column", zoomType = "x")
 ```
 
-# Triumps
+# Triumphs
 
 ```{r import_triumps}
 triumphs_data <- read.csv(file = "tirumph-frequency.csv")
