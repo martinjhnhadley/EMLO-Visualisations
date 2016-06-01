@@ -134,40 +134,7 @@ end.dates <-
 end.dates <- end.dates[end.dates > 1000]
 
 
-usefulCols_life_events <-
-  c(
-    "Primary.Participant.Name",
-    "Primary.Participant.Role",
-    "Secondary.Participant.Name",
-    "Secondary.Participant.Role",
-    "Event.or.Relationship.Type",
-    "Category",
-    "DateOne.Year",
-    "DateOne.Month",
-    "DateOne.Day",
-    "DateOne.Uncertainty",
-    "DateTwo.Year",
-    "DateTwo.Month",
-    "DateTwo.Day",
-    "DateTwo.Uncertainty",
-    "Date.Type",
-    "Location.Details",
-    "Location.Region",
-    "Location.Country",
-    "Textual.Source.Source",
-    "Primary.Participant.Emlo_ID",
-    "Secondary.Participant.Emlo_ID",
-    "Event.Name.or.Description",
-    "Location.Name",
-    "Location.Details",
-    "Location.Type.Ahead",
-    "Location.Region",
-    "Location.Country",
-    "Location.Type",
-    "Who.Entered.Date",
-    "Whose.Notes",
-    "Additional.Notes"
-  )
+usefulCols_life_events <- colnames(life.events.df)
 
 ### ========= show/hide advanced options for the whole network
 
@@ -322,9 +289,7 @@ connections_to_selected_individual <- reactive({
   selected.interactions <- droplevels(selected.interactions)
   
   # Append a column with the URLS
-  
-  ## Get selected individual from click
-  nodes <- visNetwork_wholeNetwork_nodes()
+
   selectedIndividual <-
     as.numeric(input$current_node_id$nodes[[1]])
   

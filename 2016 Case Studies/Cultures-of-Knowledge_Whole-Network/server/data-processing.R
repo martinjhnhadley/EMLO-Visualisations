@@ -15,22 +15,24 @@ people.df <- read.csv("data/master_people_sheet.csv")
 ## Convert name to character vector for simplicity later
 people.df$Person.Name <- as.character(people.df$Person.Name)
 ## Sort by name
-people.df <- people.df[order(people.df$Person.Name),]
+people.df <- people.df[order(people.df$Person.Name), ]
 
 ## ===== Add surnames
 ## Empty character vector
 surnames.list <- as.character()
 ## If there's a comma assume first word is surname, otherwise keep whole name
-add.surname.fn <- function(name){
-  if(grepl(",",name)){
-    surnames.list <<- append(surnames.list, sapply(strsplit(name, ","), "[[", 1))
+add.surname.fn <- function(name) {
+  if (grepl(",", name)) {
+    surnames.list <<-
+      append(surnames.list, sapply(strsplit(name, ","), "[[", 1))
   } else {
-    surnames.list <<- append(surnames.list,name)
+    surnames.list <<- append(surnames.list, name)
   }
 }
 
 ## lapply invisibly
-invisible(lapply(people.df$Person.Name,function(x)add.surname.fn(x)))
+invisible(lapply(people.df$Person.Name, function(x)
+  add.surname.fn(x)))
 ## Append surname column to people.df
 people.df$Surname <- surnames.list
 
@@ -45,77 +47,82 @@ people.df$Surname <- surnames.list
 # people_listed_multiple_times <- people.df[people.df$iperson_id %in% people_listed_multiple_times,]
 
 ## This is a black list of repeated names
-names_to_remove <- c("nat: philosopher. Boyle / Boyle Robert. 1627-91.",
-                     "Sec: of State. Nicholas / Nicholas Sir Edward. 1593-1669.",
-                     "Schonaich (fl. 1660)",
-                     "von Schönaich (family)",
-                     "Budeus (fl. 1636-1642)",
-                     "Žerotín, Karel of",
-                     "Tossanus, Maria, also Toussaint")
-people.df <- people.df[!people.df$Person.Name %in% names_to_remove,]
+names_to_remove <-
+  c(
+    "nat: philosopher. Boyle / Boyle Robert. 1627-91.",
+    "Sec: of State. Nicholas / Nicholas Sir Edward. 1593-1669.",
+    "Schonaich (fl. 1660)",
+    "von Schönaich (family)",
+    "Budeus (fl. 1636-1642)",
+    "Žerotín, Karel of",
+    "Tossanus, Maria, also Toussaint"
+  )
+people.df <- people.df[!people.df$Person.Name %in% names_to_remove, ]
 
 
 ### ============= Import Places Sheet =========================
 places.df <- read.csv("data/master_places_sheet.csv")
 
-### ============= Import All Life Events ========================= 
+### ============= Import All Life Events =========================
 
 life.events.df <- read.csv("data/master_life_events_sheet.csv")
-life.events.df$Primary.Participant.Emlo_ID <- as.character(life.events.df$Primary.Participant.Emlo_ID)
-life.events.df$Secondary.Participant.Emlo_ID <- as.character(life.events.df$Secondary.Participant.Emlo_ID)
+life.events.df$Primary.Participant.Emlo_ID <-
+  as.character(life.events.df$Primary.Participant.Emlo_ID)
+life.events.df$Secondary.Participant.Emlo_ID <-
+  as.character(life.events.df$Secondary.Participant.Emlo_ID)
 
+### ============= Non-self Referential Events (i.e. not births) =============
+
+multiparty.interactions <-
+  life.events.df[!is.na(life.events.df$Secondary.Participant.Emlo_ID), ]
+multiparty.interactions <- droplevels(multiparty.interactions)
+
+## =========================== Canonical List of People ====================================
+## ==============================================================================
+
+
+all_unique_emlo_ids <-
+  unique(
+    c(
+      people.df$iperson_id,
+      multiparty.interactions$Primary.Participant.Emlo_ID,
+      multiparty.interactions$Secondary.Participant.Emlo_ID
+    )
+  )
+
+emlos_not_in_people <-
+  setdiff(all_unique_emlo_ids, unique(people.df$iperson_id))
+
+throw_away <- data.frame(
+  "iperson_id" = as.numeric(
+    c(
+      multiparty.interactions$Primary.Participant.Emlo_ID,
+      multiparty.interactions$Secondary.Participant.Emlo_ID
+    )
+  ),
+  "Person.Name" = c(
+    as.character(multiparty.interactions$Primary.Participant.Name),
+    as.character(multiparty.interactions$Secondary.Participant.Name)
+  ),
+  stringsAsFactors = F
+)
+throw_away <- throw_away[!duplicated(throw_away), ]
+
+missing_persons <-
+  throw_away[throw_away$iperson_id %in% emlos_not_in_people, ]
+
+people.df <- rbind.fill(people.df, missing_persons)
 
 ## ============= Get list of non-persons in life events and people.df ===========
 ## ==============================================================================
 
-non_people_in_life_events <- life.events.df[life.events.df$Secondary.Participant.Type != "Person",]
+non_people_in_life_events <-
+  life.events.df[life.events.df$Secondary.Participant.Type != "Person", ]
 
-nrow(non_people_in_life_events)
+non_people_in_life_events_emlo_ids <-
+  unique(non_people_in_life_events$Secondary.Participant.Emlo_ID)
+non_people_in_life_events_emlo_ids <-
+  non_people_in_life_events_emlo_ids[!is.na(non_people_in_life_events_emlo_ids)]
 
-str(non_people_in_life_events)
-
-non_people_in_life_events_emlo_ids <- unique(non_people_in_life_events$Secondary.Participant.Emlo_ID)
-non_people_in_life_events_emlo_ids <- non_people_in_life_events_emlo_ids[!is.na(non_people_in_life_events_emlo_ids)]
-
-non_people_in_people_df <- intersect(non_people_in_life_events_emlo_ids, people.df$iperson_id)
-
-
-
-# life.events.df <- life.events.df[life.events.df$Secondary.Participant.Type == "Person",]
-
-
-### ============= Non-self Referential Events (i.e. not births) =============
-
-multiparty.interactions <- life.events.df[!is.na(life.events.df$Secondary.Participant.Emlo_ID),]
-multiparty.interactions <- droplevels(multiparty.interactions)
-
-
-
-
-
-
-
-
-# ### ============== Old =========================
-# 
-# # find the individuals that are documented in the people sheet
-# documented.people <- intersect(c(multiparty.interactions$Primary.Participant.Emlo_ID,
-#                                  multiparty.interactions$Secondary.Participant.Emlo_ID),people.df$iperson_id)
-# # All 148 documented people exist in the multiparty.interactions, 245 undocumented people are included!
-# # Remove undocumented individuals from the multiparty.interactions
-# # Only 272 interactions survive out of a total of 555 multiparty interactions in the original dataset.
-# # For now re-assign multiparty.interactions to these documented interactions:
-# 
-# multiparty.interactions <- subset(multiparty.interactions,
-#                                   Primary.Participant.Emlo_ID %in% documented.people &
-#                                     Secondary.Participant.Emlo_ID %in% documented.people)
-
-# ### ============= Documented Interactions (including individuals with only self-referential events) ============= ###
-# 
-# all.documented.interactions <- subset(life.events.df,
-#        Primary.Participant.Emlo_ID %in% documented.people &
-#          Secondary.Participant.Emlo_ID %in% documented.people)
-# 
-# all.documented.interactions <- droplevels(all.documented.interactions)
-
-
+non_people_in_people_df <-
+  intersect(non_people_in_life_events_emlo_ids, people.df$iperson_id)

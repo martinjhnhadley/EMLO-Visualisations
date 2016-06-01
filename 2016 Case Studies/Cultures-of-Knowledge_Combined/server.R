@@ -6,8 +6,7 @@
 ## Author: Martin John Hadley (orcid.org/0000-0002-3039-6849)
 ## Academic Contact: Arno Bosse (http://orcid.org/0000-0003-3681-1289)
 ## Data Source: emlo.bodleian.ox.ac.uk
-## ===============================================================================
-
+## ================================================================================
 
 ## ==== Packages to load for server
 
@@ -24,7 +23,6 @@ library(scales)
 library(htmltools) # Need for htmlDependency used by custom date picker 
 library(lubridate)
 library(igraph)
-library(shinyBS)
 # library(shinyjs) could be useful for hiding content but appears to cause other issues
 
 
@@ -40,7 +38,7 @@ shinyServer(function(input, output, session){
   
   source("server/shared-data-and-functions.R",local = TRUE)
   source("server/whole-network-visualisation.R",local = TRUE)
-  source("server/tooltips.R", local = TRUE)$value
+  source("server/server_select-individuals.R",local = TRUE)
   
   
 ## ===== Allow for linking to individual tabPanels, code provided by daattali here https://github.com/rstudio/shiny/issues/772#issuecomment-112919149

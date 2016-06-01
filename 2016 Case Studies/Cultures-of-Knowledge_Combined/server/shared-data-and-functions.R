@@ -8,6 +8,49 @@
 ## Data Source: emlo.bodleian.ox.ac.uk
 ## ================================================================================
 
+## ================ People With Connections ===========================
+## ====================================================================
+
+people_with_connections <- reactive({
+  ## Only include people who are in the multiparty events!
+  people.with.connections <-
+    unique(
+      c(
+        multiparty.interactions$Primary.Participant.Emlo_ID,
+        multiparty.interactions$Secondary.Participant.Emlo_ID
+      )
+    )
+  
+  people.with.connections <-
+    subset(people.df, iperson_id %in% people.with.connections)
+  
+  # ## IF timeline enabled, filter out individuals who are do not appear in life events with DateOne.Year values
+  # if (!is.null(input$visNetwork_selected_individual_show_timeslider)) {
+  #   events.with.dates <-
+  #     multiparty.interactions[!is.na(multiparty.interactions$DateOne.Year), ]
+  #   people.with.dates <-
+  #     unique(
+  #       c(
+  #         events.with.dates$Primary.Participant.Emlo_ID,
+  #         events.with.dates$Secondary.Participant.Emlo_ID
+  #       )
+  #     )
+  #   
+  #   people.with.connections <-
+  #     subset(people.with.connections,
+  #            iperson_id %in% people.with.dates)
+  #   
+  # }
+  
+  labels.list <- as.character(people.with.connections$Person.Name)
+  values.list <-
+    as.list(unlist(as.character(people.with.connections$iperson_id)))
+  names(values.list) <- labels.list
+  # return object
+  values.list
+})
+
+
 ## ====================================================================
 ## ===================== Shared Data ==================================
 
@@ -19,8 +62,41 @@ end.dates <-
   multiparty.interactions$DateOne.Year[!is.na(multiparty.interactions$DateOne.Year)]
 end.dates <- end.dates[end.dates > 1000]
 
+usefulCols_life_events <-
+  c(
+    "Primary.Participant.Name",
+    "Primary.Participant.Role",
+    "Secondary.Participant.Name",
+    "Secondary.Participant.Role",
+    "Event.or.Relationship.Type",
+    "Category",
+    "DateOne.Year",
+    "DateOne.Month",
+    "DateOne.Day",
+    "DateOne.Uncertainty",
+    "DateTwo.Year",
+    "DateTwo.Month",
+    "DateTwo.Day",
+    "DateTwo.Uncertainty",
+    "Date.Type",
+    "Location.Details",
+    "Location.Region",
+    "Location.Country",
+    "Textual.Source.Source",
+    "Primary.Participant.Emlo_ID",
+    "Secondary.Participant.Emlo_ID",
+    "Event.Name.or.Description",
+    "Location.Name",
+    "Location.Details",
+    "Location.Type.Ahead",
+    "Location.Region",
+    "Location.Country",
+    "Location.Type",
+    "Who.Entered.Date",
+    "Whose.Notes",
+    "Additional.Notes"
+  )
 
-usefulCols_life_events <- colnames(life.events.df)
 ### ========= show/hide advanced options for the whole network
 
 # shinyjs::onclick("toggleDateOptions",
@@ -44,8 +120,6 @@ all_event_categories <-
 
 ### ====================================== Filter By Date  ====================================================
 ### ===========================================================================================================
-
-
 
 ## Function for filtering interactions by date
 filter_interactions <- reactive({
@@ -162,41 +236,3 @@ network.edges.function <- function(selected.interactions) {
 ### ====================================== Find Connections to Selected Individual ============================
 ### ===========================================================================================================
 
-connections_to_selected_individual <- reactive({
-  ## Set selected.interactions as all multiparty.interactions
-  selected.interactions <- filter_interactions()
-  
-  # Drop levels that are empty (as a result of above subsetting)
-  selected.interactions <- droplevels(selected.interactions)
-  
-  # Append a column with the URLS
-
-  selectedIndividual <-
-    as.numeric(input$current_node_id$nodes[[1]])
-  
-  # Get edges of network
-  edges <- visNetwork_wholeNetwork_edges()
-  
-  connectedIndividuals <-
-    c(as.character(edges[edges$source.emlo.id == selectedIndividual, "target.emlo.id"]),
-      as.character(edges[edges$target.emlo.id == selectedIndividual, "source.emlo.id"]))
-  
-  # Create an empty data.frame with life.event.columns
-  connected_life_events <- selected.interactions[0,]
-  # Function to extract connected events
-  get.connected.life.events <-
-    function(selectedNode, connectedNode) {
-      connections <-
-        rbind(selected.interactions[selected.interactions$Primary.Participant.Emlo_ID == selectedNode &
-                                      selected.interactions$Secondary.Participant.Emlo_ID == connectedNode,],
-              selected.interactions[selected.interactions$Primary.Participant.Emlo_ID == connectedNode &
-                                      selected.interactions$Secondary.Participant.Emlo_ID == selectedNode,])
-      connected_life_events <<-
-        rbind(connected_life_events, connections)
-    }
-  # lapply function
-  invisible(lapply(connectedIndividuals, function(x)
-    get.connected.life.events(selectedIndividual, x)))
-  # return
-  connected_life_events
-})

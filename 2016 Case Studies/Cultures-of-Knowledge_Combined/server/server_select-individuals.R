@@ -1,3 +1,4 @@
+## =============================== License ========================================
 ## ================================================================================
 ## This work is distributed under the MIT license, included in the parent directory
 ## Copyright Owner: University of Oxford
@@ -73,7 +74,7 @@ output$visNetwork_selected_individuals_time_period_of_interest_UI <-
     }
   })
 
-output$neighbor_degree_UI <- renderUI({
+output$neighbor.degree.UI <- renderUI({
   if (is.null(input$visNetwork_selected_individual_show_timeslider)) {
     return()
   }
@@ -86,7 +87,6 @@ output$neighbor_degree_UI <- renderUI({
     step = 1
   )
 })
-
 
 ### ====================================== Generate Network Data =====================================
 ### ==================================================================================================
@@ -258,9 +258,8 @@ subgraph_edges <- reactive({
 ### ====================================== Details of excluded data ========================
 ### ========================================================================================
 
-
-output$selected_individual_NumberOfExcluded <- renderUI({
-  if (is.null(input$visNetwork_selected_individual_show_timeslider)) {
+output$visNetwork_select_individuals_NumberOfExcluded <- renderUI({
+  if (is.null(input$visNetwork_selected_individuals_show_timeslider)) {
     return()
   }
   
@@ -268,7 +267,21 @@ output$selected_individual_NumberOfExcluded <- renderUI({
     return()
   }
   
-  selected.interactions <- filter_interactions()
+  if (input$visNetwork_selected_individual_show_timeslider &
+      is.null(input$visNetwork_selected_individual_time_period_of_interest)) {
+    return()
+  }
+  
+  #
+  # ## if timeslider is to be shown but the controller variable is null do not return anything
+  # if (input$visNetwork_select_individual_show_timeslider &
+  #     is.null(input$visNetwork_selected_individual_time_period_of_interest)) {
+  #   return()
+  # }
+  
+  ## load visN_edges
+  
+  selected.interactions <- subgraph_members()
   
   multiparty.people <-
     unique(
@@ -286,32 +299,26 @@ output$selected_individual_NumberOfExcluded <- renderUI({
       )
     )
   
-  visN_edges <- subgraph_edges()
-  
-  ## Subset people.df by the nodes appearing in the edges:
-  visN_nodes <-
-    subset(people.df, iperson_id %in% unique(c(visN_edges$Primary.Emlo_ID, visN_edges$Secondary.Emlo_ID)))
-  
   if (is.igraph(visNetwork_select_individuals_neighboring_nodes())) {
     HTML(
       paste0(
         "<p>Included Interactions: ",
-        nrow(visN_edges),
+        nrow(selected.interactions),
         "</p>",
         "<p>Included People/Organisations: ",
-        nrow(visN_nodes),
+        length(selected.people),
         "</p>",
         "<p>Excluded Interactions: ",
-        nrow(multiparty.interactions) - nrow(visN_edges),
+        nrow(multiparty.interactions) - nrow(selected.interactions),
         "</p>",
         "<p>Excluded People/Organisations: ",
-        length(multiparty.people) - nrow(visN_nodes),
+        length(multiparty.people) - length(selected.people),
         "</p>"
       )
     )
+  } else {
+    HTML("There is no data to display")
   }
-  
-
 })
 
 ### ====================================== Generate visNetwork ========================
@@ -395,14 +402,13 @@ output$select.individual.network_graph <- renderVisNetwork({
   visN_nodes <- data.frame(
     "id" = visN_nodes$iperson_id,
     "title" = visN_nodes$Person.Name,
-    "label" = visN_nodes$Surname,
-    "color" = mapvalues(visN_nodes$iperson_id %in% non_people_in_people_df, from = c(TRUE, FALSE), to = c("#a1d76a","#7570b3")),
-    stringsAsFactors = F
+    "label" = visN_nodes$Surname
   )
   
   ## Highlight the selected nodes as red
-  node_colors <- visN_nodes$color
-  node_colors[match(input$select_individuals, visN_nodes$id)] <- "red"
+  node_colors <- rep("#7570b3", nrow(visN_nodes))
+  node_colors[match(input$select_individuals,
+                    visN_nodes$id)] <- "red"
   
   ## Highlight first degree edges as red
   edge_colors <-
@@ -414,9 +420,6 @@ output$select.individual.network_graph <- renderVisNetwork({
       # to = c("#d95f02", "lightblue")
     )
   visN_edges$color <- edge_colors
-  
-  print(visN_edges[visN_edges$from %in% input$select_individuals |
-                     visN_edges$to %in% input$select_individuals, ])
   
   visN_nodes$color <- node_colors
   ## Remove duplicated nodes
@@ -491,9 +494,6 @@ output$visNetwork_select_individual_selected_node_info <- renderUI({
   # Load connected individuals
   connected_life_events <- subgraph_members()
   
-  connected_life_events <- connections_to_selected_individual()
-  connected_life_events <- connected_life_events[!duplicated(connected_life_events),]
-  
   wellPanel(HTML(
     paste0(
       "<p><strong>Selected Person: ",
@@ -503,11 +503,11 @@ output$visNetwork_select_individual_selected_node_info <- renderUI({
       selected.person.name,
       "</a></strong></p>",
       "<p>Number of Unique Connections: ",
-      nrow(connected_life_events),
+      nrow(connections_to_selected_individual()),
       "</p>",
       "<p>Scroll down for more information about ",
-      trimws(selected.person.name),
-      "'s connections.",
+      selected.person.name,
+      "'s connections",
       "</p>",
       sep = ""
     )
@@ -524,7 +524,7 @@ output$visNetwork_selected_individual_connected_life_events_columns_to_show_UI <
     
     fluidRow(column(tagList(
       selectInput(
-        'connected_life_events_Cols',
+        'select_individuals_connected_life_events_Cols',
         'Columns to show:',
         usefulCols_life_events,
         selected = c(
@@ -543,7 +543,7 @@ output$visNetwork_selected_individual_connected_life_events_columns_to_show_UI <
       ),
       tags$style(
         type = "text/css",
-        "select#connected_life_events_Cols + .selectize-control{width: 700px}"
+        "select#select_individuals_connected_life_events_Cols + .selectize-control{width: 700px}"
       )
     ), width = 12))
   })
@@ -644,7 +644,7 @@ connected_individuals_events <- reactive({
     connected_life_events[!!rowSums(!is.na(connected_life_events)), ]
   # Return only selected columns
   connected_life_events <-
-    connected_life_events[, input$connected_life_events_Cols, drop = FALSE]
+    connected_life_events[, input$select_individuals_connected_life_events_Cols, drop = FALSE]
   # Replace "." with " " in colnames
   colnames(connected_life_events) <-
     gsub("[.]", " ", colnames(connected_life_events))

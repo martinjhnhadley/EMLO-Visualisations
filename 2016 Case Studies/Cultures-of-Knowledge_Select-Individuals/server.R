@@ -12,6 +12,7 @@ library(networkD3)
 library(scales)
 library(htmltools) # Need for htmlDependency used by custom date picker 
 library(lubridate)
+library(shinyBS)
 # library(shinyjs) could be useful for hiding content but appears to cause other issues
 
 

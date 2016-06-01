@@ -15,30 +15,32 @@ library(shiny) # Some advanced functionality depends on the shiny package being 
 library(visNetwork)
 library(networkD3)
 library(lubridate)
-library(htmltools) # Need for htmlDependency used by custom date picker 
+library(shinyBS)
+library(htmltools) # Need for htmlDependency used by custom date picker
 
 ## ==== Global Variables (client-side)
 
 library(shinythemes) # Template uses the cerulean theme as it is pretty
 
 shinyUI(fluidPage(
-
-## ==== Include google analytics code
+  ## ==== Include google analytics code
   tags$head(includeScript("google-analytics.js")),
   
-## ==== Automatically include vertical scrollbar
-## ==== This prevents the app from reloading content when the window is resized which would otherwise result in the
-## ==== appearance of the scrollbar and the reloading of content. Note that "click data" may still be lost during 
-## ==== resizing, as discussed here https://github.com/rstudio/shiny/issues/937
-  tags$style(type="text/css", "body { overflow-y: scroll; }"),
+  ## ==== Automatically include vertical scrollbar
+  ## ==== This prevents the app from reloading content when the window is resized which would otherwise result in the
+  ## ==== appearance of the scrollbar and the reloading of content. Note that "click data" may still be lost during
+  ## ==== resizing, as discussed here https://github.com/rstudio/shiny/issues/937
+  tags$style(type = "text/css", "body { overflow-y: scroll; }"),
   
-
+  
   theme = shinytheme("cerulean"),
   
   navbarPage(
-    "", id = 'someID',
-    source("ui/landing-tab.R", local = TRUE)$value,
-    source("ui/visNetwork-wholeNetwork.R", local = TRUE)$value
+    "",
+    id = 'someID',
+    tabPanel("Prosopographical Network Visualizations – Introduction",
+             includeMarkdown("ui/landing-tab.Rmd")),
+    source("ui/whole-network_tab_ui.R", local = TRUE)$value
     
-  ))
-)
+  )
+))
