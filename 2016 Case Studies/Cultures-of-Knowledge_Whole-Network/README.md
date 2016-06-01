@@ -1,11 +1,12 @@
 
 # Cultures of Knowledge
 
-This case study is the result of a collaboration between the Live Data project team and [Culture of Knowlege](http://www.culturesofknowledge.org/) to visualise a subset of 1695 individuals correspondances from the <a href="http://emlo.bodleian.ox.ac.uk/">Early Modern Letters Online</a> (EMLO) repository.
+<p>This Live Data&nbsp;case study is the result of a collaboration between the Live Data project team and <a href="http://www.culturesofknowledge.org/">Cultures of Knowledge</a> to visualise a subset of 1695 individuals correspondences from the <a href="http://emlo.bodleian.ox.ac.uk/">Early Modern Letters Online</a> (EMLO) repository.</p>
 
-A beta Shiny app is currently in development, a screenshot of which is included here. It is hoped that a publically available visualisation will be made available in the near future.
+<p class="p1"><span class="s1">The visualisations were built by Martin Hadley, data scientist in the <a href="http://blogs.it.ox.ac.uk/acit-rs-team"><span class="s2">Academic IT Research Support team</span></a>, using <a href="http://shiny.rstudio.com/"><span class="s2">Shiny</span></a>, RStudio’s interactive web application framework based on the programming language R. The visualizations were designed by the <a href="http://www.culturesofknowledge.org/"><span class="s2">‘Cultures of Knowledge’</span></a> Project Director Howard Hotson, Digital Project Manager Arno Bosse and Postdoctoral Research Fellow Robin Buning.</span></p>
 
-<img src="https://raw.githubusercontent.com/ox-it/Live-Data_Case-Studies/master/2016%20Case%20Studies/Cultures-of-Knowledge/CulturesOfKnowledge_screenshot.png" width="400">
+
+<img src="CoF_whole-Network_Screenshot.png" width="400">
 
 Should you have questions about the project or wish to find out more about this dataset, please contact Arno Bosse (http://www.culturesofknowledge.org/?page_id=5).
 
