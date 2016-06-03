@@ -13,7 +13,7 @@ tabPanel(
   wellPanel(includeMarkdown("ui/select-individuals_Intro.Rmd")),
   uiOutput("select_individuals_ui"),
   bsTooltip("select_individuals_ui",
-            "Type up to three names into this field to visualise their connections in the network below."),
+            "Please select or type up to three names into this field to visualise their connections in the network below."),
   fluidRow(
     column(uiOutput("select.individual.1_UI"),width=4),
     column(uiOutput("select.individual.2_UI"),width=4),

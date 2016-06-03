@@ -68,7 +68,7 @@ tabPanel(
   conditionalPanel(
     "typeof input.current_node_id !== 'undefined'",
     HTML(
-      "<p>The default columns show the most basic information. Columns with additional or more detailed information, including the source of the data, can be added by selecting them from the list that appears when you click in the ‘Columns to show’ box. To remove a column, click on the name of the column and press the ‘Delete’ or ‘Backspace’ key. The free-text search box allows you to search for any information within the data concerning the selected individual. You can also search per column in the search boxes below the columns.</p>"
+      "<p>The default columns show the most basic information. Columns with additional information, including the source of the data, can be added to the table by selecting them from the list that appears when you click in the ‘Columns to show’ box. To remove a column, click on the name of the column and press the ‘Delete’ or ‘Backspace’ key. The free-text search box allows you to search for any information within the data concerning the selected individual. You can also search per column in the search boxes below the columns.</p>"
     ),
     uiOutput(
       "visNetwork_whole_network_connected_life_events_columns_to_show_UI"
