@@ -1,0 +1,214 @@
+---
+title: "Shapefile Tally fo Choropleth"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries}
+library(maps)
+library(mapproj)
+library(leaflet)
+library(rgdal)
+library(GISTools)
+library(sp)
+```
+
+
+## Shape Files
+
+
+```{r}
+## Load county borders
+full_us_shapefiles <- readOGR(dsn = "data/shapefiles/", layer = "cb_2015_us_cd114_500k", verbose = F)
+## Convert FIPS code to numeric
+full_us_shapefiles$STATEFP <- as.character(full_us_shapefiles$STATEFP)
+full_us_shapefiles$STATEFP <- as.numeric(full_us_shapefiles$STATEFP)
+
+
+```
+
+Access only contiguous US?
+
+```{r}
+
+make_us_contiguous <- function(spatial_polgyon= NA){
+  fips_codes <- read.csv("data/US-FIPS-Codes.csv")
+  contiguous_fips_codes <- fips_codes[fips_codes$Contiguous.United.States. == "Y",]$STATE
+  contiguous <- full_us_shapefiles[spatial_polgyon$STATEFP %in% contiguous_fips_codes,]
+  # Drop unnecessary levels
+  contiguous@data <- droplevels(contiguous@data)
+  contiguous
+}
+
+contiguous_us_shapefiles <- make_us_contiguous(full_us_shapefiles)
+
+```
+
+
+
+```{r}
+map <- leaflet(data = contiguous_us_shapefiles) %>% addTiles()
+map %>% addPolygons(
+  stroke = FALSE,
+  smoothFactor = 0.2,
+  fillOpacity = 0.8,
+  # fillColor = ~ pal(var),
+  weight = 1
+)
+```
+
+
+## Locaiton Data
+
+```{r}
+just_send_points <- entries_with_locations[,c("Sender.Location.GIS.Longitude", "Sender.Location.GIS.Latitude")]
+colnames(just_send_points) <- c("longitude","latitude")
+
+send_location_spdf <- SpatialPointsDataFrame(coords = just_send_points,
+                                         data = just_send_points,
+                                         proj4string = full_us_shapefiles@proj4string)
+
+```
+
+## Tally
+
+The dataframe below contains counts per polygon, note they're ordered from 0-440
+
+```{r}
+## Example http://gis.stackexchange.com/a/113009
+## Apply to my data!
+contiguous_counts = poly.counts(pts = send_location_spdf, polys = contiguous_us_shapefiles)
+contiguous_counts_df = data.frame(contiguous_counts)
+contiguous_us_shapefiles@data$Count.of.Send.Locations <- contiguous_counts_df$contiguous_counts
+```
+
+
+Make as a chloropleth, but it's clear the counts per location is not working correctly:
+
+```{r}
+
+var <- contiguous_us_shapefiles$Count.of.Send.Locations
+var[var == 0] <- NA
+palette <- colorNumeric(palette = "YlGnBu", domain = var)
+
+
+map <- leaflet(data = contiguous_us_shapefiles) %>% addTiles()
+map %>% addPolygons(
+    stroke = FALSE,
+    smoothFactor = 0.2,
+    fillOpacity = 0.8,
+    fillColor = ~palette(var),
+    weight = 1,
+    popup = ~as.character(var)
+  )
+
+```
+
+
+### Playing with Map asthetics
+
+```{r color_palette}
+
+var <- contiguous_us_shapefiles$Count.of.Send.Locations
+var[var == 0] <- NA
+
+brewer_palettete <- brewer.pal(7, "Blues")
+brewer_palettete
+
+palette <- colorBin(c(NA,brewer.pal(7, "Blues")), 
+                     bins = c(0,1, 10, 20, 30, 40, 50, 100, 1000),
+                    na.color = NA)
+
+
+sort(unique(var))
+
+palette <- colorBin(brewer.pal(5, "YlGnBu")[2:5], 
+                    c(1,10,20, 50, 100,1000),
+                    na.color = brewer.pal(5, "YlGnBu")[1],
+                    alpha = TRUE
+                    )
+
+brewer.pal(5, "YlGnBu")[2:5]
+
+
+palette(var)
+
+dput(palette(var))
+```
+
+
+```{r}
+
+palette <- colorBin(brewer.pal(5, "YlGnBu")[2:5], 
+                    bins = c(1,5,10,20,50,300),
+                    pretty = FALSE,
+                    na.color = brewer.pal(5, "YlGnBu")[1],
+                    alpha = TRUE
+                    )
+
+palette <- colorBin(brewer.pal(5, "YlGnBu"), 
+                    bins = c(1,5,10,20,50,300),
+                    pretty = FALSE,
+                    na.color = "#FFFFFF",
+                    alpha = TRUE
+                    )
+
+map <- leaflet(data = contiguous_us_shapefiles) %>% addTiles()
+map <- map %>% addPolygons(
+    stroke = TRUE,
+    color = "#FFFFFF",
+    smoothFactor = 0.2,
+    fillOpacity = 0.8,
+    fillColor = ~palette(var),
+    weight = 1,
+    popup = ~as.character(var)
+  )
+
+map %>% addLegend(position = 'topleft', ## choose bottomleft, bottomright, topleft or topright
+          colors = brewer.pal(5, "YlGnBu"),
+          labels = c("0","1-5","5-10","10-20","20-1000"),  ## legend labels (only min and max)
+          opacity = 0.6,      ##transparency again
+          title = "relative<br>amount")   ## title of the legend
+
+```
+
+
+## sp over
+
+```{r}
+over_output <- over(as(contiguous_us_shapefiles,"SpatialPolygons"),
+                    as(send_location_spdf,"SpatialPoints"), 
+                    fn = mean,
+                    returnList = T)
+str(over_output)
+
+points_per_polygon_from_over <- data.frame(
+  "polygon_id" = names(over_output),
+  "count" = as.vector(unlist(lapply(over_output, function(x) length(x))))
+)
+
+points_per_polygon_from_over
+
+contiguous_us_shapefiles$count.from.over <- points_per_polygon_from_over$count
+
+var <- contiguous_us_shapefiles$count.from.over
+palette <- colorNumeric(palette = "YlGnBu", domain = var)
+
+map <- leaflet(data = contiguous_us_shapefiles) %>% addTiles()
+map %>% addPolygons(
+    stroke = TRUE,
+    smoothFactor = 0.2,
+    fillOpacity = 0.8,
+    fillColor = ~palette(var),
+    weight = 1,
+    popup = ~as.character(var)
+  ) %>%
+  addCircleMarkers(data = send_location_spdf,lng = ~longitude, lat = ~latitude)
+
+```
+
+
+

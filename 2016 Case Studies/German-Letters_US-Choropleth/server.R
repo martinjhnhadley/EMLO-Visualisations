@@ -8,6 +8,13 @@ library(plyr)
 library(lubridate)
 library(stringr)
 
+library(maps)
+library(mapproj)
+library(leaflet)
+library(rgdal)
+library(GISTools)
+library(sp)
+
 ## ==== Global Variables (server-side)
 
 ## ==== Tab selection variables (these are required to support anchor links, see within shinyServer)
@@ -19,6 +26,7 @@ shinyServer(function(input, output, session){
   
   source("server/data-processing.R",local = TRUE)
   source("server/visualisations-and-ui.R",local = TRUE)
+  source("server/leaflet-choropleth.R", local = TRUE)
 
   
   

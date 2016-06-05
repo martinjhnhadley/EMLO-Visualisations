@@ -47,6 +47,9 @@ entries_with_locations$Sender.LatLong.String <- as.character(entries_with_locati
 ## Drop element where send == receive
 entries_with_locations <- entries_with_locations[entries_with_locations$Sender.LatLong.String != entries_with_locations$Receiver.LatLong.String,]
 
+
+
+
 ## Interpret dates as dmy and force as GMT
 entries_with_locations$Date <- force_tz(dmy(entries_with_locations$Date, quiet = TRUE), tzone = "GMT")
 ## Find any dates in the future
@@ -77,6 +80,10 @@ entries_with_locations <-
 entries_with_locations <-
   entries_with_locations[grepl("[(][A-Z]{2}[)]", entries_with_locations$Sender.Location), ]
 
+## Drop NA entries
+entries_with_locations <- entries_with_locations[!is.na(entries_with_locations$Sender.Location.GIS.Longitude),]
+
+
 ## Create a vector containing send states"
 get_states_from_column <- function(data){
   str_extract(string = data, pattern = "[(][A-Z]{2}[)]") %>%
@@ -105,9 +112,3 @@ duplicate_locations <- subset(location_name_df, LatLong %in% location_name_df[du
 location_name_df <- location_name_df[!duplicated(location_name_df$LatLong),]
 
 
-### ============= Letter Series
-
-
-
-
-### ============= Data Processing Task 2 ========================= ###

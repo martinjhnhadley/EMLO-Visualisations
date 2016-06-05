@@ -17,13 +17,7 @@ fluidPage(
   #     column(uiOutput("show_timeslider_UI"), width = 2)
   #     ),
   wellPanel(
-    uiOutput("show_letters_where_receive_unknown_UI"),
-    uiOutput("show_timeslider_UI"),
-    # uiOutput("legend_type_UI"),
-    fluidRow(column(
-      uiOutput("time_period_of_interest_UI"),
-      width = 12
-    )),
+    
     HTML("<p>This map displays the origins of a subsample of 1,000 letters used for the research project “Political Remittances: Understanding the Political Impacts of Migration”. 
          The project is funded through the Leverhulme Trust (Ref-No RPG-338) and based at the University of Oxford, Department of Politics and International Relations. The research 
          conducted by Gwendolyn Sasse and Félix Krawatzek uses a total collection of 6,000 letters sent between the US and Germany between around 1830 and 1970. Permission to use the 
@@ -37,5 +31,18 @@ fluidPage(
          felix.krawatzek(at)politics.ox.ac.uk.
          </p>")
     ),
-  uiOutput("americamap_via_renderUI")
+  sidebarLayout(
+    sidebarPanel(
+      uiOutput("selected_shapefiles_UI"),
+      uiOutput("show_letters_where_receive_unknown_UI"),
+      uiOutput("show_timeslider_UI"),
+      # uiOutput("legend_type_UI"),
+      uiOutput("time_period_of_interest_UI")
+    ),
+    mainPanel(
+      leafletOutput("leaflet_choropleth")
+    )
+  )
+  
+  # uiOutput("americamap_via_renderUI")
     )

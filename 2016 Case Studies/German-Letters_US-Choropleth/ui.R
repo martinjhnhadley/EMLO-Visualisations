@@ -12,6 +12,7 @@
 
 library(shiny) # Some advanced functionality depends on the shiny package being loaded client-side, including plot.ly
 library(plotly)
+library(leaflet)
 
 ## ==== Global Variables (client-side)
 
