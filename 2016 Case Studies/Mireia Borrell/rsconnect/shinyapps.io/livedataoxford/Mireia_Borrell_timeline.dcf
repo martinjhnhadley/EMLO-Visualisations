@@ -1,0 +1,10 @@
+name: Mireia_Borrell_timeline
+account: livedataoxford
+server: shinyapps.io
+appId: 108972
+bundleId: 482376
+url: https://livedataoxford.shinyapps.io/Mireia_Borrell_timeline/
+when: 1466112796.43284
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: ~$FP dataset from 1999 onwards edited copy.xlsx|~$timeline_data.xlsx
