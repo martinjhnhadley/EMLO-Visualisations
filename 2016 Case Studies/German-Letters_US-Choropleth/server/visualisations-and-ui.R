@@ -20,7 +20,7 @@ output$time_period_of_interest_UI <- renderUI({
     return()
   }
   
-  dates <- entries_with_locations$Date[!is.na(entries_with_locations$Date)]
+  dates <- letters_sent_from_usa$Date[!is.na(letters_sent_from_usa$Date)]
   
   if (input$show_timeslider == TRUE) {
     sliderInput(
@@ -53,39 +53,8 @@ output$show_letters_where_receive_unknown_UI <- renderUI({
 
 output_of_input <- "1834-04-12"
 
-entries_with_locations$Date >= "1834-04-12"
+letters_sent_from_usa$Date >= "1834-04-12"
 
-subset(entries_with_locations,
+subset(letters_sent_from_usa,
        Date >= "1834-04-12",
        Date <= "1900-04-12")
-
-letters_sent_between_dates <-
-  function(start.year = NA,
-           end.year = NA,
-           data = NA) {
-    if (input$show_letters_where_receive_unknown) {
-      letters.for.analysis <- data
-    } else {
-      letters.for.analysis <-
-        data[data$Sender.LatLong.String != "NA NA" &
-               data$Receiver.LatLong.String != "NA NA",]
-    }
-    
-    letters.for.analysis <- data
-    if (input$show_timeslider == TRUE) {
-    
-    letters.for.analysis <- letters.for.analysis[!is.na(entries_with_locations$Date),]
-    
-    # letters.for.analysis$Date <- as.POSIXct(letters.for.analysis$Date)
-    letters.for.analysis <- subset(letters.for.analysis,
-                                   Date >= start.year &
-                                     Date <= end.year)
-    
-    letters.for.analysis
-    
-    } else
-      letters.for.analysis
-    
-  }
-
-

@@ -18,9 +18,9 @@ output$selected_shapefiles_UI <-
       "selected_shapefiles",
       label = "Select Shape Files",
       choices = list(
-        "States" = "cb_2015_us_state_500k",
-        "Congressional Districts" = "cb_2015_us_cd114_500k",
-        "Counties" = "cb_2015_us_county_500k"
+        "States" = "contiguous_states",
+        "Congressional Districts" = "contiguous_congressional_districts",
+        "Counties" = "contiguous_counties"
       )
     )
   })
@@ -30,35 +30,28 @@ output$selected_shapefiles_UI <-
 ## Note shape file may be dependent on input$var and so is not included in data-processing.R
 
 ## Load county borders
-full_us_shapefiles <-
+contiguous_us_shapefiles <-
   reactive({
     full_us_shapefiles <- readOGR(
       dsn = "data/shapefiles/",
       layer = input$selected_shapefiles,
       verbose = F
     )
-    
-    ## Convert FIPS code to numeric
-    full_us_shapefiles$STATEFP <-
-      as.character(full_us_shapefiles$STATEFP)
-    full_us_shapefiles$STATEFP <- as.numeric(full_us_shapefiles$STATEFP)
     full_us_shapefiles
   })
 ## Load FIPS codes
 fips_codes <- read.csv("data/US-FIPS-Codes.csv")
 
-## Extract only shapes that are in the contiguous USA
-make_us_contiguous <- function(spatial_polgyon = NA) {
-  contiguous_fips_codes <-
-    fips_codes[fips_codes$Contiguous.United.States. == "Y",]$STATE
-  contiguous <-
-    spatial_polgyon[spatial_polgyon$STATEFP %in% contiguous_fips_codes,]
-  # Drop unnecessary levels
-  contiguous@data <- droplevels(contiguous@data)
-  contiguous
+contiguous_us_state_shapefiles <- {
+
+  states_shapefiles <- readOGR(
+    dsn = "data/shapefiles/",
+    layer = "contiguous_states",
+    verbose = F
+  )
+  states_shapefiles
 }
 
-contiguous_us_shapefiles <- reactive({make_us_contiguous(full_us_shapefiles())})
 
 ## =========================== Label States in ====================================
 ## ==============================================================================
@@ -84,13 +77,13 @@ unaddressed_filtered_letters <- reactive({
   }
   
   if (input$show_letters_where_receive_unknown) {
-    entries_with_locations
+    letters_sent_from_usa
   } else {
-    entries_with_locations <-
-      entries_with_locations[entries_with_locations$Sender.LatLong.String != "NA NA" &
-                               entries_with_locations$Receiver.LatLong.String != "NA NA",]
+    letters_sent_from_usa <-
+      letters_sent_from_usa[letters_sent_from_usa$Sender.LatLong.String != "NA NA" &
+                               letters_sent_from_usa$Receiver.LatLong.String != "NA NA",]
     
-    entries_with_locations
+    letters_sent_from_usa
     
   }
   
@@ -111,9 +104,13 @@ letters_sent_between_dates <-
     letters.for.analysis <- data
     if (input$show_timeslider == TRUE) {
       letters.for.analysis <-
-        letters.for.analysis[!is.na(entries_with_locations$Date),]
+        letters.for.analysis[!is.na(letters.for.analysis$Date),]
       
-      # letters.for.analysis$Date <- as.POSIXct(letters.for.analysis$Date)
+      letters.for.analysis$Date <- as.Date(letters.for.analysis$Date)
+      
+      
+      
+      
       letters.for.analysis <- subset(letters.for.analysis,
                                      Date >= start.year &
                                        Date <= end.year)
@@ -143,9 +140,7 @@ send_locations_as_spdf <- reactive({
     letters_for_analysis[, c("Sender.Location.GIS.Longitude",
                              "Sender.Location.GIS.Latitude")]
   colnames(just_send_points) <- c("longitude", "latitude")
-  
-  print(contiguous_us_shapefiles()@proj4string)
-  print("everytime")
+
   
   proj4_string <- contiguous_us_shapefiles()@proj4string
   
@@ -181,7 +176,6 @@ output$leaflet_choropleth <- renderLeaflet({
     return()
   }
   
-  print("here")
   us_shape_files <- polygons_with_tallies()
   
   send_locations_as_spdf <- send_locations_as_spdf()
@@ -204,7 +198,7 @@ output$leaflet_choropleth <- renderLeaflet({
   map <- leaflet(data = us_shape_files) %>% addTiles()
   map <- map %>% addPolygons(
     stroke = TRUE,
-    color = "#000",
+    color = "#ffffff",
     smoothFactor = 0.2,
     fillOpacity = 0.8,
     fillColor = ~ palette(Count.of.Send.Locations),
@@ -222,5 +216,15 @@ output$leaflet_choropleth <- renderLeaflet({
     opacity = 0.6,
     ##transparency again
     title = "relative<br>amount"
-  )   ## title of the legend
+  ) %>%   ## title of the legend
+    addPolygons(
+      data = contiguous_us_state_shapefiles,
+      stroke = TRUE,
+      color = "#000000",
+      smoothFactor = 0.2,
+      weight = 1,
+      fill = FALSE 
+    )
+  
+    
 })

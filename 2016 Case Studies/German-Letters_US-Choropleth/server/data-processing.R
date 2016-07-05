@@ -48,8 +48,6 @@ entries_with_locations$Sender.LatLong.String <- as.character(entries_with_locati
 entries_with_locations <- entries_with_locations[entries_with_locations$Sender.LatLong.String != entries_with_locations$Receiver.LatLong.String,]
 
 
-
-
 ## Interpret dates as dmy and force as GMT
 entries_with_locations$Date <- force_tz(dmy(entries_with_locations$Date, quiet = TRUE), tzone = "GMT")
 ## Find any dates in the future

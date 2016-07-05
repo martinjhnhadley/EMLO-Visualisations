@@ -4,13 +4,9 @@ library(plotly)
 ethopia_schooling_youngOld <- read.csv(file = "data/ethopia_education_schooling_young-old-comparison.csv")
 ethopia_schooling_region <- ethopia_schooling_youngOld[ethopia_schooling_youngOld$Property.Type == "schooling region",]
 
-colnames(ethopia_schooling_youngOld) %>% dput()
-
 measure_list <- c("percentage.in.school", 
                   "highest.grade.completed.2006", "Percentage.children.over.age.for.grade", 
                   "percentage.attending.private.schools..", "Sample.Size")
-
-trimws(gsub("\\.", " ", measure_list))
 
 measure_list <- setNames(measure_list, trimws(gsub("\\.", " ", measure_list)))
 

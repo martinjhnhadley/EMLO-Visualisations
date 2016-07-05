@@ -19,6 +19,9 @@ library(jsonlite)
 library(rjson)
 library(ForceAtlas2)
 library(DT)
+library(ggplot2)
+library(plotly)
+library(highcharter)
 ```
 
 
@@ -125,10 +128,23 @@ comment_edges_generator <- function(discussion_id) {
 
 ### Apply the function:
 
-invisible(lapply(unique(discussions_df$discussion_id), function(x) {
-  discussion_edges <<-
-    rbind(discussion_edges, comment_edges_generator(x))
+generate_edges <- function(data = NA, empty_df = NA){
+  empty_df <- empty_df
+  invisible(lapply(unique(data$discussion_id), function(x) {
+  empty_df <<-
+    rbind(empty_df, comment_edges_generator(x))
 }))
+  empty_df
+}
+
+discussion_edges <- generate_edges(data = discussions_df, empty_df = discussion_edges)
+
+# discussion_edges
+
+# invisible(lapply(unique(discussions_df$discussion_id), function(x) {
+#   discussion_edges <<-
+#     rbind(discussion_edges, comment_edges_generator(x))
+# }))
 ```
 
 # Discussion Network
@@ -186,19 +202,19 @@ DT::datatable(board_summary)
 The largest board is visualised as follows:
 
 ```{r board_specific_graph_attrs}
-board_specific_edges <- function(board = NA){
-  board_specific_edges <- discussion_edges[discussion_edges$board_title == board,]
+board_specific_edges <- function(data = NA, board = NA){
+  board_specific_edges <- data[data$board_title == board,]
 }
 
-board_specific_nodes <- function(board = NA){
-  board_specific_edges <- discussion_edges[discussion_edges$board_title == board,]
+board_specific_nodes <- function(data = NA, board = NA){
+  board_specific_edges <- data[data$board_title == board,]
   user_df[user_df$comment_user_id %in% unique(c(board_specific_edges$from, board_specific_edges$to)),]
 }
 ```
 
 ```{r notes_visNetwork}
-notes_edges <- board_specific_edges("Notes")
-notes_nodes <- board_specific_nodes("Notes")
+notes_edges <- board_specific_edges(data = discussion_edges, board = "Notes")
+notes_nodes <- board_specific_nodes(data = discussion_edges, board = "Notes")
 
 
 visN_edges <- data.frame(
@@ -217,11 +233,177 @@ visNetwork(nodes = visN_nodes, edges = visN_edges) %>%
   visIgraphLayout(layout = "layout_on_sphere")
 ```
 
-# Help & Technical Issues
+# Frequency of Comments
+
+```{r comment_freq}
+comments_per_user <- table(discussions_df$comment_user_id)
+comments_per_user <-
+  as.data.frame(comments_per_user, stringsAsFactors = F)
+colnames(comments_per_user) <-
+  c("comment_user_id", "number.of.comments")
+most_active_user <-
+  as.character(user_df[user_df$comment_user_id == comments_per_user[comments_per_user$number.of.comments ==
+                                                                      max(comments_per_user$number.of.comments), 1], "comment_user_login"])
+```
+
+The activity of users on the discussion boards is quite variable, with user "`r most_active_user`" racking up `r max(comments_per_user$number.of.comments)` comments over all the boards and `r round(100*{sum(comments_per_user$number.of.comments == 1) / nrow(comments_per_user)}, 1)`% of users only made one comment.
+
+```{r highchart_how_many_commeted_x_times}
+
+comments_between <- function(min, max){
+    sum(min <= comments_per_user$number.of.comments & comments_per_user$number.of.comments < max)
+}
+
+comments_table <- data.frame(
+  "Number of Comments" = c("1", "2 to 5", "5 to 10", "10 to 20","20 to 30", "30 to 40", "40 to 100","100 to 1000"),
+"Number of Users" = c(
+  sum(comments_per_user$number.of.comments == 1),
+  comments_between(2,5),
+  comments_between(5,10),
+  comments_between(10,20),
+  comments_between(20,30),
+  comments_between(30,40),
+  comments_between(40,100),
+  comments_between(100,1000)
+)
+)
+
+hc <- highchart() %>%
+  hc_chart(type = "bar") %>%
+  hc_xAxis(categories = comments_table$Number.of.Comments,
+           title = list(text = "Number of Comments")) %>%
+  hc_add_series(
+    data = comments_table$Number.of.Users,
+    color = "#f1a340",
+    name = "Number of Users"
+  ) %>%
+  hc_yAxis(title = "") %>%
+  hc_title(text = "How many users commented X times across all boards?")
+hc
+
+```
+
+
+```{r remove_single_comment_users}
+discussions_of_frequent_users <-
+  discussions_df[discussions_df$comment_user_id %in% comments_per_user[comments_per_user$number.of.comments != 1, 1],]
+
+discussion_frequent_users_edges <- data.frame(
+  "from" = as.numeric(),
+  "to" = as.numeric(),
+  "board_id" = as.numeric(),
+  "board_title" = as.character(),
+  "board_description" = as.character(),
+  "discussion_id" = as.numeric(),
+  "discussion_title" = as.character()
+)
+
+discussion_frequent_users_edges <- generate_edges(data = discussions_of_frequent_users, empty_df = discussion_frequent_users_edges)
+
+```
+
+The total number of interactions between all users is `r nrow(discussion_edges)`, removing those users who only commented once decreases this to `r nrow(discussion_frequent_users_edges)` interactions.
+
+In the network below, only those individuals in the #Notes board who have commented more than once across all boards are included:
+
+```{r notes_visNetwork_frequent_only}
+notes_edges <- board_specific_edges(data = discussion_frequent_users_edges, board = "Notes")
+notes_nodes <- board_specific_nodes(data = discussion_frequent_users_edges, board = "Notes")
+
+
+visN_edges <- data.frame(
+  "from" = notes_edges$from,
+  "to" = notes_edges$to,
+  "title" = notes_edges$discussion_title
+)
+
+visN_nodes <- data.frame(
+  "id" = notes_nodes$comment_user_id,
+  "title" = notes_nodes$comment_user_login,
+  "label" = notes_nodes$comment_user_login
+)
+
+visNetwork(nodes = visN_nodes, edges = visN_edges) %>%
+  visIgraphLayout(layout = "layout_with_lgl")
+```
+
+# Specific Boards
+
+The sections below include visualisations/analyses of specific boards, note that these visualisations include ALL commenters unless otherwise specified
+
+## OED Discussions
+
+This is how commenters on the #OED board are connected to one another if multiple edges are allowed:
+
+```{r oed_discussions}
+oed_edges <- board_specific_edges(data = discussion_edges, board = "#OED")
+oed_nodes <- board_specific_nodes(data = discussion_edges, board = "#OED")
+
+visN_edges <- data.frame(
+  "from" = oed_edges$from,
+  "to" = oed_edges$to,
+  "title" = oed_edges$discussion_title
+)
+
+visN_nodes <- data.frame(
+  "id" = oed_nodes$comment_user_id,
+  "title" = oed_nodes$comment_user_login,
+  "label" = oed_nodes$comment_user_login
+)
+
+visNetwork(nodes = visN_nodes, edges = visN_edges)
+```
+
+Removing multiple edges:
 
 ```{r}
-help_edges <- board_specific_edges("Help and Technical issues")
-help_nodes <- board_specific_nodes("Help and Technical issues")
+oed_edges <- board_specific_edges(data = discussion_edges, board = "#OED")
+oed_nodes <- board_specific_nodes(data = discussion_edges, board = "#OED")
+
+visN_edges <- data.frame(
+  "from" = oed_edges$from,
+  "to" = oed_edges$to,
+  "title" = oed_edges$discussion_title
+)
+
+visN_nodes <- data.frame(
+  "id" = oed_nodes$comment_user_id,
+  "title" = oed_nodes$comment_user_login,
+  "label" = oed_nodes$comment_user_login
+)
+
+g <- graph.data.frame(visN_edges, vertices = visN_nodes,directed = F)
+g <- simplify(g)
+visIgraph(g, idToLabel = F) %>%
+  visIgraphLayout(layout = "layout_with_lgl", randomSeed = 1)
+```
+
+Include only those individuals who commented more than once:
+
+```{r}
+oed_edges <- board_specific_edges(data = discussion_edges, board = "#OED")
+oed_nodes <- board_specific_nodes(data = discussion_edges, board = "#OED")
+
+visN_edges <- data.frame(
+  "from" = oed_edges$from,
+  "to" = oed_edges$to,
+  "title" = oed_edges$discussion_title
+)
+
+visN_nodes <- data.frame(
+  "id" = oed_nodes$comment_user_id,
+  "title" = oed_nodes$comment_user_login,
+  "label" = oed_nodes$comment_user_login
+)
+
+visNetwork(nodes = visN_nodes, edges = visN_edges)
+```
+
+## Help & Technical Issues
+
+```{r}
+help_edges <- board_specific_edges(data = discussion_frequent_users_edges, board = "Help and Technical issues")
+help_nodes <- board_specific_nodes(data = discussion_frequent_users_edges, board = "Help and Technical issues")
 
 visN_edges <- data.frame(
   "from" = help_edges$from,
@@ -240,7 +422,7 @@ visNetwork(nodes = visN_nodes, edges = visN_edges) %>%
 ```
 
 
-# Women
+## Women
 
 The "Women writers and autobiography" network appears as follows:
 
@@ -265,6 +447,12 @@ visN_nodes <- data.frame(
 visNetwork(nodes = visN_nodes, edges = visN_edges) %>%
   visIgraphLayout()
 ```
+
+
+
+
+
+
 
 
 

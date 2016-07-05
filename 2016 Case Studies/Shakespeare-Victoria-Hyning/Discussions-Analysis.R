@@ -60,13 +60,6 @@ user_df <- data.frame(
 ## ==============================================================================
 
 
-node_list <- c(1:5)
-combinations <- combn(node_list, 2, simplify = T)
-
-df <- data.frame(
-  "from" = combinations[1,],
-  "to" = combinations[2,]
-)
 
 discussion_edges <- data.frame(
   "from" = as.numeric(),
