@@ -1,60 +1,274 @@
 library(igraph)
 library(visNetwork)
+library(plyr)
 library(dplyr)
 library(shiny)
+library(ForceAtlas2)
+library(igraph)
+library(DT)
 
-cruk.nodes.df <- read.csv("data/CRUK-oxford-nodes.csv")
-cruk.edges.df <- read.csv("data/CRUK-oxford-edges.csv")
-## colnames need to be lower case
-colnames(cruk.edges.df) <- tolower(colnames(cruk.edges.df))
-colnames(cruk.nodes.df) <- tolower(colnames(cruk.nodes.df))
-## visNetwork wants from and to not source and target
-colnames(cruk.edges.df)[colnames(cruk.edges.df) == c("source", "target")] <- c("from","to")
-## the vertex tooltip is added by way of the title column:
-cruk.nodes.df$title <- cruk.nodes.df$label
+source("data-processing.R", local = T)
 
-## Extract only people
-cruk.nodes.df <- cruk.nodes.df[cruk.nodes.df$type == "Person",]
-## Extract only edges that concern people
-cruk.edges.df <- subset(cruk.edges.df, from %in% cruk.nodes.df$id & to %in% cruk.nodes.df$id)
-## edge width is specified by value
-cruk.edges.df$value <- (cruk.edges.df$weight == 10) + 1
+## =========================== igraph ===========================================
+## ==============================================================================
+
+ox_ox_igraph <-
+  graph.data.frame(d = ox_ox_edges[, 1:2], vertices = ox_ox_nodes[, 1:2])
+V(ox_ox_igraph)$title <- ox_ox_nodes$name
 
 
-# ## Circle is very dense
-# visNetwork(node = cruk.nodes.df, edges = cruk.edges.df) %>% 
-#   visNodes(label = FALSE) %>%
-#   visIgraphLayout(layout = "layout_in_circle", type = "full") %>%
-#   visInteraction(tooltipDelay = 0.2, hideEdgesOnDrag = TRUE, dragNodes = FALSE, dragView = FALSE, zoomView = TRUE) %>%
-#   visOptions(highlightNearest = TRUE)
-#   
+# ox_ox_depart_igraph <-
+#   contract(ox_ox_igraph, mapping = as.numeric(
+#     mapvalues(
+#       ox_ox_nodes$department,
+#       from = department_colours$department,
+#       to = 1:nrow(department_colours)
+#     )
+#   ))
+#
+# V(ox_ox_depart_igraph)$name <- unique(ox_ox_nodes$department)
+# V(ox_ox_depart_igraph)$title <- V(ox_ox_depart_igraph)$name
+# V(ox_ox_depart_igraph)$color <-
+#   mapvalues(
+#     mapvalues(
+#       unlist(V(ox_ox_depart_igraph)$name),
+#       from = department_colours$department,
+#       to = department_colours$colours
+#     ),
+#     from = department_colours$department,
+#     to = department_colours$colours
+#   )
+#
+# ox_ox_depart_igraph <- simplify(as.undirected(ox_ox_depart_igraph))
 
-shinyServer(
-  function(input, output, sessions){
+# 
+# visIgraph(ox_ox_depart_igraph,
+#           idToLabel = F,
+#           layout = "layout_nicely")
+# 
+
+## =========================== Server Function ==================================
+## ==============================================================================
+
+shinyServer(function(input, output, sessions) {
+  ## =========================== Invalidate Click Input ===========================
+  ## ==============================================================================
+  
+  control_tracker <-
+    reactiveValues(
+      selected_node = 0,
+      destructive_inputs = 0,
+      both = 0,
+      check = 1
+    )
+  
+  observeEvent(c(input$people_or_departments), {
+    control_tracker$destructive_inputs <-
+      control_tracker$destructive_inputs + 1
+  })
+  
+  observeEvent(c(input$people_or_departments, input$current_node_id), {
+    control_tracker$both <- control_tracker$both + 1
+  })
+  
+  observeEvent(c(input$current_node_id), {
+    control_tracker$check <-
+      list(control_tracker$destructive_inputs,
+           control_tracker$both)
+  })
+  
+  ## =========================== Generate Graph ====================================
+  ## ==============================================================================
+  
+  
+  ox_ox_igraph <- reactive({
+    ox_ox_igraph <-
+      graph.data.frame(d = ox_ox_edges[, 1:4], vertices = ox_ox_nodes[, 1:5])
+    V(ox_ox_igraph)$title <- ox_ox_nodes$name
+    V(ox_ox_igraph)$color <- ox_ox_nodes$color
     
-    output$layout_control_UI <- renderUI({
-      selectInput("layout_control", 
-                  choices = c("layout_nicely","layout_as_tree", "layout_in_circle","layout.grid"),
-                  selected = "layout_nicely", multiple = FALSE,
-                  label = "Layout")
-    })
+    ox_ox_igraph
+  })
+  
+  ox_ox_depart_igraph <- reactive({
+    ox_ox_igraph <- ox_ox_igraph()
     
+    ox_ox_depart_igraph <-
+      contract(ox_ox_igraph, mapping = as.numeric(
+        mapvalues(
+          ox_ox_nodes$department,
+          from = department_colours$department,
+          to = 1:nrow(department_colours)
+        )
+      ))
     
+    V(ox_ox_depart_igraph)$name <- unique(ox_ox_nodes$department)
+    V(ox_ox_depart_igraph)$title <- V(ox_ox_depart_igraph)$name
+    V(ox_ox_depart_igraph)$color <-
+      mapvalues(unlist(V(ox_ox_depart_igraph)$name),
+                from = department_colours$department,
+                to = department_colours$colours)
     
-    output$crukNetwork <- renderVisNetwork({
-      
-      if(is.null(input$layout_control)){
+    ox_ox_depart_igraph <-
+      simplify(as.undirected(ox_ox_depart_igraph))
+    ox_ox_depart_igraph
+    
+  })
+  
+  
+  output$crukNetwork <- renderVisNetwork({
+    if (is.null(input$layout_control)) {
+      return()
+    }
+    
+    switch(
+      input$people_or_departments,
+      "individuals" = {
+        graph_to_plot <- ox_ox_igraph()
+      },
+      "departments" = {
+        graph_to_plot <- ox_ox_depart_igraph()
+      }
+    )
+    
+    switch(
+      input$layout_control,
+      "layout_nicely" = {
+        visIgraph(graph_to_plot,
+                  idToLabel = F,
+                  layout = "layout_nicely") %>%
+          visEvents(selectNode = "function(nodes) {
+                    Shiny.onInputChange('current_node_id', nodes);
+                    ;}")
+  },
+  "layout_with_fr" = {
+    #   visPhysics(
+    #     solver = "forceAtlas2Based",
+    #     forceAtlas2Based = list(avoidOverlap = 1),
+    #     stabilization = list(iterations = 400)
+    #   )
+    visIgraph(graph_to_plot,
+              idToLabel = F,
+              layout = "layout_with_fr") %>%
+      visEvents(selectNode = "function(nodes) {
+                Shiny.onInputChange('current_node_id', nodes);
+                ;}")
+  }
+      )
+    
+      })
+  
+  individual_datatable <- reactive({
+    selected_id <-
+      ox_ox_nodes[ox_ox_nodes$name == input$current_node_id$nodes, "id"]
+    subsetted_edges <-
+      filter(ox_ox_edges, from == selected_id |
+               to == selected_id)
+    subsetted_edges$from <-
+      mapvalues(subsetted_edges$from,
+                from = ox_ox_nodes$id,
+                to = ox_ox_nodes$name)
+    subsetted_edges$to <-
+      mapvalues(subsetted_edges$to,
+                from = ox_ox_nodes$id,
+                to = ox_ox_nodes$name)
+    select(subsetted_edges,
+           from,
+           to,
+           collaborations,
+           publication.name,
+           publication.date)
+  })
+  
+  department_datatable <- reactive({
+    filter(ox_ox_nodes, department == input$current_node_id$nodes) %>% select(id) %>% .[, 1] -> department_members
+    
+    subsetted_edges <-
+      filter(ox_ox_edges,
+             from %in% department_members |
+               to %in% department_members)
+    
+    subsetted_edges$from <-
+      mapvalues(subsetted_edges$from,
+                from = ox_ox_nodes$id,
+                to = ox_ox_nodes$name)
+    subsetted_edges$to <-
+      mapvalues(subsetted_edges$to,
+                from = ox_ox_nodes$id,
+                to = ox_ox_nodes$name)
+    select(subsetted_edges,
+           from,
+           to,
+           collaborations,
+           publication.name,
+           publication.date)
+  })
+  
+
+  output$selected_node_table <- DT::renderDataTable({
+    if (is.null(input$current_node_id$nodes)) {
+      return()
+    }
+    
+    if (control_tracker$destructive_inputs == 1) {
+      if (is.null(input$current_node_id)) {
         return()
+      } else {
+        switch(
+          input$people_or_departments,
+          "individuals" = {
+            individual_datatable()
+          },
+          "departments" = {
+            department_datatable()
+          }
+        )
       }
       
-      visNetwork(node = cruk.nodes.df, edges = cruk.edges.df, width = "100%") %>% 
-        visNodes(label = FALSE) %>%
-        visIgraphLayout(layout = input$layout_control) %>%
-        visInteraction(tooltipDelay = 0.2, hideEdgesOnDrag = TRUE, dragNodes = TRUE, dragView = FALSE, zoomView = TRUE) %>%
-        visOptions(highlightNearest = TRUE) %>%
-        visInteraction(navigationButtons = TRUE)
-      
-    })
-    
-  }
-)
+    } else {
+      if (control_tracker$destructive_inputs > control_tracker$check[1]) {
+        return()
+      } else {
+        switch(
+          input$people_or_departments,
+          "individuals" = {
+            individual_datatable()
+          },
+          "departments" = {
+            department_datatable()
+          }
+        )
+      }
+    }
+
+  })
+  
+  output$ui_containing_a_dt <- renderUI({
+
+    if (is.null(input$current_node_id$nodes)) {
+      wellPanel("Select a node for more details")
+    }
+
+    if (control_tracker$destructive_inputs == 1) {
+      if (is.null(input$current_node_id)) {
+        # return()
+        wellPanel("Select a node for more details")
+      } else {
+        wellPanel(
+        DT::dataTableOutput("selected_node_table")
+        )
+      }
+
+    } else {
+      if (control_tracker$destructive_inputs > control_tracker$check[1]) {
+        # return()
+        wellPanel("Select a node for more details")
+      } else {
+        wellPanel(
+          DT::dataTableOutput("selected_node_table")
+        )
+      }
+    }
+  })
+  
+  })
