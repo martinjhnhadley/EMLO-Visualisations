@@ -5,6 +5,10 @@
 
 # CSV files
 *.csv
+*.txt
+
+# PDFs
+*.pdf
 
 #Ignore all xlsx files
 *.xlsx
