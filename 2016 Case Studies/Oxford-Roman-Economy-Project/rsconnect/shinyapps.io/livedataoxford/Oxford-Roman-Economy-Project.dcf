@@ -1,0 +1,10 @@
+name: Oxford-Roman-Economy-Project
+account: livedataoxford
+server: shinyapps.io
+appId: 110048
+bundleId: 486488
+url: https://livedataoxford.shinyapps.io/Oxford-Roman-Economy-Project/
+when: 1466607431.69949
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: OxRep-Initial-Visualisations.html|OxRep-Initial-Visualisations.Rmd|data/Aqueducts.zip|data/Current OxREP database.sql|data/shapes.txt|data/Current OxREP database/areas.csv|data/Current OxREP database/biblioref.csv|data/Current OxREP database/connections.csv|data/Current OxREP database/docref.csv|data/Current OxREP database/documents.csv|data/Current OxREP database/history.csv|data/Current OxREP database/institutions.csv|data/Current OxREP database/keywords.csv|data/Current OxREP database/locations.csv|data/Current OxREP database/objects.csv|data/Current OxREP database/people.csv|data/Current OxREP database/publications.csv|data/Current OxREP database/relations.csv|data/Current OxREP database/toponyms.csv|data/Current OxREP database/transactions.csv|data/shapefiles/aqueducts.dbf|data/shapefiles/aqueducts.prj|data/shapefiles/aqueducts.sbn|data/shapefiles/aqueducts.sbx|data/shapefiles/aqueducts.shp|data/shapefiles/aqueducts.shx|data/shapefiles/roman_roads_v2008.dbf|data/shapefiles/roman_roads_v2008.prj|data/shapefiles/roman_roads_v2008.sbn|data/shapefiles/roman_roads_v2008.sbx|data/shapefiles/roman_roads_v2008.shp|data/shapefiles/roman_roads_v2008.shp.xml|data/shapefiles/roman_roads_v2008.shx

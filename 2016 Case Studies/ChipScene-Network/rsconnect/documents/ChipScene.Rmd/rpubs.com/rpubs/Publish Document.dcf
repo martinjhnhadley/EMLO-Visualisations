@@ -1,0 +1,7 @@
+name: Publish Document
+account: rpubs
+server: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/189416/046601a349b0472c82198aa5e963a3c9
+bundleId: https://api.rpubs.com/api/v1/document/189416/046601a349b0472c82198aa5e963a3c9
+url: http://rpubs.com/martinjhnhadley/189416
+when: 1466420593.6475

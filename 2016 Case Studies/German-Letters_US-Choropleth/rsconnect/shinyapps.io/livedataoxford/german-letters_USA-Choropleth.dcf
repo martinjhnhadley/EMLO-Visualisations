@@ -1,0 +1,10 @@
+name: german-letters_USA-Choropleth
+account: livedataoxford
+server: shinyapps.io
+appId: 93830
+bundleId: 474408
+url: https://livedataoxford.shinyapps.io/german-letters_USA-Choropleth/
+when: 1465310042.11043
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: README.md|screenshot.png
