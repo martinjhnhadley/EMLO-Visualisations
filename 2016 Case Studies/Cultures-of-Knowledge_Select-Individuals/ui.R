@@ -83,7 +83,7 @@ shinyUI(fluidPage(
     uiOutput(
       "visNetwork_selected_individual_connected_life_events_columns_to_show_UI"
     ),
-    dataTableOutput("visNetwork_selected_individual_selected_node")
+    DT::dataTableOutput("visNetwork_selected_individual_selected_node")
     )
   
 ))

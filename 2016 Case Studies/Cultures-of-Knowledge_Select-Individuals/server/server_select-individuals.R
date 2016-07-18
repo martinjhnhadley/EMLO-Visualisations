@@ -564,11 +564,11 @@ output$visNetwork_selected_individual_connected_life_events_columns_to_show_UI <
         'Columns to show:',
         usefulCols_life_events,
         selected = c(
+          "Primary.Participant.Name",
+          "Secondary.Participant.Name",
           "Category",
           "Event.or.Relationship.Type",
-          "Primary.Participant.Name",
           "Primary.Participant.Role",
-          "Secondary.Participant.Name",
           "Secondary.Participant.Role",
           "DateOne.Year",
           "DateTwo.Year",
@@ -671,26 +671,37 @@ connected_individuals_events <- reactive({
   connected_life_events
 })
 
+fixed_order_columns <- c("Primary Participant Name","Secondary Participant Name","Category")
+
 output$visNetwork_selected_individual_selected_node <-
-  renderDataTable({
-    connected_individuals_events()
+  DT::renderDataTable({
+    print(colnames(connected_individuals_events()))
     
+    connected_individuals_events <- connected_individuals_events()
+    cols_names <- colnames(connected_individuals_events)
+    
+    connected_individuals_events[,c(fixed_order_columns, cols_names[!cols_names %in% fixed_order_columns])]
+    
+
   }, escape = FALSE,
-  # rownames = FALSE,
-  # filter = list(position = 'top', clear = FALSE),
+  rownames = FALSE,
+  # filter = list(position = 'top', clear = FALSE)
+  options = list(order = list(list(0,"desc")))
   # only make name column non-orderable
-  options = if (length(which(
-    colnames(connected_individuals_events()) %in% c("Primary Participant Name", "Secondary Participant Name")
-  )) > 0) {
-    list(
-      dom = 'ft',
-      columnDefs = list(list(
-        targets = which(
-          colnames(connected_individuals_events()) %in% c("Primary Participant Name", "Secondary Participant Name")
-        ) - 1,
-        orderable = FALSE
-      )),
-      search = list(regex = TRUE,
-                    caseInsensitive = FALSE)
-    )
-  })
+  # options = if (length(which(
+  #   colnames(connected_individuals_events()) %in% c("Primary Participant Name", "Secondary Participant Name")
+  # )) > 0) {
+  #   list(
+  #     dom = 'ft',
+  #     columnDefs = list(list(
+  #       targets = which(
+  #         colnames(connected_individuals_events()) %in% c("Primary Participant Name", "Secondary Participant Name")
+  #       ) - 1,
+  #       orderable = FALSE
+  #     )),
+  #     search = list(regex = TRUE,
+  #                   caseInsensitive = FALSE),
+  #     order = list(list(2,"desc"))
+  #   )
+  # }
+  )

@@ -2,8 +2,8 @@ name: PoC_CRUK-Network
 account: livedataoxford
 server: shinyapps.io
 appId: 82214
-bundleId: 503874
+bundleId: 508224
 url: https://livedataoxford.shinyapps.io/PoC_CRUK-Network/
-when: 1468424542.93062
+when: 1468856277.8726
 asMultiple: FALSE
 asStatic: FALSE
