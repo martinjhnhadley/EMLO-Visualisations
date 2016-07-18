@@ -197,6 +197,12 @@ connections_to_selected_individual <- reactive({
   # lapply function
   invisible(lapply(connectedIndividuals, function(x)
     get.connected.life.events(selectedIndividual, x)))
-  # return
+
+  if(nrow(connected_life_events) > 0){
   connected_life_events
+} else {
+  NULL
+}
+
+  
 })

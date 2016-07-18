@@ -99,7 +99,8 @@ shinyUI(fluidPage(
     uiOutput(
       "visNetwork_whole_network_connected_life_events_columns_to_show_UI"
     ),
-    dataTableOutput("visNetwork_whole_network_selected_node")
+    # dataTableOutput("visNetwork_whole_network_selected_node"),
+    uiOutput("node_summary_DT_UI")
   )
   
   

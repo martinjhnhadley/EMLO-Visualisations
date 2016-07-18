@@ -313,10 +313,6 @@ output$visNetwork_wholeNetwork <- renderVisNetwork({
     return()
   }
   
-  # if (is.null(input$highlighted.node)) {
-  #   return()
-  # }
-  
   visNetwork_edges <- visNetwork_wholeNetwork_edges()
   visNetwork_nodes <- visNetwork_wholeNetwork_nodes()
   
@@ -334,32 +330,16 @@ output$visNetwork_wholeNetwork <- renderVisNetwork({
     "from" = visNetwork_edges$source.emlo.id,
     "to" = visNetwork_edges$target.emlo.id,
     "color" = visNetwork_edges$EdgeColor,
-    "width" = rescale(visNetwork_edges$Value, to = c(4,12))
-    ## TODO: Make this work when filtering by date
-    # "title" = unlist(sapply(
-    #   lapply(1:nrow(edges.of.network), function(x)
-    #     edge_labeler(
-    #       from = visNetwork_edges[x, "source.emlo.id"],
-    #       to = visNetwork_edges[x, "target.emlo.id"],
-    #       connections = visNetwork_edges[x, "total.connections"]
-    #     )),
-    #   "[[", 1
-    # ))
-    # 
+    "width" = rescale(visNetwork_edges$Value, to = c(4, 12))
   )
   
   ## Drop duplicate node:
-  visN_nodes <- visN_nodes[!duplicated(visN_nodes$id),]
-  
-  # if (input$highlighted.node != "None") {
-  #   visN_nodes[visN_nodes$id == input$highlighted.node,]$color <-
-  #     "#d95f02"
-  # }
+  visN_nodes <- visN_nodes[!duplicated(visN_nodes$id), ]
   
   ## Make background colour vector
   node.background.color <- rep("#d95f02", nrow(visN_nodes))
   ## Set highlighted.node to be #d95f02
-
+  
   ## Drop edges with nodes not in the node list
   non.conflicting.nodes <-
     intersect(unique(c(visN_edges$from, visN_edges$to)), visN_nodes$id)
@@ -380,14 +360,12 @@ output$visNetwork_wholeNetwork <- renderVisNetwork({
     V(igraph.for.computation)$name[which(degree(igraph.for.computation) == 0)]
   
   ## Drop isolated nodes
-  visN_nodes <- visN_nodes[!visN_nodes$id %in% isolated_nodes, ]
+  visN_nodes <- visN_nodes[!visN_nodes$id %in% isolated_nodes,]
   
   ## Make network
   visNetwork(visN_nodes, visN_edges) %>%
     visNodes(color = list(border = "darkblue"), size = 10) %>%
     visIgraphLayout(randomSeed = 1) %>%
-    # visEdges(value = round(rescale(visNetwork_edges$Value, to = c(2,10)))) %>%
-    # visEdges(width = 4) %>%
     visInteraction(
       tooltipDelay = 0.2,
       hideEdgesOnDrag = FALSE,
@@ -405,21 +383,17 @@ output$visNetwork_wholeNetwork <- renderVisNetwork({
 
 
 observe({
-  
-  if(is.null(input$highlighted.node)){
+  if (is.null(input$highlighted.node)) {
     return()
   }
   
   if (input$highlighted.node != "None") {
     visNetworkProxy("visNetwork_wholeNetwork") %>%
       visFocus(id = input$highlighted.node, scale = 1) %>%
-      visUpdateNodes(
-        nodes = data.frame(
-          "id" = input$highlighted.node,
-          "color" = "red"
-        ))
-  } 
-
+      visUpdateNodes(nodes = data.frame("id" = input$highlighted.node,
+                                        "color" = "red"))
+  }
+  
 })
 
 
@@ -441,14 +415,7 @@ output$visNetwork_wholeNetwork_selected_node_info <- renderUI({
   
   # Load connected individuals
   connected_life_events <- connections_to_selected_individual()
-  
-  print(length(setdiff(unique(
-    c(
-      connected_life_events$Primary.Participant.Emlo_ID,
-      connected_life_events$Secondary.Participant.Emlo_ID
-    )
-  ), selected_emlo_id)))
-  
+
   wellPanel(HTML(
     paste0(
       "<p><strong>Selected Person/Organisation: ",
@@ -507,6 +474,9 @@ output$visNetwork_whole_network_connected_life_events_columns_to_show_UI <-
 connected_individuals_events <- reactive({
   # Load connected individuals
   connected_life_events <- connections_to_selected_individual()
+  if(is.null(connected_life_events)){
+    return(NULL)
+  }
   
   connected_life_events$Primary.Participant.Name <-
     paste0(
@@ -528,7 +498,7 @@ connected_individuals_events <- reactive({
   
   # Drop empty rows:
   connected_life_events <-
-    connected_life_events[!!rowSums(!is.na(connected_life_events)),]
+    connected_life_events[!!rowSums(!is.na(connected_life_events)), ]
   # Return only selected columns
   connected_life_events <-
     connected_life_events[, input$connected_life_events_Cols, drop = FALSE]
@@ -539,13 +509,6 @@ connected_individuals_events <- reactive({
   factor_columns <- sapply(connected_life_events, is.factor)
   connected_life_events[factor_columns] <-
     lapply(connected_life_events[factor_columns], as.character)
-  
-  # Find position of names to make these columns non-orderable
-  name_columns <<-
-    which(
-      colnames(connected_life_events) %in% c("Primary Participant Name", "Secondary Participant Name")
-    )
-  
   
   # Return to datatable
   connected_life_events
@@ -560,7 +523,6 @@ output$visNetwork_whole_network_selected_node <-
   options = if (length(which(
     colnames(connected_individuals_events()) %in% c("Primary Participant Name", "Secondary Participant Name")
   )) > 0) {
-    print(name_columns)
     list(columnDefs = list(list(
       targets = which(
         colnames(connected_individuals_events()) %in% c("Primary Participant Name", "Secondary Participant Name")
@@ -568,3 +530,16 @@ output$visNetwork_whole_network_selected_node <-
       orderable = FALSE
     )))
   })
+
+is_simple_error <- function(x) inherits(x, "simpleError")
+
+
+output$node_summary_DT_UI <- renderUI({
+  
+  if(!is.null(connected_individuals_events())){
+    dataTableOutput("visNetwork_whole_network_selected_node")
+  } else {
+    wellPanel("The node you previously selected is no longer a member of the graph, your filtering has removed it. Please select a new node.")
+  }
+
+})
