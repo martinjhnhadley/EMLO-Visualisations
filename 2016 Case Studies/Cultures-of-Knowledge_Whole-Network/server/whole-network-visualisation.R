@@ -404,8 +404,6 @@ output$visNetwork_wholeNetwork <- renderVisNetwork({
   })
 
 
-
-
 observe({
   
   if(is.null(input$highlighted.node)){
@@ -423,8 +421,6 @@ observe({
   } 
 
 })
-
-
 
 
 ### ====================================== Selected Individuals =====================================
