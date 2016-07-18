@@ -399,6 +399,7 @@ output$select.individual.network_graph <- renderVisNetwork({
       from = c(TRUE, FALSE),
       to = c("O", "P")
     ),
+    "font.size" = 20,
     stringsAsFactors = F
   )
   
@@ -441,7 +442,7 @@ output$select.individual.network_graph <- renderVisNetwork({
   ## Visualise
   visNetwork(visN_nodes, visN_edges) %>%
     visNodes(color = list(border = "darkblue"),
-             size = 10) %>%
+             size = 15) %>%
     visIgraphLayout() %>%
     visInteraction(
       tooltipDelay = 0.2,
