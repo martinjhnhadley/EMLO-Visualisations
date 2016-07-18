@@ -71,7 +71,7 @@ shinyServer(
       new_gigs <- xts(new_gigs$count,new_gigs$date)
       
       closed_gigs <- plot_data %>% 
-        filter(status == "closed")
+        filter(status %in% c("closed", "filled"))
       closed_gigs <- xts(closed_gigs$count,closed_gigs$date)
       
       both_ts <- cbind(new_gigs, closed_gigs)
