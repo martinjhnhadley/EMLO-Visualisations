@@ -243,7 +243,7 @@ visNetwork_wholeNetwork_edges <- reactive({
       "Value" =   if (input$visNetwork_wholeNetwork_highlightedCategory == "None") {
         20 * edges$Total.Connections
       } else {
-        20 * edges$Total.Connections + edges[, c(input$visNetwork_wholeNetwork_highlightedCategory)]
+        20 * edges$Total.Connections + 10 * edges[, c(input$visNetwork_wholeNetwork_highlightedCategory)]
       },
       "EdgeColor" = if (input$visNetwork_wholeNetwork_highlightedCategory == "None") {
         rep("#7570b3", nrow(edges))
@@ -334,7 +334,8 @@ output$visNetwork_wholeNetwork <- renderVisNetwork({
     "from" = visNetwork_edges$source.emlo.id,
     "to" = visNetwork_edges$target.emlo.id,
     "color" = visNetwork_edges$EdgeColor,
-    "value" = rescale(visNetwork_edges$Value, to = c(2, 10))
+    # "value" = rescale(visNetwork_edges$Value, to = c(20, 30)),
+    "width" = rescale(visNetwork_edges$Value, to = c(4,12))
     ## TODO: Make this work when filtering by date
     # "title" = unlist(sapply(
     #   lapply(1:nrow(edges.of.network), function(x)

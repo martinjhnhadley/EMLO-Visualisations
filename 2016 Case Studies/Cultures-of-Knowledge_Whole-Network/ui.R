@@ -49,14 +49,14 @@ shinyUI(fluidPage(
           "visNetwork_wholeNetwork_highlighted_node_UI",
           "Selecting a name from the drop-down menu highlights in orange the selected individual.",
           "right",
-          options = list(container = "body")
+          options = list(container = "body", delay= '{"show":"500", "hide":"100"}')
         ),
         uiOutput("visNetwork_wholeNetwork_show_timeslider_UI"),
         bsTooltip(
           "visNetwork_wholeNetwork_show_timeslider_UI",
           "Toggling on the check box makes a date scroll bar appear allowing you to select a specific date (range). The statistics below show the effect of your selection on the network in numbers. Note: About half of the events in the selected dataset are undated. The lifespan of people is not taken into account.",
           "right",
-          options = list(container = "body")
+          options = list(container = "body", delay= '{"show":"500", "hide":"100"}')
         ),
         uiOutput("visNetwork_wholeNetwork_dateRangeInput_UI"),
         uiOutput("visNetwork_wholeNetwork_time_period_of_interest_UI"),
@@ -65,14 +65,14 @@ shinyUI(fluidPage(
           "visNetwork_wholeNetwork_HighlightedCategoryUI",
           "Selecting an event or relationship type from the drop-down menu highlights in orange all edges concerned. This function allows you to examine how people were connected. More detailed information can be found in the events table which appears below the graph when you click on a node.",
           "right",
-          options = list(container = "body")
+          options = list(container = "body", delay= '{"show":"500", "hide":"100"}')
         ),
         uiOutput("visNetwork_wholeNetwork_ExcludedCategoriesUI"),
         bsTooltip(
           "visNetwork_wholeNetwork_ExcludedCategoriesUI",
           "Selecting an event or relationship type from the drop-down menu removes from the graph the edges concerned as well as the nodes that were connected to the rest of the network by these edges if this event or relationship type was the only one connecting them. The statistics below show the effect of excluding these connections on the network in numbers.",
           "right",
-          options = list(container = "body")
+          options = list(container = "body", delay= '{"show":"500", "hide":"100"}')
         ),
         uiOutput("visNetwork_wholeNetwork_NumberOfExcluded")
       ),
