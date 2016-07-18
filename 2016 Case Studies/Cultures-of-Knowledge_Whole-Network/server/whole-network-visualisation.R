@@ -392,6 +392,8 @@ observe({
       visFocus(id = input$highlighted.node, scale = 1) %>%
       visUpdateNodes(nodes = data.frame("id" = input$highlighted.node,
                                         "color" = "red"))
+  } else {
+    visNetworkProxy("visNetwork_wholeNetwork") %>% visFit(nodes = NULL)
   }
   
 })
