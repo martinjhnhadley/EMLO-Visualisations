@@ -313,9 +313,9 @@ output$visNetwork_wholeNetwork <- renderVisNetwork({
     return()
   }
   
-  if (is.null(input$highlighted.node)) {
-    return()
-  }
+  # if (is.null(input$highlighted.node)) {
+  #   return()
+  # }
   
   visNetwork_edges <- visNetwork_wholeNetwork_edges()
   visNetwork_nodes <- visNetwork_wholeNetwork_nodes()
@@ -334,7 +334,6 @@ output$visNetwork_wholeNetwork <- renderVisNetwork({
     "from" = visNetwork_edges$source.emlo.id,
     "to" = visNetwork_edges$target.emlo.id,
     "color" = visNetwork_edges$EdgeColor,
-    # "value" = rescale(visNetwork_edges$Value, to = c(20, 30)),
     "width" = rescale(visNetwork_edges$Value, to = c(4,12))
     ## TODO: Make this work when filtering by date
     # "title" = unlist(sapply(
@@ -352,10 +351,10 @@ output$visNetwork_wholeNetwork <- renderVisNetwork({
   ## Drop duplicate node:
   visN_nodes <- visN_nodes[!duplicated(visN_nodes$id),]
   
-  if (input$highlighted.node != "None") {
-    visN_nodes[visN_nodes$id == input$highlighted.node,]$color <-
-      "#d95f02"
-  }
+  # if (input$highlighted.node != "None") {
+  #   visN_nodes[visN_nodes$id == input$highlighted.node,]$color <-
+  #     "#d95f02"
+  # }
   
   ## Make background colour vector
   node.background.color <- rep("#d95f02", nrow(visN_nodes))
@@ -403,6 +402,30 @@ output$visNetwork_wholeNetwork <- renderVisNetwork({
               ;}")
   
   })
+
+
+
+
+observe({
+  
+  if(is.null(input$highlighted.node)){
+    return()
+  }
+  
+  if (input$highlighted.node != "None") {
+    visNetworkProxy("visNetwork_wholeNetwork") %>%
+      visFocus(id = input$highlighted.node, scale = 1) %>%
+      visUpdateNodes(
+        nodes = data.frame(
+          "id" = input$highlighted.node,
+          "color" = "red"
+        ))
+  } 
+
+})
+
+
+
 
 ### ====================================== Selected Individuals =====================================
 ### ==================================================================================================
