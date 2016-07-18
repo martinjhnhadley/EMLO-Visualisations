@@ -157,19 +157,8 @@ visNetwork_select_individuals_edges <- reactive({
       ),
       "source.emlo.id" = as.numeric(edges$Primary.Emlo_ID),
       "target.emlo.id" = as.numeric(edges$Secondary.Emlo_ID),
-      ## Times the total number of connections by 10 and add 1 if of the highlighted category type
-      ## Allows for testing off oddness for colour and size for the edge width
-      # "Value" =   if (input$visNetwork_wholeNetwork_highlightedCategory == "None") {
-      #   20 * edges$Total.Connections
-      # } else {
-      #   20 * edges$Total.Connections + edges[, c(input$visNetwork_wholeNetwork_highlightedCategory)]
-      # },
-      "Value" = 20 * edges$Total.Connections,
-      # "EdgeColor" = if (input$visNetwork_wholeNetwork_highlightedCategory == "None") {
-      #   rep("lightblue", nrow(edges))
-      # } else {
-      #   mapvalues(edges[, c(input$visNetwork_wholeNetwork_highlightedCategory)] > 0, c(TRUE, FALSE), c("#ff6666", "lightblue"))
-      # }
+      "value" = 20 * edges$Total.Connections,
+      "width" = rescale(20 * edges$Total.Connections, to = c(4, 12)),
       "EdgeColor" = rep("lightblue", nrow(edges))
     )
   
@@ -290,7 +279,9 @@ output$selected_individual_NumberOfExcluded <- renderUI({
   
   ## Subset people.df by the nodes appearing in the edges:
   visN_nodes <-
-    subset(people.df, iperson_id %in% unique(c(visN_edges$Primary.Emlo_ID, visN_edges$Secondary.Emlo_ID)))
+    subset(people.df, iperson_id %in% unique(
+      c(visN_edges$Primary.Emlo_ID, visN_edges$Secondary.Emlo_ID)
+    ))
   
   if (is.igraph(visNetwork_select_individuals_neighboring_nodes())) {
     HTML(
@@ -311,7 +302,7 @@ output$selected_individual_NumberOfExcluded <- renderUI({
     )
   }
   
-
+  
 })
 
 ### ====================================== Generate visNetwork ========================
@@ -335,18 +326,20 @@ output$selected.individual.network_no_graph <- renderUI({
   if (is.igraph(visNetwork_select_individuals_neighboring_nodes())) {
     return()
   } else {
-    wellPanel(
-      HTML(
+    wellPanel(HTML(
       paste0(
         "<p>",
-      "This visualisation is designed to depict a 'subgraph' containing all of the selected individuals above.","</p>",
-      "<p>",
-      "The current filter settings mean that such a network cannot be generated from data currently available from EMLO.","</p>",
-      "<p>",
-      "It is likely that you have enabled the time filter for the network and one (or more) of the individuals are only connected ",
-      "to others with (currently) undated interactions.","</p>")
+        "This visualisation is designed to depict a 'subgraph' containing all of the selected individuals above.",
+        "</p>",
+        "<p>",
+        "The current filter settings mean that such a network cannot be generated from data currently available from EMLO.",
+        "</p>",
+        "<p>",
+        "It is likely that you have enabled the time filter for the network and one (or more) of the individuals are only connected ",
+        "to others with (currently) undated interactions.",
+        "</p>"
       )
-    )
+    ))
   }
   
 })
@@ -396,13 +389,23 @@ output$select.individual.network_graph <- renderVisNetwork({
     "id" = visN_nodes$iperson_id,
     "title" = visN_nodes$Person.Name,
     "label" = visN_nodes$Surname,
-    "color" = mapvalues(visN_nodes$iperson_id %in% non_people_in_people_df, from = c(TRUE, FALSE), to = c("#a1d76a","#7570b3")),
+    "color" = mapvalues(
+      visN_nodes$iperson_id %in% non_people_in_people_df,
+      from = c(TRUE, FALSE),
+      to = c("#a1d76a", "#7570b3")
+    ),
+    "group" = mapvalues(
+      visN_nodes$iperson_id %in% non_people_in_people_df,
+      from = c(TRUE, FALSE),
+      to = c("O", "P")
+    ),
     stringsAsFactors = F
   )
   
   ## Highlight the selected nodes as red
   node_colors <- visN_nodes$color
-  node_colors[match(input$select_individuals, visN_nodes$id)] <- "red"
+  node_colors[match(input$select_individuals, visN_nodes$id)] <-
+    "red"
   
   ## Highlight first degree edges as red
   edge_colors <-
@@ -415,12 +418,9 @@ output$select.individual.network_graph <- renderVisNetwork({
     )
   visN_edges$color <- edge_colors
   
-  print(visN_edges[visN_edges$from %in% input$select_individuals |
-                     visN_edges$to %in% input$select_individuals, ])
-  
   visN_nodes$color <- node_colors
   ## Remove duplicated nodes
-  visN_nodes <- visN_nodes[!duplicated(visN_nodes$id), ]
+  visN_nodes <- visN_nodes[!duplicated(visN_nodes$id),]
   
   ## Drop edges with nodes not in the node list
   non.conflicting.nodes <-
@@ -430,11 +430,18 @@ output$select.individual.network_graph <- renderVisNetwork({
            from %in% non.conflicting.nodes &
              to %in% non.conflicting.nodes)
   
+  ## Legend nodes
+  lnodes <- data.frame(label = c("Person", "Organisation","Selected Person"),
+                       shape = c("icon","icon","icon"), 
+                       icon.code = c("f007","f0c0","f007"),
+                       icon.color = c("#7570b3", "#a1d76a","red"),
+                       icon.size = c(48,24,48),
+                       id = 1:3)
+  
   ## Visualise
   visNetwork(visN_nodes, visN_edges) %>%
     visNodes(color = list(border = "darkblue"),
              size = 10) %>%
-    visEdges(width = 4) %>%
     visIgraphLayout() %>%
     visInteraction(
       tooltipDelay = 0.2,
@@ -445,10 +452,37 @@ output$select.individual.network_graph <- renderVisNetwork({
     ) %>%
     visOptions(highlightNearest = TRUE) %>%
     visLayout(hierarchical = FALSE) %>%
+    addFontAwesome() %>%
+    visGroups(groupname = "O", color = "#a1d76a") %>%
+    visGroups(groupname = "P", color = "#7570b3") %>%
+    visLegend(addNodes = lnodes, useGroups = FALSE) %>%
+    # addFontAwesome() %>%
+    # visLegend(addNodes = list(
+    #   list(label = "Group", shape = "icon", icon = list(code = "f0c0", size = 25)),
+    #   list(label = "User", shape = "icon", icon = list(code = "f007", size = 50))
+    # ), useGroups = FALSE) %>%
     visEvents(selectNode = "function(nodes) {
               Shiny.onInputChange('current_node_id', nodes);
               ;}")
+
+  
   })
+
+# observe({
+#   if (is.null(input$highlighted.node)) {
+#     return()
+#   }
+#   
+#   if (input$highlighted.node != "None") {
+#     visNetworkProxy("visNetwork_wholeNetwork") %>%
+#       visFocus(id = input$highlighted.node, scale = 1) %>%
+#       visUpdateNodes(nodes = data.frame("id" = input$highlighted.node,
+#                                         "color" = "red"))
+#   } else {
+#     visNetworkProxy("visNetwork_wholeNetwork") %>% visFit(nodes = NULL)
+#   }
+#   
+# })
 
 output$select.individual.network_graph_UI <- renderUI({
   if (is.null(input$select_individuals)) {
@@ -492,7 +526,8 @@ output$visNetwork_select_individual_selected_node_info <- renderUI({
   connected_life_events <- subgraph_members()
   
   connected_life_events <- connections_to_selected_individual()
-  connected_life_events <- connected_life_events[!duplicated(connected_life_events),]
+  connected_life_events <-
+    connected_life_events[!duplicated(connected_life_events), ]
   
   wellPanel(HTML(
     paste0(
@@ -579,38 +614,10 @@ connections_to_selected_individual <- reactive({
     c(as.character(edges[edges$Primary.Emlo_ID == selectedIndividual, "Primary.Emlo_ID"]),
       as.character(edges[edges$Secondary.Emlo_ID == selectedIndividual, "Secondary.Emlo_ID"]))
   
-  # rbind(subgraph_members[subgraph_members$Primary.Participant.Emlo_ID == selectedIndividual &
-  #                    subgraph_members$Secondary.Participant.Emlo_ID %in% connectedIndividuals,],
-  #       subgraph_members[subgraph_members$Primary.Participant.Emlo_ID %in% connectedIndividuals &
-  #                          subgraph_members$Secondary.Participant.Emlo_ID == selectedIndividual,]
-  # )
-  
-  
   connections_to_selected_individual <-
     subgraph_members[subgraph_members$Primary.Participant.Emlo_ID == selectedIndividual |
-                       subgraph_members$Secondary.Participant.Emlo_ID == selectedIndividual, ]
-  # subgraph_members[subgraph_members$Primary.Participant.Emlo_ID == selectedIndividual,]
-  # # subgraph_members$Primary.Participant.Emlo_ID == selectedIndividual
-  
-  # # Create an empty data.frame with life.event.columns
-  # connections_to_selected_individual <- subgraph_members[0,]
-  # # Function to extract connected events
-  # get.connected.life.events <-
-  #   function(selectedNode, connectedNode) {
-  #     connections <-
-  #       rbind(subgraph_members[subgraph_members$Primary.Participant.Emlo_ID == selectedNode &
-  #                                subgraph_members$Secondary.Participant.Emlo_ID == connectedNode,],
-  #             subgraph_members[subgraph_members$Primary.Participant.Emlo_ID == connectedNode &
-  #                                subgraph_members$Secondary.Participant.Emlo_ID == selectedNode,])
-  #     connections_to_selected_individual <<-
-  #       rbind(connections_to_selected_individual, connections)
-  #   }
-  # # lapply function
-  # invisible(lapply(connectedIndividuals, function(x)
-  #   get.connected.life.events(selectedIndividual, x)))
-  # # return
-  #
-  # connections_to_selected_individual
+                       subgraph_members$Secondary.Participant.Emlo_ID == selectedIndividual,]
+
 })
 
 connected_individuals_events <- reactive({
@@ -641,7 +648,7 @@ connected_individuals_events <- reactive({
   
   # Drop empty rows:
   connected_life_events <-
-    connected_life_events[!!rowSums(!is.na(connected_life_events)), ]
+    connected_life_events[!!rowSums(!is.na(connected_life_events)),]
   # Return only selected columns
   connected_life_events <-
     connected_life_events[, input$connected_life_events_Cols, drop = FALSE]
@@ -682,9 +689,7 @@ output$visNetwork_selected_individual_selected_node <-
         ) - 1,
         orderable = FALSE
       )),
-      search = list(
-        regex = TRUE,
-        caseInsensitive = FALSE
-      )
+      search = list(regex = TRUE,
+                    caseInsensitive = FALSE)
     )
   })
