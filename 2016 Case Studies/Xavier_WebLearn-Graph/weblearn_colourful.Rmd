@@ -114,9 +114,6 @@ visNetwork(nodes = visN_nodes, edges = visN_edges, width = "100%", height = "500
   visGroups(groupname = unique(weblearn_nodes$color)[3], color = colour_vector[3]) %>%
   visGroups(groupname = unique(weblearn_nodes$color)[4], color = colour_vector[4]) %>%
   visGroups(groupname = unique(weblearn_nodes$color)[5], color = colour_vector[5])
-  # visGroups(groupname = levels(weblearn_nodes$color)[6], color = colour_vector[6]) %>%
-  # visLegend()
-
 ```
 
 ```{r colour_legend_1, echo=FALSE}
