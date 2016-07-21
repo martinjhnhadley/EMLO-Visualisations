@@ -15,4 +15,5 @@
 *.xlsx
 *.xls
 
-.Rproj.user
+*.Rproj.user
+*.rds
