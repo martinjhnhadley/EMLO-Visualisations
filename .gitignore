@@ -17,3 +17,5 @@
 
 *.Rproj.user
 *.rds
+*.httr-oauth
+.httr-oauth
