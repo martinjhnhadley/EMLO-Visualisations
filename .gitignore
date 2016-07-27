@@ -19,3 +19,4 @@
 *.rds
 *.httr-oauth
 .httr-oauth
+.Rproj.user

@@ -45,5 +45,4 @@ shinyUI(fillPage(
     )
   )),
   h6("Map icons provided by https://mapicons.mapsmarker.com/"),
-  leafletOutput("mines_map", height = "100%")
-  , padding = 10))
+  fillCol(leafletOutput("mines_map", height = "80%")), padding = 10))

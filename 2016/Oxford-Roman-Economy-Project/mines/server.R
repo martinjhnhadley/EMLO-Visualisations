@@ -11,6 +11,8 @@
 library(shiny)
 library(leaflet)
 library(sp)
+library(dplyr)
+library(highcharter)
 
 ## Markers provided by https://mapicons.mapsmarker.com/
 
@@ -38,6 +40,16 @@ mines_with_locations <-
   SpatialPointsDataFrame(coords = sites_df[, c("sitelong", "sitelat")], data = sites_df)
 
 
+my_subset <- sites_df %>% select(sitename, sitearea, sitecountry)
+
+foo <- count(my_subset, sitearea)
+foo$sitearea
+
+highchart() %>%
+  hc_chart(type = "bar") %>%
+  hc_xAxis(categories = foo$n) %>%
+  hc_add_series(name = foo$sitearea, data = foo$sitearea) %>%
+  hc_title(text = paste0("Mean number of desktop items aggregated by ","ddd"))
 
 ## =========================== Date Filter ====================================
 ## ==============================================================================
