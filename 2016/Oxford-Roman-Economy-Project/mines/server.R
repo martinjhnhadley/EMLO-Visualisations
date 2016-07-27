@@ -40,16 +40,6 @@ mines_with_locations <-
   SpatialPointsDataFrame(coords = sites_df[, c("sitelong", "sitelat")], data = sites_df)
 
 
-my_subset <- sites_df %>% select(sitename, sitearea, sitecountry)
-
-foo <- count(my_subset, sitearea)
-foo$sitearea
-
-highchart() %>%
-  hc_chart(type = "bar") %>%
-  hc_xAxis(categories = foo$n) %>%
-  hc_add_series(name = foo$sitearea, data = foo$sitearea) %>%
-  hc_title(text = paste0("Mean number of desktop items aggregated by ","ddd"))
 
 ## =========================== Date Filter ====================================
 ## ==============================================================================
@@ -75,6 +65,35 @@ mine_labeller <-
 ## ==============================================================================
 
 shinyServer(function(input, output, session) {
+  
+  output$mines_counted_by_chart <- renderHighchart({
+    
+    selected_column <- input$count_by
+    # print(selected_column)
+    # print(as.data.frame(table(sites_df[,selected_column])))
+    # 
+    # print(sites_df %>% count(match(selected_column,names(.))))
+    
+    tally_column <- table(sites_df[, selected_column])
+    
+    tally_column <- data.frame(
+      "measure" = names(tally_column),
+      "count" = as.numeric(tally_column)
+    )
+    
+    print(tally_column)
+    # 
+    # sites_df_counted <- count(sites_df, sitecountry)
+    # # print(sites_df_counted)
+    # 
+
+    highchart() %>%
+      hc_chart(type = "bar") %>%
+      hc_xAxis(categories = tally_column$measure) %>%
+      hc_add_series(name = "Mines in Location", data = tally_column$count) %>%
+      hc_title(text = paste0("Observations per ",selected_column))
+    
+  })
 
   output$mines_map <- renderLeaflet({
 
@@ -93,8 +112,12 @@ shinyServer(function(input, output, session) {
              )
            },
            "Circles" = {
-             map %>% addCircles(
-               popup = ~mine_labeller(sitename = sitename, sitearea = sitearea)
+             map %>% addCircleMarkers(
+               popup = ~mine_labeller(sitename = sitename, sitearea = sitearea),
+               color = "#FE7569",
+               stroke = FALSE,
+               radius = 5,
+               fillOpacity = 0.5
              )
            })
   

@@ -11,8 +11,11 @@
 library(shiny)
 library(leaflet)
 library(sp)
+library(plotly)
+library(htmltools)
+library(highcharter)
 
-shinyUI(fillPage(
+shinyUI(fluidPage(
   ## Drop minor ticks from sliders
   tags$style(type = "text/css", "
              .irs-grid-pol {display: none;}
@@ -43,6 +46,24 @@ shinyUI(fillPage(
       ),
       width = 4
     )
-  )),
-  h6("Map icons provided by https://mapicons.mapsmarker.com/"),
-  fillCol(leafletOutput("mines_map", height = "80%")), padding = 10))
+  ),
+  includeMarkdown("App_Description.Rmd")),
+  
+  tabsetPanel(
+    tabPanel(
+      "Map",
+      leafletOutput("mines_map", height = "800px")
+    ),
+    tabPanel(
+      "Some Plots",
+      sidebarLayout(
+        sidebarPanel(
+          selectInput("count_by", label = "Count By",
+                      choices = c("sitecountry","siteprovince"))
+        ),
+        mainPanel(
+          highchartOutput("mines_counted_by_chart")
+        )
+      )
+    )
+  ), padding = 10))
