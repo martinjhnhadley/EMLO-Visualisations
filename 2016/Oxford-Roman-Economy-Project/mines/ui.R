@@ -15,55 +15,54 @@ library(plotly)
 library(htmltools)
 library(highcharter)
 
-shinyUI(fluidPage(
-  ## Drop minor ticks from sliders
-  tags$style(type = "text/css", "
-             .irs-grid-pol {display: none;}
-             "),
-  wellPanel(fluidRow(
-    column(h2("Mines in OxRep"), width = 4),
-    
-    column(
-      selectInput(
-        "selected_map_tile",
-        label = "Map Style",
-        choices = c(
-          "Hydda.Base",
-          "OpenTopoMap",
-          "Thunderforest.Landscape",
-          "Esri.WorldShadedRelief",
-          "Esri.OceanBasemap"
+
+shinyUI(navbarPage(
+  "Oxford Roman Economy Project",
+  tabPanel(
+    "Global Map of Mines",
+    fillPage(
+      tags$style(type = "text/css", "body { overflow-y: scroll; }"),
+      includeMarkdown("Map_Description.Rmd"),
+      fluidRow(column(
+        selectInput(
+          "selected_map_tile",
+          label = "Map Style",
+          choices = c(
+            "Hydda.Base",
+            "OpenTopoMap",
+            "Thunderforest.Landscape",
+            "Esri.WorldShadedRelief",
+            "Esri.OceanBasemap"
+          ),
+          selected = "Hydda.Base"
         ),
-        selected = "Hydda.Base"
+        width = 4
       ),
-      width = 4
-    ),
-    column(
-      selectInput(
-        "plot_marker",
-        label = "Plot Markers",
-        choices = c("Mine Icon", "Circles")
-      ),
-      width = 4
+      column(
+        selectInput(
+          "plot_marker",
+          label = "Plot Markers",
+          choices = c("Mine Icon", "Circles")
+        ),
+        width = 4
+      )),
+      leafletOutput("mines_map", height = "800px")
     )
   ),
-  includeMarkdown("App_Description.Rmd")),
-  
-  tabsetPanel(
-    tabPanel(
-      "Map",
-      leafletOutput("mines_map", height = "800px")
-    ),
-    tabPanel(
-      "Some Plots",
-      sidebarLayout(
-        sidebarPanel(
-          selectInput("count_by", label = "Count By",
-                      choices = c("sitecountry","siteprovince"))
-        ),
-        mainPanel(
-          highchartOutput("mines_counted_by_chart")
-        )
-      )
-    )
-  ), padding = 10))
+  tabPanel("Distribution of Mines",
+           fillPage(
+             includeMarkdown("Plots_Description.Rmd"),
+           sidebarLayout(sidebarPanel(
+             selectInput(
+               "count_by",
+               label = "Count By",
+               choices = c("sitecountry", "siteprovince")
+             )),
+             # downloadButton('download_hchart', 'Download')),
+             mainPanel(highchartOutput("mines_counted_by_chart"))
+           ))),
+  tabPanel("About this tool",
+           fillPage(
+             includeMarkdown("App_Description.Rmd")
+           )))
+  )

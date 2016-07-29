@@ -11,34 +11,20 @@
 library(shiny)
 library(leaflet)
 library(sp)
+library(plyr)
 library(dplyr)
 library(highcharter)
+library(htmlwidgets)
+library(webshot)
+library(markdown)
+library(plotly)
 
 ## Markers provided by https://mapicons.mapsmarker.com/
 
 ## ============== Filter shipwrecks by sites ====================================
 ## ==============================================================================
 
-imported_shipwrecks <-
-  read.csv("data/Current OxREP database/shipwrecks.csv",
-           stringsAsFactors = F)
-shipwrecks <- imported_shipwrecks
-
-sites_df <-
-  read.csv("data/Current OxREP database/sites.csv", stringsAsFactors = F)
-## Extract Mines Sites
-sites_df <- sites_df[sites_df$sitetype == "Mine", ]
-## Drop sites with coords 0,0
-sites_df <-
-  sites_df[sites_df$sitelat != 0 & sites_df$sitelong != 0, ]
-## Drop NA in locations
-sites_df <-
-  sites_df[!is.na(sites_df$sitelat) | !is.na(sites_df$sitelong), ]
-## Make into a spdf
-
-mines_with_locations <-
-  SpatialPointsDataFrame(coords = sites_df[, c("sitelong", "sitelat")], data = sites_df)
-
+source("data-processing.R", local = TRUE)
 
 
 ## =========================== Date Filter ====================================
@@ -66,35 +52,48 @@ mine_labeller <-
 
 shinyServer(function(input, output, session) {
   
-  output$mines_counted_by_chart <- renderHighchart({
-    
+  highchart_reactive <- reactive({
     selected_column <- input$count_by
-    # print(selected_column)
-    # print(as.data.frame(table(sites_df[,selected_column])))
-    # 
-    # print(sites_df %>% count(match(selected_column,names(.))))
-    
     tally_column <- table(sites_df[, selected_column])
-    
     tally_column <- data.frame(
       "measure" = names(tally_column),
       "count" = as.numeric(tally_column)
     )
     
-    print(tally_column)
-    # 
-    # sites_df_counted <- count(sites_df, sitecountry)
-    # # print(sites_df_counted)
-    # 
-
     highchart() %>%
-      hc_chart(type = "bar") %>%
+      hc_chart(type = "bar", zoomType = "xy", panning = TRUE) %>%
       hc_xAxis(categories = tally_column$measure) %>%
       hc_add_series(name = "Mines in Location", data = tally_column$count) %>%
       hc_title(text = paste0("Observations per ",selected_column))
-    
+  })
+  
+  output$mines_counted_by_chart <- renderHighchart({
+    highchart_reactive()
   })
 
+  plotly_reactive <- reactive({
+    selected_column <- input$count_by
+    tally_column <- table(sites_df[, selected_column])
+    tally_column <- data.frame(
+      "measure" = names(tally_column),
+      "count" = as.numeric(tally_column)
+    )
+    
+    
+    
+    highchart() %>%
+      hc_chart(type = "bar", zoomType = "xy", panning = TRUE) %>%
+      hc_xAxis(categories = tally_column$measure) %>%
+      hc_add_series(name = "Mines in Location", data = tally_column$count) %>%
+      hc_title(text = paste0("Observations per ",selected_column))
+  })
+  
+  output$mines_counted_by_chart <- renderPlotly({
+    highchart_reactive()
+  })
+  
+  
+  
   output$mines_map <- renderLeaflet({
 
     map <-
@@ -122,5 +121,33 @@ shinyServer(function(input, output, session) {
            })
   
   })
+  
+  ## Dummy download
+  # output$download_hchart <- downloadHandler(
+  #   filename = function() { paste("highchart-image", '.png', sep='') },
+  #   
+  #   content = function(file){
+  #   foo_hchart <- highchart() %>%
+  #     hc_chart(type = "bar", zoomType = "xy", panning = TRUE) %>%
+  #     hc_xAxis(categories = c("a","b","c")) %>%
+  #     hc_add_series(name = "Mines in Location", data = c(10,12,10)) %>%
+  #     hc_title(text = paste0("Observations per"))
+  #   
+  #   saveWidget(as.widget(foo_hchart),"hc_chart.html")
+  #   
+  #   webshot("hc_chart.html", file = file,
+  #           cliprect = "viewport")
+  #   }
+    # )
+
+  output$download_hchart <- downloadHandler(
+    filename = function() { paste("highchart-image", '.png', sep='') },
+    content = function(file) {
+      saveWidget(widget = highchart_reactive(), file = "hc_chart.html")
+      webshot(url = "hc_chart.html", file = file,
+              cliprect = "viewport")
+    },
+    contentType = "image/png"
+  )
   
 })
