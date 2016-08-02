@@ -1,0 +1,5 @@
+<p>This app provides an interactive exploration of the policies investigated by Mireia Borrell of Oxford University.</p>
+
+<p>The data for this visualisation can be downloaded either from <a href=www.figshare.com>Figshare</a> or else by clicking the download button below</p>
+
+<p>This interactive visualisation was developed using Shiny, the code is available on <a href=https://github.com/ox-it/Live-Data_Case-Studies/tree/gh-pages/2016/Mireia%20Borrell>GitHub</a>
