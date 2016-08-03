@@ -5,17 +5,23 @@ xlsx_convert_import <- function(inputFile = NA,
                                 outputFile = NA,
                                 stringsAsFactors = NA) {
   if (file.exists(outputFile)) {
-    imported_data <<- read.csv(outputFile, stringsAsFactors = stringsAsFactors)
+    imported_data <<-
+      read.csv(outputFile, stringsAsFactors = stringsAsFactors)
   } else {
     library(xlsx)
     xlsx_import <- read.xlsx(inputFile, sheetIndex = 1)
     write.csv(xlsx_import, file = outputFile, row.names = FALSE)
     remove(xlsx_import)
-    imported_data <<- read.csv(outputFile, stringsAsFactors = stringsAsFactors)
+    imported_data <<-
+      read.csv(outputFile, stringsAsFactors = stringsAsFactors)
   }
 }
 imported_timeline_data <-
-  xlsx_convert_import(inputFile = "data/policies.xlsx", outputFile = "data/policies.csv", stringsAsFactors = FALSE)
+  xlsx_convert_import(
+    inputFile = "data/policies.xlsx",
+    outputFile = "data/policies.csv",
+    stringsAsFactors = FALSE
+  )
 
 timeline_data <- imported_timeline_data
 
@@ -25,8 +31,10 @@ timeline_data <- imported_timeline_data
 timeline_data$Valid.from..b. <- ymd(timeline_data$Valid.from..b.)
 
 ## Convert ongoing to today's date, non-ongoing convert from Excel date format to as.Date
-ongoings_entries <- which(timeline_data$Valid.until..c... == "ongoing")
-excel_dates_entries <- which(timeline_data$Valid.until..c... != "ongoing")
+ongoings_entries <-
+  which(timeline_data$Valid.until..c... == "ongoing")
+excel_dates_entries <-
+  which(timeline_data$Valid.until..c... != "ongoing")
 
 timeline_data$Valid.until..c...[excel_dates_entries] <-
   as.character(as.POSIXct(
@@ -35,18 +43,11 @@ timeline_data$Valid.until..c...[excel_dates_entries] <-
     origin = "1899-12-30"
   ) %>% as.Date)
 
-timeline_data$Valid.until..c...[ongoings_entries] <- as.character(Sys.Date())
+timeline_data$Valid.until..c...[ongoings_entries] <-
+  as.character(Sys.Date())
 ## Final fix
-timeline_data$Valid.until..c... <- as.Date(timeline_data$Valid.until..c...)
-
-
-str(timeline_data)
-
-timeline_data$Valid.from...childbirth.related.date..d.
-
-grep("[0-9]",timeline_data$Valid.from...childbirth.related.date..d.)
-
-timeline_data$Valid.until...childbirth.related.date..e..
+timeline_data$Valid.until..c... <-
+  as.Date(timeline_data$Valid.until..c...)
 
 fix_childbirth_related <- function(data) {
   returned_data <- data
@@ -65,9 +66,11 @@ fix_childbirth_related <- function(data) {
   as.Date(returned_data)
 }
 
-timeline_data$Valid.from...childbirth.related.date..d. <- fix_childbirth_related(timeline_data$Valid.from...childbirth.related.date..d.)
+timeline_data$Valid.from...childbirth.related.date..d. <-
+  fix_childbirth_related(timeline_data$Valid.from...childbirth.related.date..d.)
 
-timeline_data$Valid.until...childbirth.related.date..e.. <- fix_childbirth_related(timeline_data$Valid.until...childbirth.related.date..e..)
+timeline_data$Valid.until...childbirth.related.date..e.. <-
+  fix_childbirth_related(timeline_data$Valid.until...childbirth.related.date..e..)
 
 ## =========================== Sort by earliest date ====================================
 ## ==============================================================================
@@ -75,17 +78,20 @@ timeline_data$Valid.until...childbirth.related.date..e.. <- fix_childbirth_relat
 aggregate(data = timeline_data, Name.Policy ~ Valid.from..b., FUN = sort)
 ## Find earliest date for each policy
 earliest_date_by_Name_of_Policy <-
-  timeline_data[timeline_data$Valid.from..b. == ave(timeline_data$Valid.from..b., timeline_data$Name.Policy, FUN =
-                                                  min),]
+  timeline_data[timeline_data$Valid.from..b. == ave(timeline_data$Valid.from..b.,
+                                                    timeline_data$Name.Policy,
+                                                    FUN =
+                                                      min), ]
 
-earliest_date_by_Name_of_Policy$Name.Policy <- as.factor(earliest_date_by_Name_of_Policy$Name.Policy)
+earliest_date_by_Name_of_Policy$Name.Policy <-
+  as.factor(earliest_date_by_Name_of_Policy$Name.Policy)
 
 ## Force order by date then Name.Policy
 earliest_date_by_Name_of_Policy <-
   earliest_date_by_Name_of_Policy[order(
     earliest_date_by_Name_of_Policy$Valid.from..b.,
     earliest_date_by_Name_of_Policy$Name.Policy
-  ), ]
+  ),]
 
 
 
@@ -124,6 +130,14 @@ displayable_columns <- c(
   "Territorial.application"
 )
 
+## =========================== Format Text ======================================
+## ==============================================================================
 
 
+lapply(
+  colnames(timeline_data)[which(unlist(lapply(colnames(timeline_data), function(x)class(timeline_data[,x]))) == "character")],
+  function(x){
+    timeline_data[,x] <<- new_lines_to_p_tags(timeline_data[,x])
+  }
+)
 
