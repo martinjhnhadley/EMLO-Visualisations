@@ -39,6 +39,36 @@ timeline_data$Valid.until..c...[ongoings_entries] <- as.character(Sys.Date())
 ## Final fix
 timeline_data$Valid.until..c... <- as.Date(timeline_data$Valid.until..c...)
 
+
+str(timeline_data)
+
+timeline_data$Valid.from...childbirth.related.date..d.
+
+grep("[0-9]",timeline_data$Valid.from...childbirth.related.date..d.)
+
+timeline_data$Valid.until...childbirth.related.date..e..
+
+fix_childbirth_related <- function(data) {
+  returned_data <- data
+  ongoings_entries <- which(data == "ongoing")
+  dash_entries <- which(data == "-")
+  excel_dates_entries <- grep("[0-9]", data)
+  
+  returned_data[excel_dates_entries] <-
+    as.character(as.POSIXct(as.numeric(data[excel_dates_entries]) * (60 * 60 * 24),
+                            origin = "1899-12-30") %>% as.Date)
+  
+  returned_data[ongoings_entries] <- as.character(Sys.Date())
+  
+  returned_data[dash_entries] <- NA
+  
+  as.Date(returned_data)
+}
+
+timeline_data$Valid.from...childbirth.related.date..d. <- fix_childbirth_related(timeline_data$Valid.from...childbirth.related.date..d.)
+
+timeline_data$Valid.until...childbirth.related.date..e.. <- fix_childbirth_related(timeline_data$Valid.until...childbirth.related.date..e..)
+
 ## =========================== Sort by earliest date ====================================
 ## ==============================================================================
 

@@ -6,7 +6,10 @@ library(plotly)
 library(dplyr)
 library(shinyBS)
 
-source("data-processing.R", local = T)
+
+
+## =========================== Beautification ===================================
+## ==============================================================================
 
 gantt_labeler <-
   function(start_date = NA,
@@ -26,6 +29,16 @@ gantt_labeler <-
       color
     )
   }
+
+new_lines_to_p_tags <- function(text){
+  gsub(pattern = "\n", replacement = "<br />", text)
+}
+
+
+## =========================== Shiny Server Fn ===================================
+## ==============================================================================
+
+source("data-processing.R", local = T)
 
 shinyServer(function(input, output, session) {
   output$timeline_timline_selected_cols_UI <- renderUI({
@@ -91,7 +104,7 @@ shinyServer(function(input, output, session) {
     
   })
   
-  output$timeline_selected_Policy_Table <- renderDataTable({
+  output$timeline_selected_Policy_Table <- DT::renderDataTable({
     event_data <- event_data("plotly_click")
     
     selected_Policy <-
@@ -100,11 +113,11 @@ shinyServer(function(input, output, session) {
     data_to_show <-
       timeline_data %>% filter(as.character(Name.Policy) == selected_Policy)
     data_to_show[, input$timline_selected_cols]
-  }, rownames = FALSE, filter = 'top')
+  }, rownames = FALSE, filter = 'top', escape = FALSE)
   
-  output$pulldown_selected_Policy_Table <- renderDataTable({
+  output$pulldown_selected_Policy_Table <- DT::renderDataTable({
     timeline_data[, input$pulldown_selected_cols]
-  }, rownames = FALSE, filter = 'top')
+  }, rownames = FALSE, filter = 'top', escape = FALSE)
   
   output$timeline_selected_Policy_UI <- renderUI({
     event_data <- event_data("plotly_click")
@@ -120,7 +133,7 @@ shinyServer(function(input, output, session) {
           "top",
           options = list(container = "body")
         ),
-        dataTableOutput("timeline_selected_Policy_Table"),
+        DT::dataTableOutput("timeline_selected_Policy_Table"),
         width = 12
       ))
       

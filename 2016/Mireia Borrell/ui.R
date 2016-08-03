@@ -29,7 +29,7 @@ shinyUI(fluidPage(
                    "top",
                    options = list(container = "body")
                  ),
-                 dataTableOutput("pulldown_selected_Policy_Table"),
+                 DT::dataTableOutput("pulldown_selected_Policy_Table"),
                  width = 12
                ))
                
