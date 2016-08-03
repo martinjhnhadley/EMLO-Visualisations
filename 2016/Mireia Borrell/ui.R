@@ -14,14 +14,12 @@ shinyUI(fluidPage(
                plotlyOutput(
                  "timeline"
                ),
-               # DT::dataTableOutput("data_table")
                uiOutput("timeline_selected_Policy_UI")
              )),
     tabPanel("All Policies",
              fluidPage(
                fluidRow(column(
                  "The table below allows the entire dataset to be explored.",p(),
-                 # uiOutput("pulldown_selected_policy_UI"),
                  uiOutput("pulldown_timeline_selected_cols_UI"),
                  bsTooltip(
                    "pulldown_timeline_selected_cols_UI",

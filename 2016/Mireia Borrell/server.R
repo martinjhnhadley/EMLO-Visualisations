@@ -98,8 +98,6 @@ shinyServer(function(input, output, session) {
         size = 4,
         arrow=arrow(type = "closed")
       ) +
-      # geom_segment(data=timeline_data, aes(x=Valid.from..b., xend=Valid.until..c..., y=Name.Policy, yend=Name.Policy), size=11, colour="red") + 
-      # geom_segment(data=timeline_data, aes(x=Valid.from..b. + 0.1, xend=Valid.until..c... - 0.1, y=Name.Policy, yend=Name.Policy), size=11, colour="red") +
       xlab("Date") + ylab(""), tooltip = "text")
     
   })
