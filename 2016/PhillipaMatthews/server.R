@@ -1,7 +1,9 @@
 library(DT)
 library(shiny)
 
-heliotope_df <- read.csv("https://docs.google.com/spreadsheets/d/18-QtuiOHTOpqEixqgyGG4GUizu3xFtUnPZEkIOJhBOA/pub?gid=1871412950&single=true&output=csv", stringsAsFactors = F)
+obscured_url <- read.csv(file = "obscured_url.csv",stringsAsFactors = F)[1,]
+
+heliotope_df <- read.csv(obscured_url, stringsAsFactors = F)
 
 colnames(heliotope_df) <- gsub("[.]", " ", colnames(heliotope_df))
 
