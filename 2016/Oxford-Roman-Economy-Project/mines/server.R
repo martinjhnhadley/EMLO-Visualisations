@@ -5,8 +5,7 @@
 ## Date of Authorship: 2016
 ## Author: Martin John Hadley (orcid.org/0000-0002-3039-6849)
 ## Data Source: local file
-## ================================================================================
-
+## ================================================================================insta
 
 library(shiny)
 library(leaflet)
@@ -41,6 +40,7 @@ mine_labeller <-
       "<p>Location Name: ",
       sitename,
       "</p>",
+      "<a href=http://www.google.com target=blank>Click</a>",
       "<p>Site Area: ",
       sitearea,
       "</p>")
