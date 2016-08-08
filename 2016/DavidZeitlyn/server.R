@@ -3,7 +3,7 @@ library(htmltools)
 library(igraph)
 library(visNetwork)
 library(plyr)
-
+library(stringr)
 
 source("data-processing.R", local = TRUE)
 
@@ -18,20 +18,30 @@ code_names_for_ui <-
 
 
 shinyServer(function(input, output, session) {
+  
+  output$main_component_vertex_proportion <-
+    renderText({
+      round(100 * {
+        vcount(decomposed_igraph[[1]]) / vcount(entire_igraph)
+      }, 0)
+    })
+  
+  output$intro_text_at_top <- renderUI({
+    includeHTML(knitr::knit("App_Description.Rmd"))
+  })
+  
   output$main_component_or_subcomponents_UI <- renderUI({
     selectInput("main_component_or_subcomponents",
                 label = "show main component or sub-components",
                 choices = component_names_for_ui)
   })
-
+  
   
   computed_graph <-
-    reactiveValues(
-      igraph_object = NULL,
-      igraph_node_labels = NULL
-    )
+    reactiveValues(igraph_object = NULL,
+                   igraph_node_labels = NULL)
   
-
+  
   
   igraph_to_analyse <-
     eventReactive(input$main_component_or_subcomponents,
@@ -40,7 +50,6 @@ shinyServer(function(input, output, session) {
   
   codes_to_names_list <-
     eventReactive(input$main_component_or_subcomponents, {
-      
       igraph_to_analyse <- igraph_to_analyse()
       replacement_names <-
         mapvalues(

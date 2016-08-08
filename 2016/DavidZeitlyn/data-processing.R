@@ -36,7 +36,7 @@ supervisors_df <-
 
 names_df <-
   read.csv(
-    "data/names2.tab",
+    "data/names2.txt",
     stringsAsFactors = F,
     quote = "",
     sep = "\t",
@@ -48,11 +48,19 @@ names_df <-
 
 ## The names2.txt file is garbled and the names need to be reconstructed.
 
+
 garbled_names <- names_df[names_df$V3 != "",]
 garbled_names$V2 <- paste(garbled_names$V2, garbled_names$V3)
 names_df[names_df$V3 != "",] <- garbled_names
 names_df <- names_df[,1:2]
 colnames(names_df) <- c("id","name")
+## Attempt to convert bad characters
+names_df$name <- stringi::stri_trans_general(names_df$name, "latin-ascii")
+## Remove bad characters
+names_df$name <- stringi::stri_trans_general(names_df$name, "latin-ascii")
+names_df$name <- iconv(names_df$name, "latin1", "ASCII", sub="")
+names_df$name <- gsub("\032", "", names_df$name)
+names_df$name <- gsub("\v","",names_df$name)
 
 ## There are some names with vertical tabs \v that need to be fixed and trimws
 examiners_df <-
@@ -116,11 +124,5 @@ decomposed_igraph <- decomposed_igraph[rev(order(component_vcounts))]
 
 ## ================ Experiment Area ==========================
 ## ===========================================================
-
-main_component_g <- decomposed_igraph[[1]]
-
-names(vertex.attributes(main_component_g))
-
-V(main_component_g)$supervised
 
 
