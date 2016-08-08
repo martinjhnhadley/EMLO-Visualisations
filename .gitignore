@@ -1,0 +1,23 @@
+# Ignore RProject files
+*.Rproj.user
+*.Rhistory
+*.RData
+*.dcf
+
+# CSV files
+*.csv
+*.txt
+*.tab
+
+# PDFs
+*.pdf
+
+#Ignore all xlsx files
+*.xlsx
+*.xls
+
+*.Rproj.user
+*.rds
+*.httr-oauth
+.httr-oauth
+.Rproj.user

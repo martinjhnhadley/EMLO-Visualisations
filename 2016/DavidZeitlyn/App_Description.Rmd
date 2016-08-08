@@ -1,0 +1,10 @@
+
+<p>
+This application allows for the exploration of data published by David Zeitlyn on the ancestory of PhD defense advisory and supervisory relationships in the field of primatology. The supervisory network has one connected component containing `r round(100 * {
+        vcount(decomposed_igraph[[1]]) / vcount(entire_igraph)
+      }, 0)`% of the individuals in the network, consequently there is one mode of interaction for the largest connected component (or lineage) and another for all other lineages.
+</p>
+
+<p>
+This visualisation was developed as part of the Live Data project and the code is available on Github
+</p>
