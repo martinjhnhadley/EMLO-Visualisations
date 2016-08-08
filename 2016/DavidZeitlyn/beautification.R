@@ -6,9 +6,25 @@ advisor_supervisor_color_scheme <- list(
   "Authored_Only" = "#ffffb3"
 )
 
+node_legend <-
+  data.frame(
+    label = c(
+      "Examined Own",
+      "Examiner & Supervisor",
+      "Supervisor",
+      "Examinor",
+      "Author"
+    ),
+    # shape = c("icon","icon","icon"),
+    # icon.code = c("f007","f0c0","f007"),
+    icon.color = as.character(advisor_supervisor_color_scheme),
+    icon.size = c(48,48,48,48,48),
+    id = 1:5
+  )
 
-set_node_colour <- function(node){
-  if(node$N_own_students_examined > 0) {
+
+set_node_colour <- function(node) {
+  if (node$N_own_students_examined > 0) {
     advisor_supervisor_color_scheme$Examined_own_student
   } else {
     if (node$supervised > 0 & node$examined) {
@@ -26,18 +42,3 @@ set_node_colour <- function(node){
     }
   }
 }
-
-head(entire_graph_node_df)
-
-entire_graph_node_df[1,]
-
-set_node_colour(entire_graph_node_df[1,])
-
-
-foo <- as.vector(lapply(1:nrow(entire_graph_node_df), function(x) set_node_colour(entire_graph_node_df[x,])))
-
-
-sum(is.na(foo))
-
-
-
