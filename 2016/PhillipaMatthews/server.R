@@ -3,6 +3,9 @@ library(shiny)
 
 obscured_url <- read.csv(file = "obscured_url.csv",stringsAsFactors = F)[1,]
 
+
+
+
 heliotope_df <- read.csv(obscured_url, stringsAsFactors = F)
 
 colnames(heliotope_df) <- gsub("[.]", " ", colnames(heliotope_df))

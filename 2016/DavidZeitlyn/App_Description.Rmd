@@ -1,1 +1,1 @@
-App Description
+<p>Foobar</p>
