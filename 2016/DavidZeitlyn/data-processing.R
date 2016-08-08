@@ -113,7 +113,9 @@ colnames(all_edges) <-
 entire_igraph <-
   simplify(graph.data.frame(all_edges, vertices = all_nodes))
 ## Name vertices
-V(entire_igraph)$name <- mapvalues(V(entire_igraph)$name, from = names_df$id, to = names_df$name)
+V(entire_igraph)$zeitlyn_id <- V(entire_igraph)$name
+V(entire_igraph)$title <- mapvalues(V(entire_igraph)$name, from = names_df$id, to = names_df$name)
+V(entire_igraph)$label <- mapvalues(V(entire_igraph)$name, from = names_df$id, to = names_df$name)
 
 ## Add supervisor/advisor property
 V(entire_igraph)$supervisor <- ids_vs_numbers$supervised > 0
@@ -139,5 +141,14 @@ decomposed_igraph <- decomposed_igraph[rev(order(component_vcounts))]
 ## ===========================================================
 
 
+super_examiner_table <- merge(supervisors_df,examiners_df)
+names(super_examiner_table) <- c("Author","Supervisor","Supervisor Affiliation","Examiner","Examiner Affiliation")
+super_examiner_table <- super_examiner_table[,c(1,2,4)]
+
+super_examiner_table$Author <- mapvalues(super_examiner_table$Author, from = names_df$id, to = names_df$name)
+super_examiner_table$Supervisor <- mapvalues(super_examiner_table$Supervisor, from = names_df$id, to = names_df$name)
+super_examiner_table$Examiner <- mapvalues(super_examiner_table$Examiner, from = names_df$id, to = names_df$name)
+
+head(super_examiner_table)
 
 

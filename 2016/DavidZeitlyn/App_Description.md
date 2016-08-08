@@ -1,6 +1,6 @@
 
 <p>
-This application allows for the exploration of data published by David Zeitlyn on the ancestory of PhD defense advisory and supervisory relationships in the field of primatology. The supervisory network has one connected component containing 67 of the individuals in the network, consequently there is one mode of interaction for the largest connected component (or lineage) and another for all other lineages.
+This application allows for the exploration of data published by David Zeitlyn on the ancestory of PhD defense advisory and supervisory relationships in the field of primatology. The supervisory network has one connected component containing 67% of the individuals in the network, consequently there is one mode of interaction for the largest connected component (or lineage) and another for all other lineages.
 </p>
 
 <p>

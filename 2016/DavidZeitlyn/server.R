@@ -4,6 +4,7 @@ library(igraph)
 library(visNetwork)
 library(plyr)
 library(stringr)
+library(dplyr)
 
 source("beautification.R", local = TRUE)
 
@@ -16,8 +17,6 @@ component_names_for_ui <-
 
 code_names_for_ui <-
   setNames(names_df$id, names_df$name)
-
-
 
 shinyServer(function(input, output, session) {
   
