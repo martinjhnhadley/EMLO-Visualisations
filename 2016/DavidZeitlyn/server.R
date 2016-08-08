@@ -5,6 +5,8 @@ library(visNetwork)
 library(plyr)
 library(stringr)
 
+source("beautification.R", local = TRUE)
+
 source("data-processing.R", local = TRUE)
 
 component_names_for_ui <-

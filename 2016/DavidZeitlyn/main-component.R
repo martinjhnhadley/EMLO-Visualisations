@@ -24,19 +24,28 @@ output$main_component_degree_slider_UI <- renderUI({
 })
 
 output$main_component_subgraph <- renderVisNetwork({
-  # 
-  # if(is.null(input$main_component_select_individuals)){
-  #   return()
-  # }
-  # 
+
+  if(is.null(input$main_component_select_individuals)){
+    return()
+  }
+
   subgraph <- graph.union(
     make_ego_graph(
       igraph_to_analyse(),
       order = input$main_component_degree,
       nodes = input$main_component_select_individuals
-      # nodes = c("AU_16161")
     )
   )
+  
+  print(vertex.attributes(subgraph)[names(vertex.attributes(subgraph))[grepl("color",names(vertex.attributes(subgraph)))]])
+  
+  print(trimws(gsub("NA", "", do.call("paste", vertex.attributes(subgraph)[names(vertex.attributes(subgraph))[grepl("color",names(vertex.attributes(subgraph)))]]))))
+  
+  V(subgraph)$color <- trimws(gsub("NA", "", do.call("paste", vertex.attributes(subgraph)[names(vertex.attributes(subgraph))[grepl("color",names(vertex.attributes(subgraph)))]])))
+  
+  # 
+  # print(vertex.attributes(subgraph)$color_1 %>% dput())
+  # print(vertex.attributes(subgraph)$color_2 %>% dput())
   
   visIgraph(subgraph) %>%
     visInteraction(
@@ -51,30 +60,18 @@ output$main_component_subgraph <- renderVisNetwork({
   
 })
 
-output$test_now_ui <- renderUI({
 
-  selectizeInput("variable", "Variable:",
-              # test_2(),
-              choices = codes_to_names_list(),
-              multiple = TRUE,
-              # selected = codes_to_names_list[1:3], 
-              width = "100%"
-              # choices = c("1","3")
-              )
-})
 
 output$main_component_output <- renderUI({
   fillPage(
-    h1("main"),
-    # uiOutput("test_now_ui"),
-    uiOutput("main_component_select_individuals_ui"),
+    wellPanel("Please select up to 3 individuals in the box below to view their advisory lineage:",
+    uiOutput("main_component_select_individuals_ui")),
     sidebarLayout(
       sidebarPanel(
         uiOutput("main_component_degree_slider_UI")
       ),
       mainPanel(
-        # "dd",
-        visNetworkOutput("main_component_subgraph")
+          visNetworkOutput("main_component_subgraph")
         )
     )
     

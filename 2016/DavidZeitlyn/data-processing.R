@@ -112,7 +112,20 @@ colnames(all_edges) <-
 
 entire_igraph <-
   simplify(graph.data.frame(all_edges, vertices = all_nodes))
+## Name vertices
+V(entire_igraph)$name <- mapvalues(V(entire_igraph)$name, from = names_df$id, to = names_df$name)
 
+## Add supervisor/advisor property
+V(entire_igraph)$supervisor <- ids_vs_numbers$supervised > 0
+V(entire_igraph)$examined <- ids_vs_numbers$examined > 0
+V(entire_igraph)$number_supervised <- ids_vs_numbers$supervised
+V(entire_igraph)$number_examined <- ids_vs_numbers$examined
+V(entire_igraph)$number_own_examined <- ids_vs_numbers$N_own_students_examined
+entire_graph_node_df <- as.data.frame(vertex.attributes(entire_igraph))
+
+V(entire_igraph)$color <- unlist(lapply(1:nrow(entire_graph_node_df), function(x)set_node_colour(entire_graph_node_df[x,])))
+
+## Simplify graph
 non_zero_igraph <-
   simplify(delete.vertices(entire_igraph, V(entire_igraph)[degree(entire_igraph) ==
                                                              0]))
@@ -124,5 +137,7 @@ decomposed_igraph <- decomposed_igraph[rev(order(component_vcounts))]
 
 ## ================ Experiment Area ==========================
 ## ===========================================================
+
+
 
 

@@ -10,7 +10,7 @@ shinyUI(
     conditionalPanel(
       condition = 'input.main_component_or_subcomponents == 1',
       fillPage(
-        uiOutput("main_component_select_individuals_ui")
+        uiOutput("main_component_output")
       )
     )
   )
