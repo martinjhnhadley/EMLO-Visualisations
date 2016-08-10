@@ -1,5 +1,6 @@
 ## ================ Import Files =============================
 ## ===========================================================
+start.time <- Sys.time()
 
 authors_df <-
   read.csv(
@@ -97,7 +98,7 @@ all_ids <- unique(c(examiners_df$Examiner_id,examiners_df$Author_id,supervisors_
 
 missing_names <- setdiff(names_df$id, all_ids)
 
-## ================ Build Complete igraph  =============================
+## ================ Build Complete igraph  ===================
 ## ===========================================================
 
 ## nodes
@@ -123,9 +124,39 @@ V(entire_igraph)$examined <- ids_vs_numbers$examined > 0
 V(entire_igraph)$number_supervised <- ids_vs_numbers$supervised
 V(entire_igraph)$number_examined <- ids_vs_numbers$examined
 V(entire_igraph)$number_own_examined <- ids_vs_numbers$N_own_students_examined
-entire_graph_node_df <- as.data.frame(vertex.attributes(entire_igraph))
 
-V(entire_igraph)$color <- unlist(lapply(1:nrow(entire_graph_node_df), function(x)set_node_colour(entire_graph_node_df[x,])))
+## ================ Colour igraph  ===========================
+## ===========================================================
+
+## which is not terse but massively faster than alternatives tried.
+
+which_own_students <-
+  which(ids_vs_numbers$N_own_students_examined > 0)
+which_super_and_examiner <-
+  which(ids_vs_numbers$supervised > 0 & ids_vs_numbers$examined > 0 & ids_vs_numbers$N_own_students_examined == 0)
+which_super_only <-
+  which(ids_vs_numbers$supervised > 0 & ids_vs_numbers$examined == 0 & ids_vs_numbers$N_own_students_examined == 0)
+which_examiner_only <-
+  which(ids_vs_numbers$supervised == 0 & ids_vs_numbers$examined > 0 & ids_vs_numbers$N_own_students_examined == 0)
+which_author_only <-
+  which(
+    ids_vs_numbers$supervised == 0 &
+      ids_vs_numbers$examined == 0 &
+      ids_vs_numbers$N_own_students_examined == 0
+  )
+
+colour_vector <- 1:nrow(ids_vs_numbers)
+
+colour_vector[which_own_students] <- advisor_supervisor_color_scheme$Examined_own_student
+colour_vector[which_super_and_examiner] <- advisor_supervisor_color_scheme$Examined_and_Supervised
+colour_vector[which_super_only] <- advisor_supervisor_color_scheme$Supervised_Only
+colour_vector[which_examiner_only] <- advisor_supervisor_color_scheme$Examined_Only
+colour_vector[which_author_only] <- advisor_supervisor_color_scheme$Authored_Only
+V(entire_igraph)$color <- colour_vector
+
+
+## ================ decompose igraph  ===================
+## ===========================================================
 
 ## Simplify graph
 non_zero_igraph <-
@@ -141,14 +172,8 @@ decomposed_igraph <- decomposed_igraph[rev(order(component_vcounts))]
 ## ===========================================================
 
 
-super_examiner_table <- merge(supervisors_df,examiners_df)
-names(super_examiner_table) <- c("Author","Supervisor","Supervisor Affiliation","Examiner","Examiner Affiliation")
-super_examiner_table <- super_examiner_table[,c(1,2,4)]
 
-super_examiner_table$Author <- mapvalues(super_examiner_table$Author, from = names_df$id, to = names_df$name)
-super_examiner_table$Supervisor <- mapvalues(super_examiner_table$Supervisor, from = names_df$id, to = names_df$name)
-super_examiner_table$Examiner <- mapvalues(super_examiner_table$Examiner, from = names_df$id, to = names_df$name)
-
-head(super_examiner_table)
-
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+time.taken
 
