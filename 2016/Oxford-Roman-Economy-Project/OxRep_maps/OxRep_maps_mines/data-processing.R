@@ -6,18 +6,18 @@
 # ## ==============================================================================
 #
 #
-sites_df <-
-  read.csv("data/Current OxREP database/sites.csv", stringsAsFactors = F)
-## Extract Mines Sites
-sites_df <- sites_df[sites_df$sitetype == "Mine", ]
-## Drop sites with coords 0,0
-sites_df <-
-  sites_df[sites_df$sitelat != 0 & sites_df$sitelong != 0, ]
-## Drop NA in locations
-sites_df <-
-  sites_df[!is.na(sites_df$sitelat) | !is.na(sites_df$sitelong), ]
-
-str(sites_df)
+# sites_df <-
+#   read.csv("data/Current OxREP database/sites.csv", stringsAsFactors = F)
+# ## Extract Mines Sites
+# sites_df <- sites_df[sites_df$sitetype == "Mine", ]
+# ## Drop sites with coords 0,0
+# sites_df <-
+#   sites_df[sites_df$sitelat != 0 & sites_df$sitelong != 0, ]
+# ## Drop NA in locations
+# sites_df <-
+#   sites_df[!is.na(sites_df$sitelat) | !is.na(sites_df$sitelong), ]
+# 
+# str(sites_df)
 #
 # ## ================== Replace area codes etc ====================================
 # ## ==============================================================================
