@@ -17,43 +17,51 @@ library(highcharter)
 
 
 shinyUI(
-    fluidPage(
-      h3("Oxford Roman Economy Project: Mines"),
-      tags$style(type = "text/css", "body { overflow-y: scroll; }"),
-      tags$style(type = "text/css", "#map {height: calc(80vh - 100px) !important;}"),
-      includeMarkdown("App_Description.Rmd"),
-      fluidRow(
-        
-        column(
-        selectInput(
-          "selected_map_tile",
-          label = "Map Style",
-          choices = c(
-            "Hydda.Base",
-            "OpenTopoMap",
-            "Thunderforest.Landscape",
-            "Esri.WorldShadedRelief",
-            "Esri.OceanBasemap"
-          ),
-          selected = "Hydda.Base"
-        ),
-        selectInput(
-          "plot_marker",
-          label = "Plot Markers",
-          choices = c("Mine Icon", "Circles")
-        ),
-        width = 3
-      ),
-      column(
-        uiOutput("metal_filter_ui"),
-        width = 3
-      ),
-      column(
-        uiOutput("mining_technique_filter_ui", width = "100%"),
-        width = 6
-      )
-      ),
-      leafletOutput("map")
+    navbarPage(
+      "Oxford Roman Economy Project",
+      tabPanel("Map of Mines",
+               fluidPage(
+                 tags$style(type = "text/css", "body { overflow-y: scroll; }"),
+                 tags$style(type = "text/css", "#map {height: calc(85vh - 100px) !important;}"),
+                 fluidRow(
+                   column(
+                     selectInput(
+                       "selected_map_tile",
+                       label = "Map Style",
+                       choices = c(
+                         "Hydda.Base",
+                         "OpenTopoMap",
+                         "Thunderforest.Landscape",
+                         "Esri.WorldShadedRelief",
+                         "Esri.OceanBasemap"
+                       ),
+                       selected = "Hydda.Base"
+                     ),
+                     selectInput(
+                       "plot_marker",
+                       label = "Plot Markers",
+                       choices = c("Mine Icon", "Circles")
+                     ),
+                     width = 3
+                   ),
+                   column(
+                     uiOutput("metal_filter_ui"),
+                     width = 3
+                   ),
+                   column(
+                     uiOutput("mining_technique_filter_ui", width = "100%"),
+                     width = 6
+                   )
+                 ),
+                 leafletOutput("map")
+               )
+               ),
+      tabPanel("About",
+               includeMarkdown("App_Description.Rmd")
+               ),
+      collapsible = TRUE
+      
+    )
+      
       # fillPage(leafletOutput("map", height = "100%"))
     )
-  )
