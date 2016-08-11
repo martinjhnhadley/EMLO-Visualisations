@@ -31,12 +31,14 @@ source("data-processing.R", local = TRUE)
 ## ==============================================================================
 
 url_generator <- function(sitecountry = NA,
-                          sitename = NA){
-  paste0("http://oxrep.classics.ox.ac.uk/databases/sites/",
-         gsub(" ","_",tolower(sitecountry)),
-         "/",
-         gsub(" ","_",tolower(sitename)),
-         "_mine/")
+                          sitename = NA) {
+  paste0(
+    "http://oxrep.classics.ox.ac.uk/databases/sites/",
+    gsub(" ", "_", tolower(sitecountry)),
+    "/",
+    gsub(" ", "_", tolower(sitename)),
+    "_mine/"
+  )
 }
 
 map_point_labeller <-
@@ -45,7 +47,8 @@ map_point_labeller <-
            miningdistrict = NA,
            siteprovince = NA,
            sitecountry = NA) {
-    paste0(# "<p>", Name, "</p>",
+    paste0(
+      # "<p>", Name, "</p>",
       "<p>Location Name: ",
       sitename,
       "</p>",
@@ -56,10 +59,13 @@ map_point_labeller <-
       siteprovince,
       "</p>",
       "<p>",
-      "<a href=",url_generator(sitecountry = sitecountry, sitename = sitename),">",
+      "<a href=",
+      url_generator(sitecountry = sitecountry, sitename = sitename),
+      " target=blank>",
       "Click for more info",
       "</a>",
-      "</p>")
+      "</p>"
+    )
   }
 
 
@@ -68,39 +74,105 @@ map_point_labeller <-
 
 shinyServer(function(input, output, session) {
   
-  output$map <- renderLeaflet({
-
-    map <-
-      leaflet(data = mines_with_locations) %>% addProviderTiles(input$selected_map_tile)
-
-    switch(input$plot_marker,
-           "Mine Icon" = {
-             map %>% addMarkers(
-               # popup = ~map_point_labeller(sitename = sitename, sitearea = sitearea),
-               popup = ~map_point_labeller(sitename = sitename,
-                                           sitearea = sitearea,
-                                           miningdistrict = miningdistrict,
-                                           siteprovince = siteprovince,
-                                           sitecountry = sitecountry),
-               icon = makeIcon(
-                 "mine.png",
-                 iconWidth = 18,
-                 iconHeight = 18
-               )
-             )
-           },
-           "Circles" = {
-             map %>% addCircleMarkers(
-               popup = ~map_point_labeller(sitename = sitename, sitearea = sitearea),
-               fillColor = "#FE7569",
-               color = "#000",
-               stroke = TRUE,
-               weight = 2,
-               radius = 5,
-               fillOpacity = 0.5
-             )
-           })
+  output$timeslider_UI <- renderUI({
+    min_date <- min(shipwrecks_with_locations$ante_0)
+    max_date <- max(shipwrecks_with_locations$post_0)
+    
+    sliderInput(
+      "selected_time_period",
+      label = "Selected Time Period",
+      min = round_any(min_date, 50, f = floor),
+      max = round_any(max_date, 50, f = ceiling),
+      value = c(min_date, max_date),
+      step = 50,
+      width = "100%"
+    )
+  })
   
+  output$metal_filter_ui <- renderUI({
+    selectInput(
+      "metal_filter",
+      label = "Metals to show:",
+      choices = metals_vector,
+      selected = metals_vector,
+      multiple = TRUE,
+      width = "100%"
+    )
+    
+  })
+  
+  output$mining_technique_filter_ui <- renderUI({
+    selectInput(
+      "mining_technique_filter",
+      label = "Mining techniques to show:",
+      choices = mining_techniques_vector,
+      selected = mining_techniques_vector,
+      multiple = TRUE,
+      width = "100%"
+    )
+    
+  })
+  
+  output$map <- renderLeaflet({
+    if (is.null(input$metal_filter) |
+        is.null(input$mining_technique_filter)) {
+      leaflet() %>% addProviderTiles(input$selected_map_tile)
+    }
+    
+    filtered_siteids <-
+      intersect(metals_df[metals_df$keywrd %in% input$metal_filter, ]$siteid,
+                mining_techniques_df[mining_techniques_df$keywrd %in% input$mining_technique_filter, ]$siteid)
+    
+    
+    if (length(filtered_siteids) > 0) {
+      filtered_mines_with_locations <-
+        mines_with_locations[mines_with_locations$siteid %in% filtered_siteids,]
+      
+      map <-
+        leaflet(data = filtered_mines_with_locations) %>%
+        addProviderTiles(input$selected_map_tile)
+      
+      
+      switch(input$plot_marker,
+             "Mine Icon" = {
+               map %>% addMarkers(
+                 # popup = ~map_point_labeller(sitename = sitename, sitearea = sitearea),
+                 popup = ~ map_point_labeller(
+                   sitename = sitename,
+                   sitearea = sitearea,
+                   miningdistrict = miningdistrict,
+                   siteprovince = siteprovince,
+                   sitecountry = sitecountry
+                 ),
+                 icon = makeIcon(
+                   "mine.png",
+                   iconWidth = 18,
+                   iconHeight = 18
+                 )
+               )
+             },
+             "Circles" = {
+               map %>% addCircleMarkers(
+                 popup = ~ map_point_labeller(sitename = sitename, sitearea = sitearea),
+                 fillColor = "#FE7569",
+                 color = "#000",
+                 stroke = TRUE,
+                 weight = 2,
+                 radius = 5,
+                 fillOpacity = 0.5
+               )
+             })
+      
+    } else {
+      leaflet() %>% addProviderTiles(input$selected_map_tile) %>%
+        fitBounds(
+          lng1 = min(mines_with_locations$sitelong),
+          lng2 = max(mines_with_locations$sitelong),
+          lat1 = min(mines_with_locations$sitelat),
+          lat2 = max(mines_with_locations$sitelat)
+        )
+    }
+    
   })
   
 })

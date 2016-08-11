@@ -22,7 +22,9 @@ shinyUI(
       tags$style(type = "text/css", "body { overflow-y: scroll; }"),
       tags$style(type = "text/css", "#map {height: calc(80vh - 100px) !important;}"),
       includeMarkdown("App_Description.Rmd"),
-      fluidRow(column(
+      fluidRow(
+        
+        column(
         selectInput(
           "selected_map_tile",
           label = "Map Style",
@@ -35,16 +37,22 @@ shinyUI(
           ),
           selected = "Hydda.Base"
         ),
-        width = 4
-      ),
-      column(
         selectInput(
           "plot_marker",
           label = "Plot Markers",
           choices = c("Mine Icon", "Circles")
         ),
-        width = 4
-      )),
+        width = 3
+      ),
+      column(
+        uiOutput("metal_filter_ui"),
+        width = 3
+      ),
+      column(
+        uiOutput("mining_technique_filter_ui", width = "100%"),
+        width = 6
+      )
+      ),
       leafletOutput("map")
       # fillPage(leafletOutput("map", height = "100%"))
     )
