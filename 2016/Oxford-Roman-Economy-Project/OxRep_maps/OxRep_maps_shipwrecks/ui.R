@@ -11,45 +11,43 @@ library(shiny)
 library(leaflet)
 library(sp)
 
-shinyUI(fillPage(
-  tags$style(type = "text/css", "
-             .irs-grid-pol {display: none;}
-             "),
-  wellPanel(
-  fluidRow(
-    
-    column(h2("Shipwrecks in OxRep"),
-           width = 4),
-    column(
-      selectInput(
-        "plot_marker",
-        label = "Plot Markers",
-        choices = c("Shipwreck Icon", "Circles")
-      ),
-      width = 4
-    ),
-    column(
-      selectInput(
-        "selected_map_tile",
-        label = "Map Style",
-        choices = c(
-          "Hydda.Base",
-          "OpenTopoMap",
-          "Thunderforest.Landscape",
-          "Esri.WorldShadedRelief",
-          "Esri.OceanBasemap"
+shinyUI(navbarPage(
+  "Oxford Roman Economy Project",
+  tabPanel(
+    "Map of Shipwrecks",
+    fluidPage(
+      tags$style(type = "text/css", "body { overflow-y: scroll; }"),
+      tags$style(type = "text/css", "#map {height: calc(85vh - 100px) !important;}"),
+      fluidRow(
+        column(
+          selectInput(
+            "plot_marker",
+            label = "Plot Markers",
+            choices = c("Shipwreck Icon", "Circles")
+          ),
+          selectInput(
+            "selected_map_tile",
+            label = "Map Style",
+            choices = c(
+              "Hydda.Base",
+              "OpenTopoMap",
+              "Thunderforest.Landscape",
+              "Esri.WorldShadedRelief",
+              "Esri.OceanBasemap"
+            ),
+            selected = "Hydda.Base"
+          ),
+          width = 4
         ),
-        selected = "Hydda.Base"
+        column(
+          uiOutput("timeslider_UI"),
+          width = 8
+        )
       ),
-      width = 4
+      leafletOutput("map")
     )
-    
-  )
-  ,
-  
-  uiOutput("timeslider_UI")),
-
-  h6("Map icons provided by https://mapicons.mapsmarker.com/"),
-  leafletOutput("shipwreck_map", height = "100%"),
-  padding = 10
-  ))
+  ),
+  tabPanel("About",
+           includeMarkdown("App_Description.Rmd")),
+  collapsible = TRUE
+))
