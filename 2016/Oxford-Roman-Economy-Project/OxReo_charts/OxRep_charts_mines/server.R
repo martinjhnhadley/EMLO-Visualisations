@@ -17,128 +17,119 @@ library(htmlwidgets)
 library(webshot)
 library(markdown)
 library(plotly)
+library(tidyr)
 
 ## Markers provided by https://mapicons.mapsmarker.com/
 
-## ============== Filter shipwrecks by sites ====================================
-## ==============================================================================
-
 source("data-processing.R", local = TRUE)
 
-
-## =========================== Date Filter ====================================
+## ============== stackedBarChart ===============================================
 ## ==============================================================================
 
-
-## =========================== Labellers ====================================
-## ==============================================================================
-
-mine_labeller <-
-  function(sitename = NA,
-           sitearea = NA) {
-    paste0(# "<p>", Name, "</p>",
-      "<p>Location Name: ",
-      sitename,
-      "</p>",
-      "<a href=http://www.google.com target=blank>Click</a>",
-      "<p>Site Area: ",
-      sitearea,
-      "</p>")
-  }
-
+stacked_hc_chart <- function(data = NA,
+                             categories_column = NA,
+                             measure_columns = NA,
+                             stacking_type = NA,
+                             ordering_function = NA) {
+  
+  ordered_measure <-
+    order(unlist(lapply(measure_columns, function(x) {
+      ordering_function(data[, x])
+    })),
+    decreasing = TRUE) - 1
+  
+  chart <- highchart() %>%
+    hc_xAxis(categories = data[, categories_column],
+             title = categories_column)
+  
+  invisible(lapply(1:length(measure_columns), function(colNumber) {
+    chart <<-
+      hc_add_series(
+        hc = chart,
+        name = measure_columns[colNumber],
+        data = data[, measure_columns[colNumber]],
+        index = ordered_measure[colNumber]
+      )
+  }))
+  
+  chart %>%
+    hc_chart(type = "bar") %>%
+    hc_plotOptions(series = list(stacking = as.character(stacking_type))) %>%
+    hc_legend(reversed = TRUE)
+}
 
 ## =========================== shinyFunction ====================================
 ## ==============================================================================
 
 shinyServer(function(input, output, session) {
   
-  highchart_reactive <- reactive({
-    selected_column <- input$count_by
-    tally_column <- table(sites_df[, selected_column])
-    tally_column <- data.frame(
-      "measure" = names(tally_column),
-      "count" = as.numeric(tally_column)
+  output$group_by_ui <- renderUI({
+    
+    if(input$count_by == "Number of Mines"){
+      return()
+    }
+    
+    selectInput(
+      "stack_by",
+      label = "Stack by",
+      choices = c("percent", "normal")
     )
-    
-    highchart() %>%
-      hc_chart(type = "bar", zoomType = "xy", panning = TRUE) %>%
-      hc_xAxis(categories = tally_column$measure) %>%
-      hc_add_series(name = "Mines in Location", data = tally_column$count) %>%
-      hc_title(text = paste0("Observations per ",selected_column))
   })
   
-  output$mines_counted_by_chart <- renderHighchart({
-    highchart_reactive()
-  })
-
-  plotly_reactive <- reactive({
-    selected_column <- input$count_by
-    tally_column <- table(sites_df[, selected_column])
-    tally_column <- data.frame(
-      "measure" = names(tally_column),
-      "count" = as.numeric(tally_column)
-    )
+  grouped_tally <- reactive({
     
+    group_by <- input$group_by
+    count_by <- input$count_by
     
+    ## Filter metals %>% count_by %>% select columns %>% tally 
+    grouped_tally <- filter(mine_details, keycat == count_by) %>%
+      group_by_(group_by) %>%
+      select_(group_by, "keywrd") %>%
+      count(keywrd)
     
-    highchart() %>%
-      hc_chart(type = "bar", zoomType = "xy", panning = TRUE) %>%
-      hc_xAxis(categories = tally_column$measure) %>%
-      hc_add_series(name = "Mines in Location", data = tally_column$count) %>%
-      hc_title(text = paste0("Observations per ",selected_column))
-  })
-  
-  output$mines_counted_by_chart <- renderPlotly({
-    highchart_reactive()
+    grouped_tally <- as.data.frame(spread(grouped_tally, keywrd, n))
+    
+    grouped_tally
+    
   })
   
   
   
-  output$mines_map <- renderLeaflet({
-
-    map <-
-      leaflet(data = mines_with_locations) %>% addProviderTiles(input$selected_map_tile)
-
-    switch(input$plot_marker,
-           "Mine Icon" = {
-             map %>% addMarkers(
-               popup = ~mine_labeller(sitename = sitename, sitearea = sitearea),
-               icon = makeIcon(
-                 "mine.png",
-                 iconWidth = 18,
-                 iconHeight = 18
-               )
-             )
+  output$chart <- renderHighchart({
+    
+    switch(input$count_by,
+           "Number of Mines" = {
+             
+             grouped_tally <- as.data.frame(filter(mine_details, keycat == "Metals") %>%
+                                              group_by_(input$group_by) %>%
+                                              select_(input$group_by) %>%
+                                              count())
+             
+             print(grouped_tally)
+             
+             highchart() %>%
+               hc_chart(type = "bar") %>%
+               hc_xAxis(categories = unique(mine_details[,input$group_by])) %>%
+               hc_add_series(name = "Number of mines", data = grouped_tally$n)
            },
-           "Circles" = {
-             map %>% addCircleMarkers(
-               popup = ~mine_labeller(sitename = sitename, sitearea = sitearea),
-               color = "#FE7569",
-               stroke = FALSE,
-               radius = 5,
-               fillOpacity = 0.5
+           {
+             grouped_tally <- grouped_tally()
+             
+             stacked_hc_chart(
+               data = grouped_tally,
+               categories_column = input$group_by,
+               measure_columns = unique(mine_details[mine_details$keycat == input$count_by, "keywrd"]),
+               stacking_type = input$stack_by,
+               ordering_function = var
              )
-           })
-  
+           }
+           )
+    
+    
+    
+    
+    
   })
-  
-  ## Dummy download
-  # output$download_hchart <- downloadHandler(
-  #   filename = function() { paste("highchart-image", '.png', sep='') },
-  #   
-  #   content = function(file){
-  #   foo_hchart <- highchart() %>%
-  #     hc_chart(type = "bar", zoomType = "xy", panning = TRUE) %>%
-  #     hc_xAxis(categories = c("a","b","c")) %>%
-  #     hc_add_series(name = "Mines in Location", data = c(10,12,10)) %>%
-  #     hc_title(text = paste0("Observations per"))
-  #   
-  #   saveWidget(as.widget(foo_hchart),"hc_chart.html")
-  #   
-  #   webshot("hc_chart.html", file = file,
-  #           cliprect = "viewport")
-  #   }
-    # )
 
   output$download_hchart <- downloadHandler(
     filename = function() { paste("highchart-image", '.png', sep='') },

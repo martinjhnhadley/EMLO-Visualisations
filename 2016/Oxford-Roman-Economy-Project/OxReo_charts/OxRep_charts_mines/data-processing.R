@@ -1,49 +1,146 @@
-## ============== Extract shipwrecks from sites =================================
+
+
+## !Warning! Commented out as a query output now provides everything cheaply
+
+# ## ============== Extract mines from sites =================================
+# ## ==============================================================================
+#
+#
+# sites_df <-
+#   read.csv("data/Current OxREP database/sites.csv", stringsAsFactors = F)
+# ## Extract Mines Sites
+# sites_df <- sites_df[sites_df$sitetype == "Mine", ]
+# ## Drop sites with coords 0,0
+# sites_df <-
+#   sites_df[sites_df$sitelat != 0 & sites_df$sitelong != 0, ]
+# ## Drop NA in locations
+# sites_df <-
+#   sites_df[!is.na(sites_df$sitelat) | !is.na(sites_df$sitelong), ]
+# 
+# str(sites_df)
+#
+# ## ================== Replace area codes etc ====================================
+# ## ==============================================================================
+#
+# imported_areas <-
+#   read.csv("data/Current OxREP database/areas.csv",
+#            stringsAsFactors = F)
+# areas_df <- imported_areas
+#
+# country_replacements <- filter(areas_df, areatype == "Country") %>%
+#   select(areaid, areaname)
+#
+# province_replacements <- filter(areas_df, areatype == "Roman province") %>%
+#   select(areaid, areaname)
+#
+# mining_district_replacements <-
+#   filter(areas_df, areatype == "Mining district") %>%
+#   select(areaid, areaname)
+#
+# replacements_fn <- function(data = NA, replacements = NA){
+#   mapvalues(data, from = replacements$areaid, to = replacements$areaname)
+# }
+#
+# sites_df$sitecountry <- replacements_fn(data = sites_df$sitecountry, replacements = country_replacements)
+#
+# areas_df$areacountry <- replacements_fn(data = areas_df$sitecountry, replacements = country_replacements)
+#
+# sites_df$siteprovince <- replacements_fn(data = sites_df$siteprovince, replacements = province_replacements)
+#
+# sites_df$sitearea <- replacements_fn(data = sites_df$sitearea, replacements = mining_district_replacements)
+
+## ==== Mine site metals and techniques.xlsx ====================================
 ## ==============================================================================
 
-imported_shipwrecks <-
-  read.csv("data/Current OxREP database/shipwrecks.csv",
-           stringsAsFactors = F)
-shipwrecks <- imported_shipwrecks
+xlsx_convert_import <-
+  function(inputFile = NA,
+           outputFile = NA,
+           stringsAsFactors = FALSE) {
+    if (file.exists(outputFile)) {
+      imported_data <<-
+        read.csv(outputFile, stringsAsFactors = stringsAsFactors)
+    } else {
+      library(xlsx)
+      xlsx_import <- read.xlsx(inputFile, sheetIndex = 1)
+      write.csv(xlsx_import, file = outputFile, row.names = FALSE)
+      remove(xlsx_import)
+      imported_data <<-
+        read.csv(outputFile, stringsAsFactors = stringsAsFactors)
+    }
+  }
 
-sites_df <-
-  read.csv("data/Current OxREP database/sites.csv", stringsAsFactors = F)
+mine_details <-
+  xlsx_convert_import(
+    inputFile = "data/Current OxREP database/Mine site metals and techniques.xlsx",
+    outputFile = "mine_techniques_and_metals.csv",
+    stringsAsFactors = F
+  )
+
 ## Extract Mines Sites
-sites_df <- sites_df[sites_df$sitetype == "Mine", ]
+mine_details <- mine_details[mine_details$Site.type == "Mine",]
 ## Drop sites with coords 0,0
-sites_df <-
-  sites_df[sites_df$sitelat != 0 & sites_df$sitelong != 0, ]
+mine_details <-
+  mine_details[mine_details$Latitude != 0 &
+                 mine_details$Longitude != 0,]
 ## Drop NA in locations
-sites_df <-
-  sites_df[!is.na(sites_df$sitelat) | !is.na(sites_df$sitelong), ]
-## Make into a spdf
+mine_details <-
+  mine_details[!is.na(mine_details$Latitude) |
+                 !is.na(mine_details$Longitude),]
 
-mines_with_locations <-
-  SpatialPointsDataFrame(coords = sites_df[, c("sitelong", "sitelat")], data = sites_df)
+colnames(mine_details) <-
+  c(
+    "siteid",
+    "sitename",
+    "sitetype",
+    "Description",
+    "sitelat",
+    "sitelong",
+    "sitearea",
+    "sitecountry",
+    "siteprovince",
+    "keycat",
+    "keywrd"
+  )
 
-## ======================= Country codes etc ====================================
+
+mine_details$sitearea[mine_details$sitearea == ""] <- "Unnamed Mine"
+
+## ======================= Categorisations ====================================
 ## ==============================================================================
 
-imported_areas <-
-  read.csv("data/Current OxREP database/areas.csv",
-           stringsAsFactors = F)
-area_codes <- imported_areas
 
-country_replacements <- filter(area_codes, areatype == "Country") %>%
-  select(areaid, areaname)
+metals_df <- select(mine_details, siteid, keycat, keywrd) %>%
+  filter(keycat == "Metals")
 
-province_replacements <- filter(area_codes, areatype == "Roman province") %>%
-  select(areaid, areaname)
+metals_vector <- filter(mine_details, keycat == "Metals") %>%
+  select(keywrd) %>%
+  unlist() %>%
+  unique()
 
-replacements_fn <- function(data = NA, replacements = NA){
-  mapvalues(data, from = replacements$areaid, to = replacements$areaname)
-}
-
-sites_df$sitecountry <- replacements_fn(data = sites_df$sitecountry, replacements = country_replacements)
-sites_df$siteprovince <- replacements_fn(data = sites_df$siteprovince, replacements = province_replacements)
+mining_techniques_df <-
+  select(mine_details, siteid, keycat, keywrd) %>%
+  filter(keycat == "Mining Techniques")
 
 
+missing_mining_technique_site_id <-
+  setdiff(mine_details$siteid, mining_techniques_df$siteid)
 
+invisible(lapply(missing_mining_technique_site_id, function(id) {
+  mining_techniques_df <<- bind_rows(
+    mining_techniques_df,
+    data.frame(
+      "siteid" = id,
+      "keycat" = "Mining Techniques",
+      "keywrd" = "Unknown Technique"
+    )
+  )
+}))
 
+mining_techniques_vector <-
+  filter(mining_techniques_df, keycat == "Mining Techniques") %>%
+  select(keywrd) %>%
+  unlist() %>%
+  unique()
 
-
+## ======================= Experiments ====================================
+## ==============================================================================

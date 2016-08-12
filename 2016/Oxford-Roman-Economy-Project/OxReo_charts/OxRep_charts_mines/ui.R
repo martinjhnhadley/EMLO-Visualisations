@@ -19,50 +19,33 @@ library(highcharter)
 shinyUI(navbarPage(
   "Oxford Roman Economy Project",
   tabPanel(
-    "Global Map of Mines",
-    fillPage(
+    "Distribution of Mines",
+    fluidPage(
       tags$style(type = "text/css", "body { overflow-y: scroll; }"),
-      includeMarkdown("Map_Description.Rmd"),
-      fluidRow(column(
-        selectInput(
-          "selected_map_tile",
-          label = "Map Style",
-          choices = c(
-            "Hydda.Base",
-            "OpenTopoMap",
-            "Thunderforest.Landscape",
-            "Esri.WorldShadedRelief",
-            "Esri.OceanBasemap"
+      tags$style(type = "text/css", "#chart {height: calc(85vh - 100px) !important;}"),
+      fluidRow(
+        column(includeMarkdown("Plots_Description.Rmd"),
+               width = 7),
+        column(
+          selectInput(
+            "group_by",
+            label = "Group by",
+            choices = list("country" = "sitecountry", "province" = "siteprovince", "mine name" = "sitearea")
           ),
-          selected = "Hydda.Base"
-        ),
-        width = 4
+          selectInput(
+            "count_by",
+            label = "Count by",
+            choices = c("Metals", "Mining Techniques","Number of Mines")
+          ),
+          uiOutput("group_by_ui"),
+          width = 5
+        )
       ),
-      column(
-        selectInput(
-          "plot_marker",
-          label = "Plot Markers",
-          choices = c("Mine Icon", "Circles")
-        ),
-        width = 4
-      )),
-      leafletOutput("mines_map", height = "800px")
+      highchartOutput("chart")
     )
   ),
-  tabPanel("Distribution of Mines",
-           fillPage(
-             includeMarkdown("Plots_Description.Rmd"),
-           sidebarLayout(sidebarPanel(
-             selectInput(
-               "count_by",
-               label = "Count By",
-               choices = c("sitecountry", "siteprovince")
-             )),
-             # downloadButton('download_hchart', 'Download')),
-             mainPanel(highchartOutput("mines_counted_by_chart"))
-           ))),
   tabPanel("About this tool",
-           fillPage(
-             includeMarkdown("App_Description.Rmd")
+           fillPage(includeMarkdown(
+             "App_Description.Rmd"
            )))
-  )
+))
