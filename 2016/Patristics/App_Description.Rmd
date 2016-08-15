@@ -1,0 +1,4 @@
+<p>
+These interactive datatables allow users to explore the Patristics database.</p>
+<p>
+Code available on <a href='https://github.com/ox-it/Live-Data_Case-Studies/tree/gh-pages/2016/Patristics'>Github</a>, contact [update] for details on the data
