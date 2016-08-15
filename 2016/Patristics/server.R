@@ -2,16 +2,16 @@ library(DT)
 library(shiny)
 
 references_url <-
-  read.csv(file = "references_url.csv", stringsAsFactors = F)[1, ]
+  read.csv(file = "references_url.csv", stringsAsFactors = F)[1,]
 references_df <- read.csv(references_url, stringsAsFactors = F)
 
 authors_and_texts_url <-
-  read.csv(file = "authors_and_texts.csv", stringsAsFactors = F)[1, ]
+  read.csv(file = "authors_and_texts.csv", stringsAsFactors = F)[1,]
 authors_and_texts_df <-
   read.csv(authors_and_texts_url, stringsAsFactors = F)
 
 epitstles_url <-
-  read.csv(file = "epistles_url.csv", stringsAsFactors = F)[1, ]
+  read.csv(file = "epistles_url.csv", stringsAsFactors = F)[1,]
 epitstles_df <- read.csv(epitstles_url, stringsAsFactors = F)
 
 colnames(references_df) <- gsub("[.]", " ", colnames(references_df))
@@ -34,6 +34,31 @@ references_initial_columns <-
     "Early Christian Write",
     "Reference Text in English"
   )
+
+url_generator <- function(book_name = NA,
+                          begin_chapter = NA,
+                          begin_v = NA,
+                          end_chapter = NA,
+                          end_v = NA,
+                          link_text = NA) {
+  paste0(
+    "<a href=",
+    "https://www.biblegateway.com/passage/?search=",
+    gsub(" ", "+", book_name),
+    "+",
+    begin_chapter,
+    "%3A",
+    begin_v,
+    "%3A",
+    end_chapter,
+    "-",
+    end_v,
+    ">",
+    link_text,
+    "</a>"
+  )
+}
+
 
 shinyServer(function(input, output) {
   output$references_selected_cols_UI <- renderUI({
@@ -67,111 +92,128 @@ shinyServer(function(input, output) {
       choices = names,
       selected = NULL,
       width = "100%",
+      options = list(placeholder = 'Please start typing the name of an author'
+                     # onInitialize = I('function() { this.setValue("Please start typing the name of an author"); }'))
+      )
+  )})
+    
+    output$author_epistles_datatable <- DT::renderDataTable({
+      author_selection <- input$author_selection
+      authors_epistles <-
+        references_df[references_df$`Early Christian Writer` == author_selection, ]$Epistle
+      
+      epitstles_df[epitstles_df$Epistle %in% authors_epistles, ]
+      
+    }, rownames = FALSE,
+    filter = 'top',
+    escape = FALSE,
+    extensions = "Responsive",
+    options = list(
+      pageLength = 5,
+      responsive = TRUE,
+      autoWidth = FALSE,
+      "language" = list("search" = "Filter:",
+                        "zeroRecords" = "There are no epistles matching your query")
+    ))
+    
+    output$author_references_datatable <- DT::renderDataTable({
+      
+      
+      author_selection <- input$author_selection
+      references_df <- references_df[references_df$`Early Christian Writer` == author_selection, ]
+      
+      references_df
+      
+    }, rownames = FALSE,
+    filter = 'top',
+    escape = FALSE,
+    extensions = "Responsive",
+    options = list(
+      pageLength = 5,
+      responsive = TRUE,
+      autoWidth = FALSE,
+      "language" = list("search" = "Filter:",
+                        "zeroRecords" = "There are no references matching your query")
+    ))
+    
+    output$author_texts_datatable <- DT::renderDataTable({
+      author_selection <- input$author_selection
+      authors_and_texts_df[authors_and_texts_df$`Early Christian Writer` == author_selection, ]
+      
+    },
+    rownames = FALSE,
+    filter = 'top',
+    escape = FALSE,
+    extensions = "Responsive",
+    options = list(
+      pageLength = 5,
+      responsive = TRUE,
+      autoWidth = FALSE,
+      "language" = list("search" = "Filter:",
+                        "zeroRecords" = "There are no texts matching your query")
+    ))
+    
+    output$author_all_info_UI <- renderUI({
+      fluidRow(
+        column(
+          h3("Epistles"),
+          DT::dataTableOutput("author_epistles_datatable"),
+          h3("Texts"),
+          dataTableOutput("author_texts_datatable"),
+          h3("References"),
+          dataTableOutput("author_references_datatable"),
+          width = 12
+        )
+      )
+      
+    })
+    
+    output$authors_and_texts_datatable <- DT::renderDataTable(
+      authors_and_texts_df[, input$authors_and_texts_selected_cols],
+      rownames = FALSE,
+      filter = 'top',
+      escape = FALSE,
+      extensions = "Responsive",
       options = list(
-        placeholder = 'Please start typing the name of an author'
-        # onInitialize = I('function() { this.setValue("Please start typing the name of an author"); }')
+        pageLength = 5,
+        responsive = TRUE,
+        autoWidth = FALSE,
+        "language" = list("search" = "Filter:",
+                          "zeroRecords" = "There are no references matching your query")
       )
     )
-  })
-  
-  output$author_epistles_datatable <- DT::renderDataTable({
-
-    author_selection <- input$author_selection
-    authors_epistles <-
-      references_df[references_df$`Early Christian Writer` == author_selection,]$Epistle
     
-    epitstles_df[epitstles_df$Epistle %in% authors_epistles,]
-    
-  }, rownames = FALSE,
-  filter = 'top',
-  escape = FALSE,
-  extensions = "Responsive",
-  options = list(
-    pageLength = 5,
-    responsive = TRUE,
-    autoWidth = FALSE,
-    "language" = list("search" = "Filter:",
-                      "zeroRecords" = "There are no epistles matching your query")
-  ))
-  
-  output$author_references_datatable <- DT::renderDataTable({
-    
-    author_selection <- input$author_selection
-    references_df[references_df$`Early Christian Writer` == author_selection,]
-    
-  }, rownames = FALSE,
-  filter = 'top',
-  escape = FALSE,
-  extensions = "Responsive",
-  options = list(
-    pageLength = 5,
-    responsive = TRUE,
-    autoWidth = FALSE,
-    "language" = list("search" = "Filter:",
-                      "zeroRecords" = "There are no references matching your query")
-  ))
-  
-  output$author_texts_datatable <- DT::renderDataTable({
-    
-    author_selection <- input$author_selection
-    authors_and_texts_df[authors_and_texts_df$`Early Christian Writer` == author_selection,]
-    
-  },
-  rownames = FALSE,
-  filter = 'top',
-  escape = FALSE,
-  extensions = "Responsive",
-  options = list(
-    pageLength = 5,
-    responsive = TRUE,
-    autoWidth = FALSE,
-    "language" = list("search" = "Filter:",
-                      "zeroRecords" = "There are no texts matching your query")
-  ))
-  
-  output$author_all_info_UI <- renderUI({
-    
-    fluidRow(
-      column(
-      h3("Epistles"),
-      DT::dataTableOutput("author_epistles_datatable"),
-      h3("Texts"),
-      dataTableOutput("author_texts_datatable"),
-      h3("References"),
-      dataTableOutput("author_references_datatable"),
-      width = 12)
+    output$references_datatable <- DT::renderDataTable({
+      references_df <- references_df[, input$references_selected_cols]
+      
+      references_df$Epistle <- url_generator(
+        book_name = references_df$Epistle,
+        begin_chapter = references_df$`Start Chapter`,
+        begin_v = references_df$`Start Verse`,
+        end_chapter = references_df$`End Chapter`,
+        end_v = references_df$`End Verse`,
+        link_text = paste(
+          references_df$Epistle,
+          references_df$`Start Chapter`,
+          references_df$`Start Verse`,
+          references_df$`End Chapter`,
+          references_df$`End Verse`
+        )
+      )
+      
+      references_df},
+      
+      rownames = FALSE,
+      filter = 'top',
+      escape = FALSE,
+      extensions = "Responsive",
+      options = list(
+        pageLength = 5,
+        responsive = TRUE,
+        autoWidth = FALSE,
+        "language" = list("search" = "Filter:",
+                          "zeroRecords" = "There are no references matching your query")
+      )
     )
     
-  })
-  
-  output$authors_and_texts_datatable <- DT::renderDataTable(
-    authors_and_texts_df[, input$authors_and_texts_selected_cols],
-    rownames = FALSE,
-    filter = 'top',
-    escape = FALSE,
-    extensions = "Responsive",
-    options = list(
-      pageLength = 5,
-      responsive = TRUE,
-      autoWidth = FALSE,
-      "language" = list("search" = "Filter:",
-                        "zeroRecords" = "There are no references matching your query")
-    )
-  )
-  
-  output$references_datatable <- DT::renderDataTable(
-    references_df[, input$references_selected_cols],
-    rownames = FALSE,
-    filter = 'top',
-    escape = FALSE,
-    extensions = "Responsive",
-    options = list(
-      pageLength = 5,
-      responsive = TRUE,
-      autoWidth = FALSE,
-      "language" = list("search" = "Filter:",
-                        "zeroRecords" = "There are no references matching your query")
-    )
-  )
-  
 })
