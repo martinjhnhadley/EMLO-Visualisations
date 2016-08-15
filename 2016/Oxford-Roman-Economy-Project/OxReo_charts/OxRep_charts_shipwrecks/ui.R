@@ -7,49 +7,41 @@
 ## Data Source: local file
 ## ================================================================================
 
+
 library(shiny)
 library(leaflet)
 library(sp)
+library(plotly)
+library(htmltools)
+library(highcharter)
 
-shinyUI(fillPage(
-  tags$style(type = "text/css", "
-             .irs-grid-pol {display: none;}
-             "),
-  wellPanel(
-  fluidRow(
-    
-    column(h2("Shipwrecks in OxRep"),
-           width = 4),
-    column(
-      selectInput(
-        "plot_marker",
-        label = "Plot Markers",
-        choices = c("Shipwreck Icon", "Circles")
+
+shinyUI(navbarPage(
+  "Oxford Roman Economy Project",
+  tabPanel(
+    "Distribution of Mines",
+    fluidPage(
+      tags$style(type = "text/css", "body { overflow-y: scroll; }"),
+      tags$style(type = "text/css", "#chart {height: calc(80vh - 100px) !important;}"),
+      fluidRow(
+        column(includeMarkdown("Plots_Description.Rmd"),
+               width = 7),
+        column(
+          selectInput(
+            "group_by",
+            label = "Group by",
+            choices = list("country" = "sitecountry", "site" = "sitename")
+          ),
+          uiOutput("group_by_ui"),
+          width = 5
+        )
       ),
-      width = 4
-    ),
-    column(
-      selectInput(
-        "selected_map_tile",
-        label = "Map Style",
-        choices = c(
-          "Hydda.Base",
-          "OpenTopoMap",
-          "Thunderforest.Landscape",
-          "Esri.WorldShadedRelief",
-          "Esri.OceanBasemap"
-        ),
-        selected = "Hydda.Base"
-      ),
-      width = 4
+      uiOutput("timeslider_UI"),
+      highchartOutput("chart")
     )
-    
-  )
-  ,
-  
-  uiOutput("timeslider_UI")),
-
-  h6("Map icons provided by https://mapicons.mapsmarker.com/"),
-  leafletOutput("shipwreck_map", height = "100%"),
-  padding = 10
-  ))
+  ),
+  tabPanel("About this tool",
+           fillPage(includeMarkdown(
+             "App_Description.Rmd"
+           )))
+))
