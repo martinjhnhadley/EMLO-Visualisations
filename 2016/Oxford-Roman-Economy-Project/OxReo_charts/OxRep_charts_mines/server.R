@@ -63,7 +63,7 @@ stacked_hc_chart <- function(data = NA,
 
 shinyServer(function(input, output, session) {
   
-  output$group_by_ui <- renderUI({
+  output$stack_by_UI <- renderUI({
     
     if(input$count_by == "Number of Mines"){
       return()
@@ -72,7 +72,7 @@ shinyServer(function(input, output, session) {
     selectInput(
       "stack_by",
       label = "Stack by",
-      choices = c("percent", "normal")
+      choices = list("Percent" = "percent", "Number of Mines" = "normal")
     )
   })
   
@@ -100,12 +100,7 @@ shinyServer(function(input, output, session) {
     switch(input$count_by,
            "Number of Mines" = {
              
-             grouped_tally <- as.data.frame(filter(mine_details, keycat == "Metals") %>%
-                                              group_by_(input$group_by) %>%
-                                              select_(input$group_by) %>%
-                                              count())
-             
-             print(grouped_tally)
+             grouped_tally <- grouped_tally()
              
              highchart() %>%
                hc_chart(type = "bar") %>%
