@@ -25,6 +25,13 @@ shipwrecks_with_locations <-
   shipwrecks_with_locations[!is.na(shipwrecks_with_locations$ante_0) &
                               !is.na(shipwrecks_with_locations$ante_0),]
 
+## ================== Remove OCK Sites ====================================
+## ==============================================================================
+
+ock_sites <- read.csv(file = "data/Current OxREP database/OCK Wrecks to remove from visualisation.csv", stringsAsFactors = F)
+
+shipwrecks_with_locations <- shipwrecks_with_locations[!shipwrecks_with_locations$id %in% ock_sites$id,]
+
 ## ================== Replace area codes etc ====================================
 ## ==============================================================================
 
