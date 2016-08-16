@@ -66,6 +66,7 @@ shinyUI(
                      width = 6
                    )
                  ),
+                 uiOutput("timeslider_UI"),
                  leafletOutput("map")
                )
                ),
