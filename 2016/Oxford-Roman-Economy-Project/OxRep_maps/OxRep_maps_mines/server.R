@@ -152,7 +152,13 @@ shinyServer(function(input, output, session) {
                    iconWidth = 18,
                    iconHeight = 18
                  )
-               )
+               ) %>%
+                 fitBounds(
+                   lng1 = min(mines_with_locations$sitelong),
+                   lng2 = max(mines_with_locations$sitelong),
+                   lat1 = min(mines_with_locations$sitelat),
+                   lat2 = max(mines_with_locations$sitelat)
+                 )
              },
              "Circles" = {
                map %>% addCircleMarkers(
@@ -163,7 +169,13 @@ shinyServer(function(input, output, session) {
                  weight = 2,
                  radius = 5,
                  fillOpacity = 0.5
-               )
+               ) %>%
+                 fitBounds(
+                   lng1 = min(mines_with_locations$sitelong),
+                   lng2 = max(mines_with_locations$sitelong),
+                   lat1 = min(mines_with_locations$sitelat),
+                   lat2 = max(mines_with_locations$sitelat)
+                 )
              })
       
     } else {
