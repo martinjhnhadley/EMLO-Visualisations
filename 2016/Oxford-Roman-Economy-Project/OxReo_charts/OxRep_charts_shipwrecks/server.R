@@ -68,10 +68,10 @@ shinyServer(function(input, output, session) {
     sliderInput(
       "selected_time_period",
       label = "Selected Time Period",
-      min = round_any(min_date, 50, f = floor),
-      max = round_any(max_date, 50, f = ceiling),
-      value = c(min_date, max_date),
-      step = 50,
+      min = round_any(min_date, 100, f = floor),
+      max = round_any(max_date, 100, f = ceiling),
+      value = c(round_any(min_date, 100, f = floor), round_any(max_date, 100, f = ceiling)),
+      step = 100,
       width = "100%"
     )
   })

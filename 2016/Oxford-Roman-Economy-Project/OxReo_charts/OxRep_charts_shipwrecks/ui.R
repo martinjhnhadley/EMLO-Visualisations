@@ -23,20 +23,18 @@ shinyUI(navbarPage(
     fluidPage(
       tags$style(type = "text/css", "body { overflow-y: scroll; }"),
       tags$style(type = "text/css", "#chart {height: calc(80vh - 100px) !important;}"),
-      fluidRow(
-        column(includeMarkdown("Plots_Description.Rmd"),
-               width = 7),
-        column(
-          selectInput(
-            "group_by",
-            label = "Group by",
-            choices = list("country" = "sitecountry", "site" = "sitename")
-          ),
-          uiOutput("group_by_ui"),
-          width = 5
-        )
-      ),
-      uiOutput("timeslider_UI"),
+      includeMarkdown("Plots_Description.Rmd"),
+      fluidRow(column(
+        selectInput(
+          "group_by",
+          label = "Group by",
+          choices = list("country" = "sitecountry", "site" = "sitename")
+        ),
+        width = 4
+      )
+      ,
+      column(uiOutput("timeslider_UI"),
+             width = 8)),
       highchartOutput("chart")
     )
   ),
