@@ -18,6 +18,7 @@ library(webshot)
 library(markdown)
 library(plotly)
 library(httr)
+library(lubridate)
 
 ## Markers provided by https://mapicons.mapsmarker.com/
 
@@ -71,6 +72,7 @@ shinyServer(function(input, output, session) {
       value = c(min_date, max_date),
       step = 50,
       width = "100%"
+      # timeFormat = "%Y"
     )
   })
   
@@ -78,26 +80,6 @@ shinyServer(function(input, output, session) {
     shipwreck_points <-
       shipwrecks_locations_spdf[shipwrecks_locations_spdf$ante_0 >= input$selected_time_period[1] &
                                   shipwrecks_locations_spdf$post_0 <= input$selected_time_period[2], ]
-    
-    # map <-
-    #   leaflet(data = shipwreck_points) %>% addProviderTiles(input$selected_map_tile)
-    # map %>% addCircles(popup = ~ shipwreck_labeller(locname = locname, post_0 = post_0, ante_0 = ante_0, site_area = site_area))
-    
-    # map <-
-    #   leaflet(data = shipwreck_points) %>% addProviderTiles(input$selected_map_tile)
-    # map %>% addMarkers(
-    #   popup = ~ shipwreck_labeller(
-    #     locname = locname,
-    #     post_0 = post_0,
-    #     ante_0 = ante_0,
-    #     site_area = site_area
-    #   ),
-    #   icon = makeIcon(
-    #     "shipwreck.png",
-    #     iconWidth = 18,
-    #     iconHeight = 18
-    #   )
-    # )
     
     map <-
       leaflet(data = shipwreck_points, height = "100%") %>% addProviderTiles(input$selected_map_tile)
