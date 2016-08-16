@@ -14,6 +14,7 @@ library(sp)
 library(plotly)
 library(htmltools)
 library(highcharter)
+library(shinyBS)
 
 
 shinyUI(
@@ -46,10 +47,22 @@ shinyUI(
                    ),
                    column(
                      uiOutput("metal_filter_ui"),
+                     bsTooltip(
+                       "metal_filter_ui",
+                       "Remove metals by selecting and deleting, add new metals by typing their names",
+                       "top",
+                       options = list(container = "body")
+                     ),
                      width = 3
                    ),
                    column(
                      uiOutput("mining_technique_filter_ui", width = "100%"),
+                     bsTooltip(
+                       "mining_technique_filter_ui",
+                       "Remove mining techniques by selecting and deleting, add new metals by typing their names",
+                       "top",
+                       options = list(container = "body")
+                     ),
                      width = 6
                    )
                  ),
