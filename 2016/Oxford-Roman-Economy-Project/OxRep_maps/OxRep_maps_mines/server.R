@@ -73,10 +73,9 @@ map_point_labeller <-
 ## ==============================================================================
 
 shinyServer(function(input, output, session) {
-  
   output$timeslider_UI <- renderUI({
-    min_date <- min(shipwrecks_with_locations$ante_0)
-    max_date <- max(shipwrecks_with_locations$post_0)
+    min_date <- min(mine_details$evntpost, na.rm = TRUE)
+    max_date <- max(mine_details$evntante, na.rm = TRUE)
     
     sliderInput(
       "selected_time_period",
@@ -86,9 +85,9 @@ shinyServer(function(input, output, session) {
       value = c(min_date, max_date),
       step = 50,
       width = "100%"
+      # timeFormat = "%Y"
     )
   })
-  
   output$metal_filter_ui <- renderUI({
     selectInput(
       "metal_filter",
@@ -120,13 +119,17 @@ shinyServer(function(input, output, session) {
     }
     
     filtered_siteids <-
-      intersect(metals_df[metals_df$keywrd %in% input$metal_filter, ]$siteid,
-                mining_techniques_df[mining_techniques_df$keywrd %in% input$mining_technique_filter, ]$siteid)
+      intersect(metals_df[metals_df$keywrd %in% input$metal_filter,]$siteid,
+                mining_techniques_df[mining_techniques_df$keywrd %in% input$mining_technique_filter,]$siteid)
     
     
     if (length(filtered_siteids) > 0) {
       filtered_mines_with_locations <-
-        mines_with_locations[mines_with_locations$siteid %in% filtered_siteids,]
+        mines_with_locations[mines_with_locations$siteid %in% filtered_siteids, ]
+      
+      filtered_mines_with_locations <-
+        filtered_mines_with_locations[filtered_mines_with_locations$evntpost >= input$selected_time_period[1] &
+                                        filtered_mines_with_locations$evntante <= input$selected_time_period[2],]
       
       map <-
         leaflet(data = filtered_mines_with_locations) %>%

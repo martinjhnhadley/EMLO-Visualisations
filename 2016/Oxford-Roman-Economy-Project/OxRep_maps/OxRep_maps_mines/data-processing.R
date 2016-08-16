@@ -104,6 +104,26 @@ colnames(mine_details) <-
     "keywrd"
   )
 
+## =============== Mine Dates  ==================================================
+## ==============================================================================
+
+mine_dates <- read.csv(file = "data/Current OxREP database/Mine site dates.csv",stringsAsFactors = F)
+
+colnames(mine_dates) <- gsub("[.]","",tolower(colnames(mine_dates)))
+
+str(mine_dates)
+
+mine_details <- mine_dates %>%
+  select(siteid, evntpost, evntante) %>%
+  right_join(mine_details, by = "siteid")
+
+str(mine_details)
+
+## Drop NAs
+mine_details <- mine_details[!is.na(mine_details$evntpost),]
+mine_details <- mine_details[!is.na(mine_details$evntante),]
+
+
 ## ======================= Categorisations ====================================
 ## ==============================================================================
 
@@ -148,6 +168,8 @@ mine_locations <-
   select(
     mine_details,
     siteid,
+    evntpost,
+    evntante,
     sitename,
     sitelat,
     sitelong,
@@ -165,16 +187,16 @@ mines_with_locations <-
 ## ======================= Experiments ====================================
 ## ==============================================================================
 
-max(mines_with_locations$sitelat)
-
-
-fitBounds(
-  map = leaflet(),
-  lng1 = min(mines_with_locations$sitelong),
-  lng2 = max(mines_with_locations$sitelong),
-  lat1 = min(mines_with_locations$sitelat),
-  lat2 = min(mines_with_locations$sitelat)
-)
+# max(mines_with_locations$sitelat)
+# 
+# 
+# fitBounds(
+#   map = leaflet(),
+#   lng1 = min(mines_with_locations$sitelong),
+#   lng2 = max(mines_with_locations$sitelong),
+#   lat1 = min(mines_with_locations$sitelat),
+#   lat2 = min(mines_with_locations$sitelat)
+# )
 
 
 
