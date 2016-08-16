@@ -38,7 +38,7 @@ map_point_labeller <-
       "<p>Location Name: ",
       locname,
       "</p>",
-      "<p>Site Name:",
+      "<p>Site Name: ",
       sitename,
       "</p>",
       "<p>Country: ",
