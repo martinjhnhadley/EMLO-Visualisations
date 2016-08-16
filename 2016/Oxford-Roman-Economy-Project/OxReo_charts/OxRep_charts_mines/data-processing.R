@@ -105,6 +105,25 @@ colnames(mine_details) <-
 
 mine_details$sitearea[mine_details$sitearea == ""] <- "Unnamed Mine"
 
+## =============== Mine Dates  ==================================================
+## ==============================================================================
+
+mine_dates <- read.csv(file = "data/Current OxREP database/Mine site dates.csv",stringsAsFactors = F)
+
+colnames(mine_dates) <- gsub("[.]","",tolower(colnames(mine_dates)))
+
+str(mine_dates)
+
+mine_details <- mine_dates %>%
+  select(siteid, evntpost, evntante) %>%
+  right_join(mine_details, by = "siteid")
+
+str(mine_details)
+
+## Drop NAs
+mine_details <- mine_details[!is.na(mine_details$evntpost),]
+mine_details <- mine_details[!is.na(mine_details$evntante),]
+
 ## ======================= Categorisations ====================================
 ## ==============================================================================
 

@@ -14,6 +14,7 @@ library(sp)
 library(plotly)
 library(htmltools)
 library(highcharter)
+library(shinyBS)
 
 
 shinyUI(navbarPage(
@@ -23,24 +24,26 @@ shinyUI(navbarPage(
     fluidPage(
       tags$style(type = "text/css", "body { overflow-y: scroll; }"),
       tags$style(type = "text/css", "#chart {height: calc(85vh - 100px) !important;}"),
+      includeMarkdown("Plots_Description.Rmd"),
       fluidRow(
-        column(includeMarkdown("Plots_Description.Rmd"),
-               width = 7),
         column(
           selectInput(
             "group_by",
             label = "Group by",
             choices = list("country" = "sitecountry", "province" = "siteprovince", "mine name" = "sitearea")
-          ),
+          ), width = 4),
+        column(
           selectInput(
             "count_by",
             label = "Count by",
             choices = c("Metals", "Mining Techniques","Number of Mines")
-          ),
+          ), width = 4),
+        column(
           uiOutput("stack_by_UI"),
-          width = 5
+          width = 4
         )
       ),
+      uiOutput("timeslider_UI"),
       highchartOutput("chart")
     )
   ),

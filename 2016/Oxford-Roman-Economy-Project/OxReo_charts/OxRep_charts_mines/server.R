@@ -63,6 +63,22 @@ stacked_hc_chart <- function(data = NA,
 
 shinyServer(function(input, output, session) {
   
+  output$timeslider_UI <- renderUI({
+    min_date <- min(mine_details$evntpost, na.rm = TRUE)
+    max_date <- max(mine_details$evntante, na.rm = TRUE)
+    
+    sliderInput(
+      "selected_time_period",
+      label = "Selected Time Period",
+      min = round_any(min_date, 50, f = floor),
+      max = round_any(max_date, 50, f = ceiling),
+      value = c(min_date, max_date),
+      step = 50,
+      width = "100%"
+      # timeFormat = "%Y"
+    )
+  })
+  
   output$stack_by_UI <- renderUI({
     
     if(input$count_by == "Number of Mines"){
