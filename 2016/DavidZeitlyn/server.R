@@ -5,6 +5,7 @@ library(visNetwork)
 library(plyr)
 library(stringr)
 library(dplyr)
+library(shinyjs)
 
 source("beautification.R", local = TRUE)
 
