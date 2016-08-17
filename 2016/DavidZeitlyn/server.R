@@ -20,6 +20,8 @@ code_names_for_ui <-
 
 shinyServer(function(input, output, session) {
   
+  source("onClickInput-State.R", local = TRUE)$value
+  
   output$main_component_vertex_proportion <-
     renderText({
       round(100 * {
@@ -47,7 +49,7 @@ shinyServer(function(input, output, session) {
   igraph_to_analyse <-
     eventReactive(input$main_component_or_subcomponents,
                   decomposed_igraph[[as.numeric(input$main_component_or_subcomponents)]],
-                  ignoreNULL = FALSE)
+                  ignoreNULL = TRUE)
   
   codes_to_names_list <-
     eventReactive(input$main_component_or_subcomponents, {
@@ -60,22 +62,10 @@ shinyServer(function(input, output, session) {
           warn_missing = F
         )
       setNames(V(igraph_to_analyse)$name, replacement_names)
-    }, ignoreNULL = FALSE)
+    }, ignoreNULL = TRUE)
   
   source("main-component.R", local = TRUE)$value
   source("sub-component.R", local = TRUE)$value
-  
-  output$display_selected_graph <- renderUI({
-    if (is.null(input$main_component_or_subcomponents)) {
-      return()
-    }
-    
-    if (input$main_component_or_subcomponents == 1) {
-      uiOutput("main_component_output")
-    } else {
-      sub_component_output()
-    }
-    
-  })
+
   
 })

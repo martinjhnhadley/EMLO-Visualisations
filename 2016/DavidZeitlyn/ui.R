@@ -50,7 +50,8 @@ shinyUI(fluidPage(
   ),
   conditionalPanel(condition = 'input.main_component_or_subcomponents > 1',
                    # fluidPage(
-                   wellPanel("I've not built this yet")
+                   visNetworkOutput("sub_component_visN"),
+                   uiOutput("sub_component_selectNode_UI")
                    # ))
                    # style = "overflow-y:scroll"
   )))

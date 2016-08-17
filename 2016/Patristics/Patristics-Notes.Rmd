@@ -1,0 +1,31 @@
+---
+title: "Patristics-Notes"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Wednesday 17th August
+
+## Replace . with :
+
+## Splitting "6 or 8"
+
+## Add additional column for 12*
+
+## 12-16 split
+
+## Download filtered .csv
+
+## Link URL
+
+<a href="">Corinth</a> (<a href="">Greek</a>)
+
+Use the New Revised Standard Version (NRSV) Bible. [[figure that out, Martin]]
+
+## MAKE AN INVOICE
+
+
+
