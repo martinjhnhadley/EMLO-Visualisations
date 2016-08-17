@@ -18,6 +18,6 @@ node_legend <-
     # shape = c("icon","icon","icon"),
     # icon.code = c("f007","f0c0","f007"),
     icon.color = as.character(advisor_supervisor_color_scheme),
-    icon.size = c(48,48,48,48,48),
+    icon.size = c(48, 48, 48, 48, 48),
     id = 1:5
   )
