@@ -49,9 +49,9 @@ names_df <-
 ## The names2.txt file is garbled and the names need to be reconstructed.
 
 
-garbled_names <- names_df[names_df$V3 != "", ]
+garbled_names <- names_df[names_df$V3 != "",]
 garbled_names$V2 <- paste(garbled_names$V2, garbled_names$V3)
-names_df[names_df$V3 != "", ] <- garbled_names
+names_df[names_df$V3 != "",] <- garbled_names
 names_df <- names_df[, 1:2]
 colnames(names_df) <- c("id", "name")
 ## Attempt to convert bad characters
@@ -86,11 +86,11 @@ authors_df <-
 
 ## Remove those entries where supervisor_id and examiner_id are ""
 
-examiners_df <- examiners_df[examiners_df$Examiner_id != "",]
-examiners_df <- examiners_df[examiners_df$Author_id != "",]
+examiners_df <- examiners_df[examiners_df$Examiner_id != "", ]
+examiners_df <- examiners_df[examiners_df$Author_id != "", ]
 supervisors_df <-
-  supervisors_df[supervisors_df$Supervisor_id != "",]
-supervisors_df <- supervisors_df[supervisors_df$Author_id != "",]
+  supervisors_df[supervisors_df$Supervisor_id != "", ]
+supervisors_df <- supervisors_df[supervisors_df$Author_id != "", ]
 
 ## ================ Find Missing Names  =============================
 ## ===========================================================
