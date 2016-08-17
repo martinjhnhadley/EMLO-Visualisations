@@ -1,4 +1,4 @@
- library(shiny)
+library(shiny)
 library(htmltools)
 library(igraph)
 library(visNetwork)
@@ -20,8 +20,8 @@ code_names_for_ui <-
   setNames(names_df$id, names_df$name)
 
 shinyServer(function(input, output, session) {
-  
   source("onClickInput-State.R", local = TRUE)$value
+  
   
   output$main_component_vertex_proportion <-
     renderText({
@@ -67,6 +67,6 @@ shinyServer(function(input, output, session) {
   
   source("main-component.R", local = TRUE)$value
   source("sub-component.R", local = TRUE)$value
-
+  
   
 })
