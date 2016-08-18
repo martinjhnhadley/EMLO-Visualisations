@@ -1,6 +1,0 @@
-<p>
-This interactive visualisation allows the exploration of mines of the Roman Empire from the <a href="oxrep.classics.ox.ac.uk">Oxford Roman Economy Project</a>, the following interactivity is provided:
-
-- Change the base map and marker icons with the controls above
-- Zoom and pan the map to target interesting regions
-- Click icons for a "popup" providing further information about the mine

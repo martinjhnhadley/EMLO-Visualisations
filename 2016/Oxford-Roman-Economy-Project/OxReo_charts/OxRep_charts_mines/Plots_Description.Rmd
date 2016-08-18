@@ -1,5 +1,0 @@
-<p>
-This interactive visualisation explores the <a href="http://oxrep.classics.ox.ac.uk" target="_blank">Oxford Roman Economy Project</a>’s <a href="http://oxrep.classics.ox.ac.uk/databases/mines_database/" target="_blank">Mines Database</a>. The following interactivity is provided:
-
-- Choose between a country or province breakdown of mine locations
-- Hover cursor over bars in the chart for precise numbers
