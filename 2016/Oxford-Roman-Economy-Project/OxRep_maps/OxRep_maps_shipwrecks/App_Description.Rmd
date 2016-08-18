@@ -1,6 +1,5 @@
 <img src="images/oxrep_banner.jpg">
-
-<img src="images/Augustus_Foundation_logo.jpg" width = "30%" style="float:right; padding-right:25px">
+<img src="images/Augustus_Foundation_logo.jpg" height="71px" style="float=left;">
 
 <p>
 
