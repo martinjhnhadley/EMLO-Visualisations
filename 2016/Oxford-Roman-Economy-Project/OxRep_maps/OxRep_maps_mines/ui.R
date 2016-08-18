@@ -71,7 +71,7 @@ shinyUI(
                )
                ),
       tabPanel("About",
-               includeMarkdown("App_Description.Rmd")
+               includeMarkdown(knitr::knit("App_Description.Rmd"))
                ),
       collapsible = TRUE
       
