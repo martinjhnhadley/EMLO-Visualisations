@@ -17,7 +17,17 @@ measure_list <- c("Percent.children.enrolled.in.school",
 
 measure_list <- setNames(measure_list, trimws(gsub("\\.", " ", measure_list)))
 
-property_measure_groups <- c("2006", "2013")
+colnames(country_schooling)
+
+property_measure_groups <- c("Younger Cohort (age 12 in 2013)", "Older Cohort (age 12 in 2006)")
+
+bar_order <- list(
+  "Younger Cohort (age 12 in 2013)" = 1,
+  "Older Cohort (age 12 in 2006)" = 0
+)
+bar_order_v <- as.numeric(bar_order)
+
+percentage_measures <- as.character(measure_list)[grepl("ercent", measure_list)]
 
 ## ============================ Stacked bar chart function ==============================
 ## ======================================================================================
@@ -26,8 +36,8 @@ stacked_bar_chart <- function(data = NA,
                               categories_column = NA,
                               measure_columns = NA,
                               stacking_type = NA,
-                              ordering_function = c) {
-  
+                              ordering_function = c,
+                              explicit_order = NA) {
   ordered_measure <-
     order(unlist(lapply(measure_columns, function(x) {
       ordering_function(data[, x])
@@ -44,7 +54,12 @@ stacked_bar_chart <- function(data = NA,
         hc = chart,
         name = measure_columns[colNumber],
         data = data[, measure_columns[colNumber]],
-        index = ordered_measure[colNumber]
+        index = {
+          if (is.na(explicit_order)) {
+            ordered_measure[colNumber]
+          } else
+            explicit_order[colNumber]
+        }
       )
   }))
   
@@ -79,23 +94,22 @@ shinyServer(function(input, output){
       return()
     }
     
-    print(filter(country_schooling, Property.Type == input$selected_category) %>%
-            select_("Property", "Cohort", input$selected_measure) %>%
-            spread_("Cohort", input$selected_measure))
-    
     data_to_viz <- filter(country_schooling, Property.Type == input$selected_category) %>%
       select_("Property", "Cohort", input$selected_measure) %>%
       spread_("Cohort", input$selected_measure)
     
-    
-    
-    stacked_bar_chart(
+    bar_chart <- stacked_bar_chart(
       data = data_to_viz,
       categories_column = "Property",
-      measure_columns = property_measure_groups
+      measure_columns = property_measure_groups,
+      explicit_order = bar_order_v
     )
     
-    
+    if(input$selected_measure %in% percentage_measures){
+      bar_chart %>%
+        hc_yAxis(max = 100)
+    } else
+      bar_chart
     
   })
   
