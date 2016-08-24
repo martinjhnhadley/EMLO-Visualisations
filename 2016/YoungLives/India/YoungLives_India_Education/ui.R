@@ -17,7 +17,7 @@ navbarPage(
     )
   ),
   tabPanel("About",
-           fluidPage("Any text that you like")),
+           includeMarkdown(knitr::knit("App_Description.Rmd"))),
   collapsible = TRUE
 )
     ))

@@ -7,8 +7,8 @@ library(tidyr)
 country_schooling <- read.csv(file = "data/vietnam_education_schooling.csv", stringsAsFactors = F)
 country_schooling$Sample.Size <- as.numeric(gsub(",","",country_schooling$Sample.Size))
 
-measure_list <- c("Percent.children.enrolled.in.school", 
-                  "Average.grade.attending", "Percent.children.receiving.extra.tuition", 
+measure_list <- c("Percentage.of.children.enrolled.in.school", 
+                  "Average.grade.attending", "Percentage.of.children.receiving.extra.tuition", 
                   # "Percentage.of.children.who.can.correctly.solve..which.of.these.is.equal.to.342.", 
                   # "Percentage.of.children.who.can.correctly.solve.a.window.cleaning.problem", 
                   # "Percentage.of.children.who.can.answer.a.rope.cutting.question", 
@@ -16,9 +16,6 @@ measure_list <- c("Percent.children.enrolled.in.school",
                   "Sample.Size")
 
 measure_list <- setNames(measure_list, trimws(gsub("\\.", " ", measure_list)))
-
-
-
 
 property_measure_groups <- c("Younger Cohort (age 12 in 2013)", "Older Cohort (age 12 in 2006)")
 
@@ -114,7 +111,8 @@ shinyServer(function(input, output){
       categories_column = "Property",
       measure_columns = property_measure_groups,
       explicit_order = bar_order_v
-    )
+    ) %>%
+      hc_title(text = paste(trimws(gsub("\\.", " ", input$selected_measure)), "split by", tolower(input$selected_category)))
     
     if(input$selected_measure %in% percentage_measures){
       bar_chart %>%

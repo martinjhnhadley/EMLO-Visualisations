@@ -107,7 +107,8 @@ shinyServer(function(input, output){
       categories_column = "Property",
       measure_columns = property_measure_groups,
       explicit_order = bar_order_v
-    )
+    ) %>%
+      hc_title(text = paste(trimws(gsub("\\.", " ", input$selected_measure)), "split by", tolower(input$selected_category)))
     
     if(input$selected_measure %in% percentage_measures){
       bar_chart %>%

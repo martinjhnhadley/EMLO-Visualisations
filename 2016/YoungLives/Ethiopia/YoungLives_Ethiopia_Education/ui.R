@@ -17,7 +17,7 @@ shinyUI(fillPage(
       )
     ),
     tabPanel("About",
-             fluidPage("About")),
+             includeMarkdown(knitr::knit("App_Description.Rmd"))),
     collapsible = TRUE
   )
 ))

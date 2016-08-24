@@ -8,11 +8,11 @@ country_schooling <- read.csv(file = "data/ethopia_education_schooling.csv", str
 country_schooling$Sample.Size <- as.numeric(gsub(",","",country_schooling$Sample.Size))
 
 
-measure_list <- c("percentage.in.school", 
-                  "highest.grade.completed.2006",
+measure_list <- c("Percentage.in.school", 
+                  "Highest.grade.completed.2006",
                   "Average raw score in maths test as percentage",
                   "Percentage.children.over.age.for.grade", 
-                  "percentage.attending.private.schools..", "Sample.Size")
+                  "Percentage.attending.private.schools..", "Sample.Size")
 
 measure_list <- setNames(measure_list, trimws(gsub("\\.", " ", measure_list)))
 
@@ -104,7 +104,8 @@ shinyServer(function(input, output){
       categories_column = "Property",
       measure_columns = property_measure_groups,
       explicit_order = bar_order_v
-    )
+    ) %>%
+      hc_title(text = paste(trimws(gsub("\\.", " ", input$selected_measure)), "split by", tolower(input$selected_category)))
     
     if(input$selected_measure %in% percentage_measures){
       bar_chart %>%
