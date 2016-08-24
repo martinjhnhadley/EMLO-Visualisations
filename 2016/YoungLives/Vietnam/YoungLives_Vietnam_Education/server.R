@@ -17,6 +17,9 @@ measure_list <- c("Percent.children.enrolled.in.school",
 
 measure_list <- setNames(measure_list, trimws(gsub("\\.", " ", measure_list)))
 
+
+
+
 property_measure_groups <- c("Younger Cohort (age 12 in 2013)", "Older Cohort (age 12 in 2006)")
 
 bar_order <- list(
@@ -91,14 +94,20 @@ shinyServer(function(input, output){
     if(is.null(input$selected_measure)){
       return()
     }
+    # 
+    # print(filter(country_schooling, Property.Type == input$selected_category) %>%
+    #         select_("Property", "Cohort", input$selected_measure) %>%
+    #         spread_("Cohort", input$selected_measure) %>%
+    #         select_("Property") %>% unlist())
+    # 
     
-    print(filter(country_schooling, Property.Type == input$selected_category) %>%
-            select_("Property", "Cohort", input$selected_measure) %>%
-            spread_("Cohort", input$selected_measure))
-    
+    ## spread_ reorders columns https://github.com/hadley/tidyr/issues/47 so process in stages and reorder
     data_to_viz <- filter(country_schooling, Property.Type == input$selected_category) %>%
-      select_("Property", "Cohort", input$selected_measure) %>%
-      spread_("Cohort", input$selected_measure)
+      select_("Property", "Cohort", input$selected_measure)
+    
+    data_to_viz <- data_to_viz %>%
+      spread_("Cohort", input$selected_measure) %>%
+      .[match(unique(data_to_viz$Property), .$Property),]
     
     bar_chart <- stacked_bar_chart(
       data = data_to_viz,
