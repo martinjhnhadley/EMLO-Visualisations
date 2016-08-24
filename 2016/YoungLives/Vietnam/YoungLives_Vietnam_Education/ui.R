@@ -5,7 +5,7 @@ library(htmltools)
 shinyUI(fillPage(
   theme = "young-lives.css",
   navbarPage(
-    "Young Lives: Ethiopia",
+    "Young Lives: Vietnam",
     tabPanel(
       "Education Comparison",
       fluidPage(

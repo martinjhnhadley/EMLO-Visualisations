@@ -4,17 +4,22 @@ library(htmltools)
 library(dplyr)
 library(tidyr)
 
-country_schooling <- read.csv(file = "data/ethopia_education_schooling.csv", stringsAsFactors = F)
+country_schooling <- read.csv(file = "data/vietnam_education_schooling.csv", stringsAsFactors = F)
 country_schooling$Sample.Size <- as.numeric(gsub(",","",country_schooling$Sample.Size))
 
+dput(colnames(country_schooling))
 
-measure_list <- c("percentage.in.school", 
-                  "highest.grade.completed.2006", "Percentage.children.over.age.for.grade", 
-                  "percentage.attending.private.schools..", "Sample.Size")
+measure_list <- c("Percent.children.enrolled.in.school", 
+                  "Average.grade.attending", "Percent.children.receiving.extra.tuition", 
+                  "Percentage.of.children.who.can.correctly.solve..which.of.these.is.equal.to.342.", 
+                  "Percentage.of.children.who.can.correctly.solve.a.window.cleaning.problem", 
+                  "Percentage.of.children.who.can.answer.a.rope.cutting.question", 
+                  "Average.of.performance.across.3.comparable.maths.questions", 
+                  "Sample.Size")
 
 measure_list <- setNames(measure_list, trimws(gsub("\\.", " ", measure_list)))
 
-property_measure_groups <- c("Older Round 2", "Young Round 4")
+property_measure_groups <- c("2006", "2013")
 
 ## ============================ Stacked bar chart function ==============================
 ## ======================================================================================
@@ -77,7 +82,8 @@ shinyServer(function(input, output){
     }
     
     print(filter(country_schooling, Property.Type == input$selected_category) %>%
-            select_("Property", "Cohort", input$selected_measure))
+            select_("Property", "Cohort", input$selected_measure) %>%
+            spread_("Cohort", input$selected_measure))
     
     data_to_viz <- filter(country_schooling, Property.Type == input$selected_category) %>%
       select_("Property", "Cohort", input$selected_measure) %>%
