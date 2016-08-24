@@ -63,14 +63,14 @@ shinyServer(function(input, output){
   
   output$selected_category_UI <- renderUI({
     
-    selectInput("selected_category", label = "Selected measure",
+    selectInput("selected_category", label = "Disaggregate data",
                 choices = unique(country_schooling$Property.Type))
     
   })
   
   output$selected_measure_UI <- renderUI({
     
-    selectInput("selected_measure", label = "Selected measure",
+    selectInput("selected_measure", label = "Selected indicator",
                 choices = measure_list)
     
   })
