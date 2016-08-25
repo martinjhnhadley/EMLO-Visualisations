@@ -9,10 +9,9 @@ country_schooling$Sample.Size <- as.numeric(gsub(",","",country_schooling$Sample
 
 
 measure_list <- c("Percentage.in.school", 
-                  "Highest.grade.completed.2006",
-                  "Average raw score in maths test as percentage",
-                  "Percentage.children.over.age.for.grade", 
-                  "Percentage.attending.private.schools..", "Sample.Size")
+                  "Highest.grade.completed.2006", "Average.raw.score.in.maths.test.as.percentage", 
+                  "Percentage.of.children.over.age.for.grade", "Percentage.attending.private.schools", 
+                  "Sample.Size")
 
 measure_list <- setNames(measure_list, trimws(gsub("\\.", " ", measure_list)))
 

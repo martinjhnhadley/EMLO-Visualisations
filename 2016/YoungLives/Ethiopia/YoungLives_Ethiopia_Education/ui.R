@@ -2,10 +2,10 @@ library(shiny)
 library(highcharter)
 library(htmltools)
 
-shinyUI(fillPage(
-  theme = "young-lives.css",
+shinyUI(
   navbarPage(
-    "Young Lives: Ethiopia",
+    theme = "young-lives.css",
+    title = "Young Lives: Ethiopia",
     tabPanel(
       "Education Comparison",
       fluidPage(
@@ -20,4 +20,4 @@ shinyUI(fillPage(
              includeMarkdown(knitr::knit("App_Description.Rmd"))),
     collapsible = TRUE
   )
-))
+)
