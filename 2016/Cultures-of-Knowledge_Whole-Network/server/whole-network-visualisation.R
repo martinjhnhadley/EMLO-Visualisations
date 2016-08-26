@@ -447,7 +447,7 @@ output$visNetwork_wholeNetwork_selected_node_info <- renderUI({
 
 output$visNetwork_whole_network_connected_life_events_columns_to_show_UI <-
   renderUI({
-    fluidRow(column(tagList(
+    fluidRow(column(
       selectInput(
         'connected_life_events_Cols',
         'Columns to show:',
@@ -464,13 +464,9 @@ output$visNetwork_whole_network_connected_life_events_columns_to_show_UI <-
           "Date.Type",
           "Location.Type.Ahead"
         ),
-        multiple = TRUE
-      ),
-      tags$style(
-        type = "text/css",
-        "select#connected_life_events_Cols + .selectize-control{width: 700px}"
-      )
-    ), width = 12))
+        multiple = TRUE,
+        width = "100%"
+      ), width = 12))
   })
 
 connected_individuals_events <- reactive({
