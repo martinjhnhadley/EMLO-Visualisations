@@ -14,10 +14,7 @@
 ## File isn't perfect, import and perfect
 txt_import <- read.table("http://linux.oii.ox.ac.uk/~otto.kassi/OLI/OLIdata.txt",sep = ",",stringsAsFactors = F)
 
-txt_import
-
 colnames(txt_import) <- as.character(txt_import[1,])
-
 
 txt_import <- txt_import[2:nrow(txt_import),]
 
@@ -26,41 +23,6 @@ txt_import$count <- as.numeric(txt_import$count)
 ## Make symbol for visualising:
 gig_economy_data <- txt_import
 
-str(gig_economy_data)
-
-gig_economy_data$status
 
 ## =========================== Playground =======================================
 ## ==============================================================================
-# 
-# dygraph(gig_economy_data$count)
-# str(mdeaths)
-# 
-# lungDeaths <- cbind(mdeaths, fdeaths)
-# dygraph(lungDeaths)
-# 
-# 
-# 
-new_gigs <- filter(gig_economy_data, status == "new")
-
-new_business_gigs <- gig_economy_data %>%
-  filter(status == "new") %>%
-  filter(occupation == "Business services")
-new_business_gigs <- xts(new_business_gigs$count,new_business_gigs$date)
-
-
-
-closed_business_gigs <- gig_economy_data %>%
-  filter(status %in% c("closed", "filled")) %>%
-  filter(occupation == "Business services")
-closed_business_gigs <- xts(closed_business_gigs$count,closed_business_gigs$date)
-
-both_ts <- cbind(new_business_gigs, closed_business_gigs)
-
-names(both_ts) <- c("New","Closed")
-
-closed_business_gigs
-
-dygraph(both_ts,
-        main = "New and Won Gigs") %>% dyRangeSelector()
-
