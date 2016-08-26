@@ -119,7 +119,7 @@ shinyServer(function(input, output, session) {
              grouped_tally <- grouped_tally()
              
              highchart() %>%
-               hc_chart(type = "bar") %>%
+               hc_chart(type = "bar", zoomType = "x", zoomType = "x", panning = TRUE, panKey = 'shift') %>%
                hc_xAxis(categories = unique(mine_details[,input$group_by])) %>%
                hc_add_series(name = "Number of mines", data = grouped_tally$n)
            },
