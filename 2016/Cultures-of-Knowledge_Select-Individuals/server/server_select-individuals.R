@@ -421,7 +421,7 @@ output$select.individual.network_graph <- renderVisNetwork({
   
   visN_nodes$color <- node_colors
   ## Remove duplicated nodes
-  visN_nodes <- visN_nodes[!duplicated(visN_nodes$id),]
+  visN_nodes <- visN_nodes[!duplicated(visN_nodes$id), ]
   
   ## Drop edges with nodes not in the node list
   non.conflicting.nodes <-
@@ -432,12 +432,15 @@ output$select.individual.network_graph <- renderVisNetwork({
              to %in% non.conflicting.nodes)
   
   ## Legend nodes
-  lnodes <- data.frame(label = c("Person", "Organisation","Selected Person"),
-                       shape = c("icon","icon","icon"), 
-                       icon.code = c("f007","f0c0","f007"),
-                       icon.color = c("#7570b3", "#a1d76a","red"),
-                       icon.size = c(48,24,48),
-                       id = 1:3)
+  lnodes <-
+    data.frame(
+      label = c("Person", "Organisation", "Selected Person"),
+      shape = c("icon", "icon", "icon"),
+      icon.code = c("f007", "f0c0", "f007"),
+      icon.color = c("#7570b3", "#a1d76a", "red"),
+      icon.size = c(48, 24, 48),
+      id = 1:3
+    )
   
   ## Visualise
   visNetwork(visN_nodes, visN_edges) %>%
@@ -465,7 +468,7 @@ output$select.individual.network_graph <- renderVisNetwork({
     visEvents(selectNode = "function(nodes) {
               Shiny.onInputChange('current_node_id', nodes);
               ;}")
-
+  
   
   })
 
@@ -473,7 +476,7 @@ output$select.individual.network_graph <- renderVisNetwork({
 #   if (is.null(input$highlighted.node)) {
 #     return()
 #   }
-#   
+#
 #   if (input$highlighted.node != "None") {
 #     visNetworkProxy("visNetwork_wholeNetwork") %>%
 #       visFocus(id = input$highlighted.node, scale = 1) %>%
@@ -482,7 +485,7 @@ output$select.individual.network_graph <- renderVisNetwork({
 #   } else {
 #     visNetworkProxy("visNetwork_wholeNetwork") %>% visFit(nodes = NULL)
 #   }
-#   
+#
 # })
 
 output$select.individual.network_graph_UI <- renderUI({
@@ -528,7 +531,7 @@ output$visNetwork_select_individual_selected_node_info <- renderUI({
   
   connected_life_events <- connections_to_selected_individual()
   connected_life_events <-
-    connected_life_events[!duplicated(connected_life_events), ]
+    connected_life_events[!duplicated(connected_life_events),]
   
   wellPanel(HTML(
     paste0(
@@ -558,7 +561,7 @@ output$visNetwork_selected_individual_connected_life_events_columns_to_show_UI <
       return()
     }
     
-    fluidRow(column(tagList(
+    fluidRow(column(
       selectInput(
         'connected_life_events_Cols',
         'Columns to show:',
@@ -575,13 +578,11 @@ output$visNetwork_selected_individual_connected_life_events_columns_to_show_UI <
           "Date.Type",
           "Location.Type.Ahead"
         ),
-        multiple = TRUE
+        multiple = TRUE,
+        width = "100%"
       ),
-      tags$style(
-        type = "text/css",
-        "select#connected_life_events_Cols + .selectize-control{width: 700px}"
-      )
-    ), width = 12))
+      width = 12
+    ))
   })
 
 connections_to_selected_individual <- reactive({
@@ -617,8 +618,8 @@ connections_to_selected_individual <- reactive({
   
   connections_to_selected_individual <-
     subgraph_members[subgraph_members$Primary.Participant.Emlo_ID == selectedIndividual |
-                       subgraph_members$Secondary.Participant.Emlo_ID == selectedIndividual,]
-
+                       subgraph_members$Secondary.Participant.Emlo_ID == selectedIndividual, ]
+  
 })
 
 connected_individuals_events <- reactive({
@@ -649,7 +650,7 @@ connected_individuals_events <- reactive({
   
   # Drop empty rows:
   connected_life_events <-
-    connected_life_events[!!rowSums(!is.na(connected_life_events)),]
+    connected_life_events[!!rowSums(!is.na(connected_life_events)), ]
   # Return only selected columns
   connected_life_events <-
     connected_life_events[, input$connected_life_events_Cols, drop = FALSE]
@@ -671,7 +672,10 @@ connected_individuals_events <- reactive({
   connected_life_events
 })
 
-fixed_order_columns <- c("Primary Participant Name","Secondary Participant Name","Category")
+fixed_order_columns <-
+  c("Primary Participant Name",
+    "Secondary Participant Name",
+    "Category")
 
 output$visNetwork_selected_individual_selected_node <-
   DT::renderDataTable({
@@ -680,13 +684,13 @@ output$visNetwork_selected_individual_selected_node <-
     connected_individuals_events <- connected_individuals_events()
     cols_names <- colnames(connected_individuals_events)
     
-    connected_individuals_events[,c(fixed_order_columns, cols_names[!cols_names %in% fixed_order_columns])]
+    connected_individuals_events[, c(fixed_order_columns, cols_names[!cols_names %in% fixed_order_columns])]
     
-
+    
   }, escape = FALSE,
   rownames = FALSE,
   # filter = list(position = 'top', clear = FALSE)
-  options = list(order = list(list(0,"desc")))
+  options = list(order = list(list(0, "desc")))
   # only make name column non-orderable
   # options = if (length(which(
   #   colnames(connected_individuals_events()) %in% c("Primary Participant Name", "Secondary Participant Name")

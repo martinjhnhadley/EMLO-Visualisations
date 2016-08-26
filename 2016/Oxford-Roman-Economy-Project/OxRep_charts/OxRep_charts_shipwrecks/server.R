@@ -82,8 +82,6 @@ shinyServer(function(input, output, session) {
       shipwreck_details[shipwreck_details$ante_0 >= input$selected_time_period[1] &
                           shipwreck_details$post_0 <= input$selected_time_period[2], ]
     
-    print(nrow(shipwreck_details))
-    
     group_by <- input$group_by
     
     ## Filter metals %>% count_by %>% select columns %>% tally
@@ -98,12 +96,10 @@ shinyServer(function(input, output, session) {
     grouped_tally <- grouped_tally()
     
     highchart() %>%
-      hc_chart(type = "bar", animation = FALSE) %>%
+      hc_chart(type = "bar", animation = FALSE, zoomType = "x", panning = TRUE, panKey = 'shift') %>%
       hc_plotOptions(series = list(turboThreshold = 10000)) %>%
       hc_xAxis(categories = unique(shipwreck_details[, input$group_by])) %>%
       hc_add_series(name = "Number of Shipwrecks", data = grouped_tally$n)
-    
-    
     
   })
   

@@ -1,6 +1,6 @@
 <p>
-This interactive visualisation allows the exploration of mines of the Roman Empire from the <a href="oxrep.classics.ox.ac.uk">Oxford Roman Economy Project</a>, the following interactivity is provided:
+This interactive visualisation allows the exploration of shipwrecks of the Roman Empire from the <a href="oxrep.classics.ox.ac.uk">Oxford Roman Economy Project</a>, the following interactivity is provided:
 
-- Choose between a country or province breakdown of mine locations
+- Choose between a country or province breakdown of shipwreck locations
 - Hover cursor over bars in the chart for precise numbers
 - Drag an area on the chart to zoom in

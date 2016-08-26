@@ -19,7 +19,7 @@ library(highcharter)
 shinyUI(navbarPage(
   "Oxford Roman Economy Project",
   tabPanel(
-    "Distribution of Mines",
+    "Distribution of Shipwrecks",
     fluidPage(
       tags$style(type = "text/css", "body { overflow-y: scroll; }"),
       tags$style(type = "text/css", "#chart {height: calc(80vh - 100px) !important;}"),

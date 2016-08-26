@@ -7,29 +7,31 @@ sites_df <-
   read.csv("data/Current OxREP database/sites.csv", stringsAsFactors = F)
 ## Extract Wreck Sites
 sites_df <- sites_df[sites_df$sitetype == "Wreck Site",]
-## Drop sites with coords 0,0
-sites_df <-
-  sites_df[sites_df$sitelat != 0 & sites_df$sitelong != 0,]
-## Drop NA in locations
-sites_df <-
-  sites_df[!is.na(sites_df$sitelat) | !is.na(sites_df$sitelong),]
+
+# # In charts all shipwrecks should be included, even those without precise location
+# ## Drop sites with coords 0,0
+# sites_df <-
+#   sites_df[sites_df$sitelat != 0 & sites_df$sitelong != 0,]
+# ## Drop NA in locations
+# sites_df <-
+#   sites_df[!is.na(sites_df$sitelat) | !is.na(sites_df$sitelong),]
 
 
 ## Drop those sitenames that are not also in the shipwrecks.csv file
 sites_df <- sites_df[sites_df$sitename %in% shipwrecks$sitename, ]
 ## Merge dataframes:
-shipwrecks_with_locations <- merge(sites_df, shipwrecks)
+shipwreck_details <- merge(sites_df, shipwrecks)
 ## Remove undated:
-shipwrecks_with_locations <-
-  shipwrecks_with_locations[!is.na(shipwrecks_with_locations$ante_0) &
-                              !is.na(shipwrecks_with_locations$ante_0),]
+shipwreck_details <-
+  shipwreck_details[!is.na(shipwreck_details$ante_0) &
+                              !is.na(shipwreck_details$post_0),]
 
 ## ================== Remove OCK Sites ====================================
 ## ==============================================================================
 
 ock_sites <- read.csv(file = "data/Current OxREP database/OCK Wrecks to remove from visualisation.csv", stringsAsFactors = F)
 
-shipwrecks_with_locations <- shipwrecks_with_locations[!shipwrecks_with_locations$id %in% ock_sites$id,]
+shipwreck_details <- shipwreck_details[!shipwreck_details$id %in% ock_sites$id,]
 
 ## ================== Replace area codes etc ====================================
 ## ==============================================================================
@@ -50,15 +52,9 @@ replacements_fn <- function(data = NA, replacements = NA){
   mapvalues(data, from = replacements$areaid, to = replacements$areaname)
 }
 
-shipwrecks_with_locations$sitecountry <- replacements_fn(data = shipwrecks_with_locations$sitecountry, replacements = country_replacements)
+shipwreck_details$sitecountry <- replacements_fn(data = shipwreck_details$sitecountry, replacements = country_replacements)
 
-## ================== Shipwreck Details =========================================
-## ==============================================================================
-
-shipwreck_details <- shipwrecks_with_locations
 
 ## ================== Experiments =========================================
 ## ==============================================================================
 
-
-str(shipwreck_details)
