@@ -28,7 +28,7 @@ shinyUI(navbarPage(
         selectInput(
           "group_by",
           label = "Group by",
-          choices = list("country" = "sitecountry", "site" = "sitename")
+          choices = list("country" = "sitecountry", "site" = "sitename", "sea area" = "site_area")
         ),
         width = 4
       )

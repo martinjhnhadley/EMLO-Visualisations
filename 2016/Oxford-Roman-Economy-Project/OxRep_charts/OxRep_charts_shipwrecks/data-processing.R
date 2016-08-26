@@ -47,14 +47,14 @@ country_replacements <- filter(areas_df, areatype == "Country") %>%
 province_replacements <- filter(areas_df, areatype == "Roman province") %>%
   select(areaid, areaname)
 
-
 replacements_fn <- function(data = NA, replacements = NA){
   mapvalues(data, from = replacements$areaid, to = replacements$areaname)
 }
 
 shipwreck_details$sitecountry <- replacements_fn(data = shipwreck_details$sitecountry, replacements = country_replacements)
 
+shipwreck_details$site_area[shipwreck_details$site_area == ""] <- "Not Specified"
+
 
 ## ================== Experiments =========================================
 ## ==============================================================================
-

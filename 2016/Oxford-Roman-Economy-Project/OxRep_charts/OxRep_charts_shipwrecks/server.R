@@ -61,6 +61,7 @@ stacked_hc_chart <- function(data = NA,
 ## ==============================================================================
 
 shinyServer(function(input, output, session) {
+  
   output$timeslider_UI <- renderUI({
     min_date <- min(shipwreck_details$ante_0)
     max_date <- max(shipwreck_details$post_0)
