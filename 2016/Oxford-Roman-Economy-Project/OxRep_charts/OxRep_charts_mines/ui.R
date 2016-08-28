@@ -36,7 +36,7 @@ shinyUI(navbarPage(
           selectInput(
             "count_by",
             label = "Count by",
-            choices = c("Metals", "Mining Techniques","Number of Mines")
+            choices = c("Metals", "Mining Techniques", "Number of Mines")
           ), width = 4),
         column(
           uiOutput("stack_by_UI"),

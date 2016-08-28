@@ -31,7 +31,6 @@ stacked_hc_chart <- function(data = NA,
                              measure_columns = NA,
                              stacking_type = NA,
                              ordering_function = NA) {
-  
   ordered_measure <-
     order(unlist(lapply(measure_columns, function(x) {
       ordering_function(data[, x])
@@ -62,7 +61,6 @@ stacked_hc_chart <- function(data = NA,
 ## ==============================================================================
 
 shinyServer(function(input, output, session) {
-  
   output$timeslider_UI <- renderUI({
     min_date <- min(mine_details$evntpost, na.rm = TRUE)
     max_date <- max(mine_details$evntante, na.rm = TRUE)
@@ -80,8 +78,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$stack_by_UI <- renderUI({
-    
-    if(input$count_by == "Number of Mines"){
+    if (input$count_by == "Number of Mines") {
       return()
     }
     
@@ -92,39 +89,30 @@ shinyServer(function(input, output, session) {
     )
   })
   
-  grouped_tally <- reactive({
-    
-    group_by <- input$group_by
-    count_by <- input$count_by
-    
-    ## Filter metals %>% count_by %>% select columns %>% tally 
-    grouped_tally <- filter(mine_details, keycat == count_by) %>%
-      group_by_(group_by) %>%
-      select_(group_by, "keywrd") %>%
-      count(keywrd)
-    
-    grouped_tally <- as.data.frame(spread(grouped_tally, keywrd, n))
-    
-    grouped_tally
-    
-  })
-  
-  
-  
   output$chart <- renderHighchart({
-    
     switch(input$count_by,
            "Number of Mines" = {
+             grouped_tally <- mine_details %>%
+               group_by_(input$group_by) %>%
+               select_(input$group_by, "keywrd") %>%
+               count() %>%
+               as.data.frame
              
-             grouped_tally <- grouped_tally()
+             stacked_hc_chart(
+               data = grouped_tally,
+               categories_column = input$group_by,
+               measure_columns = "n",
+               ordering_function = var
+             )
              
-             highchart() %>%
-               hc_chart(type = "bar", zoomType = "x", zoomType = "x", panning = TRUE, panKey = 'shift') %>%
-               hc_xAxis(categories = unique(mine_details[,input$group_by])) %>%
-               hc_add_series(name = "Number of mines", data = grouped_tally$n)
            },
            {
-             grouped_tally <- grouped_tally()
+             grouped_tally <- filter(mine_details, keycat == input$count_by) %>%
+               group_by_(input$group_by) %>%
+               select_(input$group_by, "keywrd") %>%
+               count(keywrd) %>%
+               spread(keywrd, n) %>%
+               as.data.frame()
              
              stacked_hc_chart(
                data = grouped_tally,
@@ -133,20 +121,18 @@ shinyServer(function(input, output, session) {
                stacking_type = input$stack_by,
                ordering_function = var
              )
-           }
-           )
-    
-    
-    
-    
+           })
     
   })
-
+  
   output$download_hchart <- downloadHandler(
-    filename = function() { paste("highchart-image", '.png', sep='') },
+    filename = function() {
+      paste("highchart-image", '.png', sep = '')
+    },
     content = function(file) {
       saveWidget(widget = highchart_reactive(), file = "hc_chart.html")
-      webshot(url = "hc_chart.html", file = file,
+      webshot(url = "hc_chart.html",
+              file = file,
               cliprect = "viewport")
     },
     contentType = "image/png"
