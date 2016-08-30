@@ -96,10 +96,12 @@ shinyServer(function(input, output, session) {
   output$chart <- renderHighchart({
     grouped_tally <- grouped_tally()
     
+    print(str(grouped_tally))
+    
     highchart() %>%
       hc_chart(type = "bar", animation = FALSE, zoomType = "x", panning = TRUE, panKey = 'shift') %>%
       hc_plotOptions(series = list(turboThreshold = 10000)) %>%
-      hc_xAxis(categories = unique(shipwreck_details[, input$group_by])) %>%
+      hc_xAxis(categories = unique(grouped_tally[, input$group_by])) %>%
       hc_add_series(name = "Number of Shipwrecks", data = grouped_tally$n)
     
   })
