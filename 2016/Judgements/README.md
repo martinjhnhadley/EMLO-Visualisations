@@ -4,8 +4,6 @@ This case study is a simple visualisation of the judicial sources referred to in
 
 An alpha-build visNetwork visualisation has been written with a Shiny app currently in development, it is anticipated an interactive visualsiation will be made available soon.
 
-<img src="https://raw.githubusercontent.com/ox-it/Live-Data_Case-Studies/master/2016%20Case%20Studies/Judgements/Judgements_screenshot.png" width="200"/>
-
 Should you have questions about the project or wish to find out more about this dataset, please contact Nora Stappert from the International Relations Department at Oxford University.
 
 Attribution
