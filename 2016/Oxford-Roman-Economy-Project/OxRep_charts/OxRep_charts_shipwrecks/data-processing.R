@@ -56,11 +56,13 @@ replacements_fn <- function(data = NA, replacements = NA){
 
 shipwreck_details$sitecountry <- replacements_fn(data = shipwreck_details$sitecountry, replacements = country_replacements)
 
+shipwreck_details$sitecountry[is.na(shipwreck_details$sitecountry)] <- "Not Specified"
+
+
 shipwreck_details$sitearea <- replacements_fn(data = shipwreck_details$sitearea, replacements = water_replacements)
 
 shipwreck_details$sitearea[is.na(shipwreck_details$sitearea)] <- "Not Specified"
 
-
-
 ## ================== Experiments =========================================
 ## ==============================================================================
+

@@ -187,17 +187,3 @@ mines_with_locations <-
 ## ======================= Experiments ====================================
 ## ==============================================================================
 
-# max(mines_with_locations$sitelat)
-# 
-# 
-# fitBounds(
-#   map = leaflet(),
-#   lng1 = min(mines_with_locations$sitelong),
-#   lng2 = max(mines_with_locations$sitelong),
-#   lat1 = min(mines_with_locations$sitelat),
-#   lat2 = min(mines_with_locations$sitelat)
-# )
-
-
-
-

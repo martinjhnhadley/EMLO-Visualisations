@@ -95,9 +95,7 @@ shinyServer(function(input, output, session) {
   
   output$chart <- renderHighchart({
     grouped_tally <- grouped_tally()
-    
-    print(str(grouped_tally))
-    
+    print(dput(grouped_tally))
     highchart() %>%
       hc_chart(type = "bar", animation = FALSE, zoomType = "x", panning = TRUE, panKey = 'shift') %>%
       hc_plotOptions(series = list(turboThreshold = 10000)) %>%

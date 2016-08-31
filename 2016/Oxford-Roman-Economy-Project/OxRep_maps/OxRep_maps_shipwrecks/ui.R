@@ -25,6 +25,7 @@ shinyUI(navbarPage(
             label = "Plot Markers",
             choices = c("Shipwreck Icon", "Circles")
           ),
+          div(id = "mapStyle",
           selectInput(
             "selected_map_tile",
             label = "Map Style",
@@ -36,7 +37,7 @@ shinyUI(navbarPage(
               "Esri.OceanBasemap"
             ),
             selected = "Hydda.Base"
-          ),
+          ), style = "position:relative;z-index:10000;"), # see http://stackoverflow.com/questions/1287439/ie7-z-index-layering-issues
           width = 4
         ),
         column(
