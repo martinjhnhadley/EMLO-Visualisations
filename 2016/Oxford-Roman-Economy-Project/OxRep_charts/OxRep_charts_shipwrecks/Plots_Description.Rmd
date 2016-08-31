@@ -3,4 +3,4 @@ This interactive visualisation allows the exploration of shipwrecks of the Roman
 
 - Choose between a country or province breakdown of shipwreck locations
 - Hover cursor over bars in the chart for precise numbers
-- Drag an area on the chart to zoom in
+- Drag an area on the chart to zoom in, hold SHIFT to pan around within the chart
