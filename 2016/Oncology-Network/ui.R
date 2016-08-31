@@ -22,10 +22,10 @@ shinyUI(fluidPage(
       actionButton("submit", "Submit")
     ),
     mainPanel(
-      visNetworkOutput("crukNetwork", width = "100%")
+      visNetworkOutput("this_network", width = "100%")
     )
   ),
-  uiOutput("ui_containing_a_dt")
+  uiOutput("selected_node_table_UI")
   # wellPanel(
   #   DT::dataTableOutput("selected_node_table")
   # )
