@@ -50,6 +50,15 @@ map_point_labeller <-
       post_0,
       " to ",
       ante_0,
+      "</p>",
+      "<p>",
+      "<a href=",
+      # Removed until OxRep URLs are reorganised
+      # url_generator(sitecountry = sitecountry, sitename = sitename),
+      "http://http://oxrep.classics.ox.ac.uk/databases/shipwrecks_database//",
+      " target=blank rel='noopener noreferrer'>",
+      "OxRep Shipwreck Database",
+      "</a>",
       "</p>"
     )
   }
