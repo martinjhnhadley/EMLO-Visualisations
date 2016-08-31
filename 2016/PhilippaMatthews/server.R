@@ -4,9 +4,15 @@ library(shiny)
 obscured_url <-
   read.csv(file = "obscured_url.csv", stringsAsFactors = F)[1, ]
 
-heliotope_df <- read.csv(obscured_url, stringsAsFactors = F)
+heliotope_df <- read.csv(obscured_url, stringsAsFactors = F,check.names = F)
 
-colnames(heliotope_df) <- gsub("[.]", " ", colnames(heliotope_df))
+# ## Drop unnecessary columns
+heliotope_df <-
+  heliotope_df[,!colnames(heliotope_df) %in% c(
+    "Starting sequence number (based on Hepitopes reference sequence)",
+    "New record number",
+    "Optimal epitope vs. OLP"
+  )]
 
 heliotope_df$`Publication year` <-
   as.numeric(heliotope_df$`Publication year`)
