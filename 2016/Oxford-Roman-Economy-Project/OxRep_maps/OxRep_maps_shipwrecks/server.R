@@ -99,7 +99,13 @@ shinyServer(function(input, output, session) {
                  iconWidth = 18,
                  iconHeight = 18
                )
-             )
+             ) %>%
+               fitBounds(
+                 lng1 = min(shipwrecks_locations_spdf$sitelong),
+                 lng2 = max(shipwrecks_locations_spdf$sitelong),
+                 lat1 = min(shipwrecks_locations_spdf$sitelat),
+                 lat2 = max(shipwrecks_locations_spdf$sitelat)
+               )
            },
            "Circles" = {
              map %>% addCircleMarkers(
@@ -116,7 +122,13 @@ shinyServer(function(input, output, session) {
                weight = 2,
                radius = 5,
                fillOpacity = 0.5
-             )
+             ) %>%
+               fitBounds(
+                 lng1 = min(shipwrecks_locations_spdf$sitelong),
+                 lng2 = max(shipwrecks_locations_spdf$sitelong),
+                 lat1 = min(shipwrecks_locations_spdf$sitelat),
+                 lat2 = max(shipwrecks_locations_spdf$sitelat)
+               )
            })
     
     
