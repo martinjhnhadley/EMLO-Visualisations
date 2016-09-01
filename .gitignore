@@ -4,6 +4,7 @@
 *.RData
 *.dcf
 
+
 # CSV files
 *.csv
 *.txt
@@ -21,3 +22,6 @@
 *.httr-oauth
 .httr-oauth
 .Rproj.user
+
+# Attempt to be clever about Meeting Notes
+MeetingNotes.Rmd
