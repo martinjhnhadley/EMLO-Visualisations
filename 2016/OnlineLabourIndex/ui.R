@@ -16,9 +16,22 @@ library(dygraphs)
 library(htmltools)
 
 shinyServer(fluidPage(
-  wellPanel(
-    includeMarkdown(knitr::knit("App_Description.Rmd")),
-    uiOutput("selected_occupation_UI")
-  ),
-  dygraphOutput("dygraph")
+  wellPanel(includeMarkdown(knitr::knit(
+    "App_Description.Rmd"
+  ))),
+  tabsetPanel(
+    tabPanel(
+      "Temporal Patterns of Online Work",
+      fluidPage(
+        uiOutput("selected_occupation_UI"),
+        highchartOutput("dygraph", width = "100%"),
+        width = "100%"
+        )
+    ),
+    tabPanel(
+      "Geography of Demand for Online Work",
+      "There will be a bar chart here"
+    )
+  )
+  
 ))

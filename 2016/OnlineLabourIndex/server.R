@@ -25,29 +25,32 @@ shinyServer(function(input, output, session) {
     selectInput(
       "selected_occupation",
       label = "Selected Occupation",
-      choices = unique(gig_economy_data$occupation)
+      choices = c(unique(gig_economy_data$occupation), "All Occupations")
     )
   })
   
-  plot_data <- eventReactive(input$selected_occupation,{
-    gig_economy_data[gig_economy_data$occupation == input$selected_occupation,]
-  },ignoreNULL = TRUE)
+  plot_data <- eventReactive(input$selected_occupation, {
+    if (input$selected_occupation == "All Occupations") {
+      new_only <- gig_economy_data %>%
+        filter(status == "new")
+      all_occupations <- aggregate(new_only$count,
+                by = list(Category = new_only$date),
+                FUN = sum)
+      xts(all_occupations$x, all_occupations$Category)
+    } else {
+      new_gigs <-
+        gig_economy_data[gig_economy_data$occupation == input$selected_occupation,] %>%
+        filter(status == "new")
+      xts(new_gigs$count, new_gigs$date)
+    }
+    
+  }, ignoreNULL = TRUE)
   
-  output$dygraph <- renderDygraph({
+  output$dygraph <- renderHighchart({
     plot_data <- plot_data()
     
-    new_gigs <- plot_data %>%
-      filter(status == "new")
-    new_gigs <- xts(new_gigs$count, new_gigs$date)
-    
-    closed_gigs <- plot_data %>%
-      filter(status %in% c("closed", "filled"))
-    closed_gigs <- xts(closed_gigs$count, closed_gigs$date)
-    
-    both_ts <- cbind(new_gigs, closed_gigs)
-    names(both_ts) <- c("New", "Closed")
-    
-    dygraph(both_ts) %>% dyRangeSelector()
+    highchart() %>% 
+      hc_add_series_xts(plot_data, name = input$selected_occupation)
     
   })
   
