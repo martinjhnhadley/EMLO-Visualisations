@@ -16,7 +16,6 @@ sites_df <- sites_df[sites_df$sitetype == "Wreck Site",]
 # sites_df <-
 #   sites_df[!is.na(sites_df$sitelat) | !is.na(sites_df$sitelong),]
 
-
 ## Drop those sitenames that are not also in the shipwrecks.csv file
 sites_df <- sites_df[sites_df$sitename %in% shipwrecks$sitename, ]
 ## Merge dataframes:

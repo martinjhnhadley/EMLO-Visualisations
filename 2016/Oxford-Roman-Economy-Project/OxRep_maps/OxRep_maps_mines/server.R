@@ -62,7 +62,7 @@ map_point_labeller <-
       "<a href=",
       # Removed until OxRep URLs are reorganised
       # url_generator(sitecountry = sitecountry, sitename = sitename),
-      "http://oxrep.classics.ox.ac.uk/databases/mines_database/",
+      "oxrep.classics.ox.ac.uk/databases/mines_database/",
       " target=blank rel='noopener noreferrer'>",
       "OxRep Mine Database",
       "</a>",

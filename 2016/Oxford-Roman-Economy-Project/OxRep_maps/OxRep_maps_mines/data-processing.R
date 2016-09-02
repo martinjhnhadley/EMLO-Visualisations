@@ -123,6 +123,8 @@ str(mine_details)
 mine_details <- mine_details[!is.na(mine_details$evntpost),]
 mine_details <- mine_details[!is.na(mine_details$evntante),]
 
+### -999 to 999 is NA essentially, ignore that
+
 
 ## ======================= Categorisations ====================================
 ## ==============================================================================

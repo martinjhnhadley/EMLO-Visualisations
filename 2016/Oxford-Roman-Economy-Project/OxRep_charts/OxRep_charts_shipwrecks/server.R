@@ -70,9 +70,14 @@ shinyServer(function(input, output, session) {
       "selected_time_period",
       label = "Selected Time Period",
       min = round_any(min_date, 100, f = floor),
-      max = round_any(max_date, 100, f = ceiling),
-      value = c(round_any(min_date, 100, f = floor), round_any(max_date, 100, f = ceiling)),
+      # max = round_any(max_date, 100, f = ceiling),
+      max = 1800,
+      value = c(round_any(min_date, 100, f = floor), 
+                # round_any(max_date, 100, f = ceiling)
+                1800
+                ),
       step = 100,
+      sep = "",
       width = "100%"
     )
   })
@@ -99,9 +104,9 @@ shinyServer(function(input, output, session) {
     highchart() %>%
       hc_chart(type = "bar", animation = FALSE, zoomType = "x", panning = TRUE, panKey = 'shift') %>%
       hc_plotOptions(series = list(turboThreshold = 10000)) %>%
-      hc_xAxis(categories = unique(grouped_tally[, input$group_by])) %>%
-      hc_add_series(name = "Number of Shipwrecks", data = grouped_tally$n)
-    
+      hc_xAxis(categories = as.list(unique(grouped_tally[, input$group_by]))) %>%
+      hc_add_series(name = "Number of Shipwrecks", data = grouped_tally$n) %>%
+      hc_yAxis(minTickInterval = 1, minRange = 4, min = 0)
   })
   
   output$download_hchart <- downloadHandler(

@@ -103,7 +103,9 @@ shinyServer(function(input, output, session) {
                categories_column = input$group_by,
                measure_columns = "n",
                ordering_function = var
-             )
+             ) %>%
+               hc_yAxis(minTickInterval = 1, minRange = 4, min = 0)  %>%
+               hc_chart(zoomType = "x", panning = TRUE, panKey = 'shift')
              
            },
            {
@@ -120,7 +122,8 @@ shinyServer(function(input, output, session) {
                measure_columns = unique(mine_details[mine_details$keycat == input$count_by, "keywrd"]),
                stacking_type = input$stack_by,
                ordering_function = var
-             )
+             ) %>%
+               hc_yAxis(minTickInterval = 1, minRange = 4, min = 0)
            })
     
   })
