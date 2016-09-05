@@ -19,19 +19,24 @@ heliotope_df$`Publication year` <-
 
 initial_columns <-
   c(
-    "Record number",
+    "Optimal amino acid sequence(s)",
+    "HLA restriction(s); NS=not specified",
     "HBV protein",
-    "Sequence numbers within protein  based on reference sequence ",
     "Database",
     "Authors",
     "Title",
     "Journal",
     "Publication year",
-    "DOI"
+    "DOI (NA=not available)"
   )
 
+## Reorder columns in dataframe by the initial_columns to ensure correct display in selectInput
+colnames(heliotope_df) <- colnames(heliotope_df)[order(match(colnames(heliotope_df), initial_columns))]
+
 shinyServer(function(input, output) {
+  
   output$HEPITOPES_selected_cols_UI <- renderUI({
+    
     selectInput(
       "HEPITOPES_selected_cols",
       label = "Columns to show: ",
@@ -42,8 +47,10 @@ shinyServer(function(input, output) {
     )
   })
   
-  output$HEPITOPES_datatable <- DT::renderDataTable(
-    heliotope_df[, input$HEPITOPES_selected_cols],
+  output$HEPITOPES_datatable <- DT::renderDataTable({
+    selected_columns <- input$HEPITOPES_selected_cols
+
+    heliotope_df[, selected_columns]},
     rownames = FALSE,
     filter = 'top',
     escape = FALSE,

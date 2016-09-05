@@ -3,6 +3,10 @@
 *.Rhistory
 *.RData
 *.dcf
+*.rds
+*.httr-oauth
+.httr-oauth
+.Rproj.user
 
 
 # CSV files
@@ -13,15 +17,12 @@
 # PDFs
 *.pdf
 
-#Ignore all xlsx files
+# Ignore all xlsx files
 *.xlsx
 *.xls
 
-*.Rproj.user
-*.rds
-*.httr-oauth
-.httr-oauth
-.Rproj.user
+# Google Analytics Code
+google-analytics.js
 
 # Attempt to be clever about Meeting Notes
 MeetingNotes.Rmd
