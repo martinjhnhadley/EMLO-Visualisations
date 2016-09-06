@@ -26,32 +26,28 @@ shinyServer(function(input, output, session) {
     selectInput(
       "selected_occupation",
       label = "Selected Occupation",
-      choices = c(unique(gig_economy_data$occupation), "All Occupations")
+      choices = unique(gig_economy_data$occupation),
+      selected = unique(gig_economy_data$occupation),
+      multiple = TRUE,
+      width = "100%"
     )
   })
   
-  plot_data <- eventReactive(input$selected_occupation, {
-    if (input$selected_occupation == "All Occupations") {
-      new_only <- gig_economy_data %>%
-        filter(status == "new")
-      all_occupations <- aggregate(new_only$count,
-                by = list(Category = new_only$date),
-                FUN = sum)
-      xts(all_occupations$x, all_occupations$Category)
-    } else {
-      new_gigs <-
-        gig_economy_data[gig_economy_data$occupation == input$selected_occupation,] %>%
-        filter(status == "new")
-      xts(new_gigs$count, new_gigs$date)
-    }
+  output$highchart <- renderHighchart({
     
-  }, ignoreNULL = TRUE)
-  
-  output$dygraph <- renderHighchart({
-    plot_data <- plot_data()
+    selected_categories <- input$selected_occupation
+    print(selected_categories)
     
-    highchart() %>% 
-      hc_add_series_xts(plot_data, name = input$selected_occupation)
+    hc <- highchart()
+    
+    invisible(lapply(selected_categories,
+                     function(x){
+                       filtered <- gig_economy_data[gig_economy_data$occupation == x,]
+                       hc <<- hc %>% 
+                         hc_add_series_xts(xts(filtered$count, filtered$date), name = x)
+                     }))
+    hc
+    
     
   })
   

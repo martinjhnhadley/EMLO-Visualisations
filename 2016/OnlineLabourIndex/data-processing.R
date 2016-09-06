@@ -37,3 +37,6 @@ txt_import$date <- as.Date(txt_import$date)
 txt_import$count <- as.numeric(txt_import$count)
 ## Make symbol for visualising:
 gig_economy_data <- txt_import
+## Extract only new jobs
+gig_economy_data <- gig_economy_data %>%
+  filter(status == "new")

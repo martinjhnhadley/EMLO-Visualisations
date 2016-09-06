@@ -14,6 +14,7 @@ library(highcharter)
 library(plotly)
 library(dygraphs)
 library(htmltools)
+library(shinyBS)
 
 shinyServer(fluidPage(
   wellPanel(includeMarkdown(knitr::knit(
@@ -24,7 +25,13 @@ shinyServer(fluidPage(
       "Temporal Patterns of Online Work by Occupations",
       fluidPage(
         uiOutput("selected_occupation_UI"),
-        highchartOutput("dygraph", width = "100%"),
+        bsTooltip(
+          "selected_occupation_UI",
+          "Filter occupations by deleting/adding their names",
+          "top",
+          options = list(container = "body")
+        ),
+        highchartOutput("highchart", width = "100%"),
         width = "100%"
         )
     ),

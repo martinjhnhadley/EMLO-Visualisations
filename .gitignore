@@ -7,7 +7,7 @@
 *.httr-oauth
 .httr-oauth
 .Rproj.user
-
+.DS_Store
 
 # CSV files
 *.csv
