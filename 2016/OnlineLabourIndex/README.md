@@ -13,4 +13,4 @@ Code is made available subject to a MIT license, the following copyright and att
 - Copyright Owner: University of Oxford
 - Date of Authorship: 2016
 - Developer: Martin John Hadley (orcid.org/0000-0002-3039-6849)
-- Academic Contact: Otto Kässi and Vili Lehdonvirta
+- Academic Contact: Otto Kässi and Vili Lehdonvirta (http://orcid.org/0000-0002-6509-1703)
