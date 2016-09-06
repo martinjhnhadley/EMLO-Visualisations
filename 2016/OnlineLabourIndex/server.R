@@ -10,6 +10,7 @@
 
 
 library(shiny)
+library(rfigshare)
 library(lubridate)
 library(plotly)
 library(highcharter)

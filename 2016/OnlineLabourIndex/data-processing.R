@@ -11,8 +11,25 @@
 ## =========================== Load file ========================================
 ## ==============================================================================
 
-## File isn't perfect, import and perfect
-txt_import <- read.table("http://linux.oii.ox.ac.uk/~otto.kassi/OLI/OLIdata.txt",sep = ",",stringsAsFactors = F)
+fs_deposit_id <- 3761562
+print("before fs_details")
+deposit_details <- fs_details(fs_deposit_id)
+print("after fs_details")
+deposit_details <- unlist(deposit_details$files)
+deposit_details <- data.frame(split(deposit_details, names(deposit_details)),stringsAsFactors = F)
+
+timeseries_file_names <- deposit_details$name[grepl("OLIdata_",deposit_details$name)]
+
+timeseries_most_recent_file <-
+  timeseries_file_names[grepl(max(as.Date(
+    gsub(".*_|[.txt]*", "", timeseries_file_names), "%Y-%m-%d"
+  )), timeseries_file_names)]
+
+deposit_details[deposit_details$name == timeseries_most_recent_file,]
+
+timeseries_download <- deposit_details[deposit_details$name == timeseries_most_recent_file,]$download_url
+
+txt_import <- read.table(timeseries_download,sep = ",",stringsAsFactors = F)
 
 colnames(txt_import) <- as.character(txt_import[1,])
 
@@ -22,8 +39,3 @@ txt_import$date <- as.Date(txt_import$date)
 txt_import$count <- as.numeric(txt_import$count)
 ## Make symbol for visualising:
 gig_economy_data <- txt_import
-
-
-## =========================== Playground =======================================
-## ==============================================================================
-
