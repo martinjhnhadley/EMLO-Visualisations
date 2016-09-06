@@ -21,7 +21,7 @@ shinyServer(fluidPage(
   ))),
   tabsetPanel(
     tabPanel(
-      "Temporal Patterns of Online Work",
+      "Temporal Patterns of Online Work by Occupations",
       fluidPage(
         uiOutput("selected_occupation_UI"),
         highchartOutput("dygraph", width = "100%"),
