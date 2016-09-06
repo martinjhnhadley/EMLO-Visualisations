@@ -6,77 +6,112 @@ library(shiny)
 library(ForceAtlas2)
 library(igraph)
 library(DT)
+library(highcharter)
 
+source("beautification.R", local = T)
 source("data-processing.R", local = T)
 
 
 ## =========================== Server Function ==================================
 ## ==============================================================================
 
-shinyServer(function(input, output, sessions) {
+shinyServer(function(input, output, session) {
+  
+  
+  
+  url_selected_department <- eventReactive(session$clientData$url_search,
+                                           {
+                                             query <- parseQueryString(session$clientData$url_search)
+                                             if (!is.null(query[['department']])) {
+                                               query[['department']]
+                                             } else
+                                               "oncology"
+                                           })
+  
+  output$url_department <- renderUI(
+   
+    url_selected_department()
+    
+  )
+  
+  output$highchart_node_legened <- renderHighchart(
+    highchart_legend(legend_names = department_colours$department,legend_colours = department_colours$colours)
+  )
+  
   source("control_tracker.R", local = TRUE)$value
   source("contract_institution_network.R", local = TRUE)$value
   
   ## =========================== Generate Graph ====================================
   ## ==============================================================================
   
+
+  graph_to_display <- eventReactive(input$people_or_departments,
+                                    switch(
+                                      input$people_or_departments,
+                                      "individuals" = {
+                                        institution_igraph
+                                      },
+                                      "departments" = {
+                                        contract_instition_network(institution_igraph)
+                                      }
+                                    ))
   
-  institution_igraph <- reactive({
-    institution_igraph <-
-      graph.data.frame(d = institution_edges[, 1:4], vertices = institution_nodes[, 1:5])
-    V(institution_igraph)$title <- institution_nodes$name
-    V(institution_igraph)$color <- institution_nodes$color
+  output$displayed_network <- renderVisNetwork({
+
+    graph_to_display <- graph_to_display()
     
-    institution_igraph
-  })
-  
-  output$this_network <- renderVisNetwork({
-    if (is.null(input$layout_control)) {
-      return()
-    }
-    
-    switch(
-      input$people_or_departments,
-      "individuals" = {
-        graph_to_plot <- institution_igraph()
-      },
-      "departments" = {
-        graph_to_plot <- contract_instition_network(institution_igraph())
-      }
-    )
-    
-    switch(
-      input$layout_control,
-      "layout_nicely" = {
-        visIgraph(graph_to_plot,
-                  idToLabel = F,
-                  layout = "layout_nicely") %>%
-          visOptions(nodesIdSelection = TRUE) %>%
-          visEvents(selectNode = "function(nodes) {
-                    Shiny.onInputChange('current_node_id', nodes);
-                    ;}")
-  },
-  "layout_with_fr" = {
-    #   visPhysics(
-    #     solver = "forceAtlas2Based",
-    #     forceAtlas2Based = list(avoidOverlap = 1),
-    #     stabilization = list(iterations = 400)
-    #   )
-    visIgraph(graph_to_plot,
+    visIgraph(graph_to_display,
               idToLabel = F,
-              layout = "layout_with_fr") %>%
-      visOptions(nodesIdSelection = TRUE) %>%
+              layout = "layout_nicely") %>%
+      visOptions(highlightNearest = TRUE,
+                 nodesIdSelection = list(enabled = TRUE)
+                 ) %>%
+      visLayout(hierarchical = FALSE) %>%
       visEvents(selectNode = "function(nodes) {
                 Shiny.onInputChange('current_node_id', nodes);
                 ;}")
-  }
-      )
-    
-      })
+})
+  output$displayed_network_properties <- renderUI({
+    wellPanel(
+      p(paste0("Average path length: ",round(average.path.length(graph_to_display()),2))),
+      p(paste0("Number of nodes: ",vcount(graph_to_display())))
+    )
+  })
+  
+  observeEvent(
+    input$refocus_network,
+    visNetworkProxy("displayed_network") %>%
+      visFit(nodes = NULL, animation = list(duration = 500))
+  )
+  
+  output$selected_node_sidePanel <- renderUI({
+    if(input$displayed_network_selected == ""){
+      return()
+    }
+    onClickInputCheck(
+      never_Clicked = return(),
+      show_Details = {
+        wellPanel(
+          paste0("Selected Node: ",input$displayed_network_selected),
+          actionButton("scroll_down","Scroll down for details", width = "100%")
+          )
+      },
+      destructive_Change = return()
+    )
+  })
+  
+  observeEvent(input$scroll_down, {
+    session$sendCustomMessage(type = "scrollDown", 1)
+  })
+  
   
   individual_datatable <- reactive({
+    
+    if(input$displayed_network_selected == ""){
+      return()
+    }
     selected_id <-
-      institution_nodes[institution_nodes$name == input$current_node_id$nodes, "id"]
+      institution_nodes[institution_nodes$name == input$displayed_network_selected, "id"]
     subsetted_edges <-
       filter(institution_edges, from == selected_id |
                to == selected_id)
@@ -103,8 +138,14 @@ shinyServer(function(input, output, sessions) {
   })
   
   department_datatable <- reactive({
+    print(input$displayed_network_selected)
+    
+    if(input$displayed_network_selected == ""){
+      return()
+    }
+    
     department_members <- filter(institution_nodes,
-                                 department == input$current_node_id$nodes) %>%
+                                 department == input$displayed_network_selected) %>%
       select(id) %>%
       .[, 1]
     
@@ -136,9 +177,8 @@ shinyServer(function(input, output, sessions) {
   })
   
   output$selected_node_table <- DT::renderDataTable({
-    print(input$this_network_selected)
-    
-    if (is.null(input$current_node_id$nodes)) {
+
+    if (is.null(input$displayed_network_selected)) {
       return()
     }
     
@@ -157,6 +197,9 @@ shinyServer(function(input, output, sessions) {
   })
   
   output$selected_node_table_UI <- renderUI({
+    if(input$displayed_network_selected == ""){
+      wellPanel("Select a node for more details")
+    } else {
     onClickInputCheck(
       never_Clicked = {
         wellPanel("Select a node for more details")
@@ -165,8 +208,8 @@ shinyServer(function(input, output, sessions) {
         wellPanel(DT::dataTableOutput("selected_node_table"))
       },
       destructive_Change = wellPanel("Select a node for more details")
-    )
+    )}
     
   })
   
-  })
+})
