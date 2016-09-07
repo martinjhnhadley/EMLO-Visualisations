@@ -40,7 +40,7 @@ shinyServer(function(input, output, session) {
   
   output$displayed_network <- renderVisNetwork({
 
-    graph_to_display <- graph_to_display()
+    graph_to_display <- as.undirected(graph_to_display())
     
     visIgraph(graph_to_display,
               idToLabel = FALSE,
