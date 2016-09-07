@@ -2,6 +2,7 @@ library(shiny)
 library(igraph)
 library(visNetwork)
 library(highcharter)
+library(shinyBS)
 
 shinyUI(fluidPage(
   tags$head(
@@ -13,28 +14,47 @@ shinyUI(fluidPage(
       $(window).scrollTop(y+200);
       }
       );'
-    )),
-  wellPanel("Collaboration overview for a specific department, note that the specified department comes from the query URL i.e. livedata.shinyapps.io/CRUKDepartment-Profile?department=oncology. Sensibly, if no department is given the default is oncology."),
-  wellPanel(uiOutput("url_department")),
-  fluidRow(
-    column(
-      wellPanel(
-      selectInput("people_or_departments",
-                  label = "Display:",
-                  choices = c("individuals","departments")),
-      actionButton("refocus_network", "Refocus Network", width = "100%")),
-        uiOutput("displayed_network_properties"),
-      uiOutput("selected_node_sidePanel")
-      
-    , width = 4),
-    column(
-      visNetworkOutput("displayed_network", width = "100%")
-      ,width = 8
     )
+    ),
+  uiOutput("department_app_title"),
+  uiOutput("department_app_description"),
+  bsCollapse(
+    id = "collapseExample",
+    open = NULL,
+    bsCollapsePanel(HTML(
+      paste0(
+        '<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>',
+        " Deparment Overview (click to expand)"
+      )
+    ),
+    fluidPage(
+      uiOutput("department_app_collapsile_info")
+    ), style = "primary")
   ),
-  highchartOutput("highchart_node_legened", height = "150px"),
-  uiOutput("selected_node_table_UI")
+  tabsetPanel(
+    tabPanel("People Directory",
+             uiOutput("people_directory_UI")),
+    tabPanel(
+      "Department Collaboration Network",
+      fluidPage(
+        fluidRow(
+          column(
+            selectInput(
+              "people_or_departments",
+              "Show?",
+              choices = c("within department", "within whole network")
+            ),
+            uiOutput("department_network_edge_degree_UI"),
+            width = 4
+          ),
+          column(visNetworkOutput("department_network"),
+                 width = 8)
+        ),
+        highchartOutput("highchart_node_legened", height = "150px")
+      )
+    )
+  )
   # wellPanel(
   #   DT::dataTableOutput("selected_node_table")
   # )
-))
+  ))
