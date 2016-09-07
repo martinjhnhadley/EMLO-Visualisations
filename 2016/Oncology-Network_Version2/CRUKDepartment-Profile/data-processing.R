@@ -89,23 +89,7 @@ institution_igraph <-
 V(institution_igraph)$title <- institution_nodes$name
 V(institution_igraph)$id <- institution_nodes$id
 V(institution_igraph)$color <- institution_nodes$color
+V(institution_igraph)$department <- institution_nodes$department
 
 ## =========================== Experiment ===========================================
 ## ==============================================================================
-
-
-
-url_selected_department <- "Oncology"
-
-institution_nodes[institution_nodes$department == url_selected_department,"name"]
-
-subgraph(institution_igraph)
-
-vertex.attributes(institution_igraph) %>% names()
-
-
-graph.union(make_ego_graph(
-  institution_igraph,
-  order = 2,
-  nodes = institution_nodes[institution_nodes$department == url_selected_department,"name"]
-)) %>% visIgraph()
