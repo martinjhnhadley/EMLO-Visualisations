@@ -30,8 +30,12 @@ initial_columns <-
     "DOI (NA=not available)"
   )
 
-## Reorder columns in dataframe by the initial_columns to ensure correct display in selectInput
-colnames(heliotope_df) <- colnames(heliotope_df)[order(match(colnames(heliotope_df), initial_columns))]
+# ## Reorder columns in dataframe by the initial_columns to ensure correct display in selectInput
+# colnames(heliotope_df) <- colnames(heliotope_df)[order(match(colnames(heliotope_df), initial_columns))]
+# 
+# order(match(colnames(heliotope_df), initial_columns))
+
+heliotope_df <- heliotope_df[,order(match(colnames(heliotope_df), initial_columns))]
 
 shinyServer(function(input, output) {
   
@@ -54,8 +58,8 @@ shinyServer(function(input, output) {
     rownames = FALSE,
     filter = 'top',
     escape = FALSE,
-    extensions = "Responsive",
-    options = list("language" = list("sSearch" = "Filter:"))
+    extensions = c("Responsive","FixedHeader"),
+    options = list("language" = list("sSearch" = "Filter:"), fixedHeader = TRUE)
   )
   
 })
