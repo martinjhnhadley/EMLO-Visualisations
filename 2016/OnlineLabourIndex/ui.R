@@ -17,12 +17,22 @@ library(htmltools)
 library(shinyBS)
 
 shinyServer(fluidPage(
+  tags$head(
+    tags$style(HTML("
+                    .navbar .container-fluid, .navbar-collapse {
+    padding-left:0;
+                    }
+                    .navbar-collapse.in {
+                    padding-left:30px;
+                    }
+                    "))
+    ),
   wellPanel(includeMarkdown(knitr::knit(
     "App_Description.Rmd"
   ))),
   tabsetPanel(
     tabPanel(
-      "Temporal Patterns of Online Work by Occupations",
+      "Temporal Patterns of Online Work by Occupation",
       fluidPage(
         uiOutput("selected_occupation_UI"),
         bsTooltip(
@@ -31,14 +41,40 @@ shinyServer(fluidPage(
           "top",
           options = list(container = "body")
         ),
-        highchartOutput("highchart", width = "100%"),
+        highchartOutput("occupation_xts_highchart", width = "100%"),
         width = "100%"
-        )
+      )
+    ),
+    tabPanel(
+      "Temporal Patterns of Online Work by Region",
+      fluidPage(
+        uiOutput("selected_regions_UI"),
+        bsTooltip(
+          "selected_regions_UI",
+          "Filter occupations by deleting/adding their names",
+          "top",
+          options = list(container = "body")
+        ),
+        highchartOutput("region_xts_highchart", width = "100%"),
+        width = "100%"
+      )
     ),
     tabPanel(
       "Geography of Demand for Online Work",
-      "There will be a bar chart here"
-    )
+      fluidPage(
+        fluidRow(
+          column(
+            uiOutput("global_trends_group_by_UI"),
+            width = 6
+          ),
+          column(
+            uiOutput("global_trends_stack_by_UI"),
+            width = 6
+          )
+        ),
+        highchartOutput("global_trends_stacked_bar_chart")
+      )
+    ),type = "pill"
   )
   
 ))
