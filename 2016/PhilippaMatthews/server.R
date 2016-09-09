@@ -17,10 +17,13 @@ heliotope_df <-
 heliotope_df$`Publication year` <-
   as.numeric(heliotope_df$`Publication year`)
 
+## Remove notes from column names
+colnames(heliotope_df) <- trimws(gsub("(; |[(]|)NS=not specified(|[)])|[(]NS = not specified[)]","",colnames(heliotope_df)))
+
 initial_columns <-
   c(
     "Optimal amino acid sequence(s)",
-    "HLA restriction(s); NS=not specified",
+    "HLA restriction(s)",
     "HBV protein",
     "Database",
     "Authors",
@@ -30,12 +33,19 @@ initial_columns <-
     "DOI (NA=not available)"
   )
 
-# ## Reorder columns in dataframe by the initial_columns to ensure correct display in selectInput
-# colnames(heliotope_df) <- colnames(heliotope_df)[order(match(colnames(heliotope_df), initial_columns))]
-# 
-# order(match(colnames(heliotope_df), initial_columns))
-
+## Reorder columns in dataframe by the initial_columns to ensure correct display in selectInput
 heliotope_df <- heliotope_df[,order(match(colnames(heliotope_df), initial_columns))]
+
+colnames(heliotope_df)
+# 
+# gsub("; NS=not specified","FOO",colnames(heliotope_df))
+# 
+# gsub("; NS=not specified|NS=not specified|[(]NS = not specified)","FOO",colnames(heliotope_df))
+# 
+# gsub("(; |[(]|)NS=not specified(|[)])|[(]NS = not specified[)]","",colnames(heliotope_df))
+# 
+# 
+# gsub("NS=not specified","FOO",colnames(heliotope_df))
 
 shinyServer(function(input, output) {
   
