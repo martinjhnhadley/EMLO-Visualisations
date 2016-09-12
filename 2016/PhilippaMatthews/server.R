@@ -22,30 +22,20 @@ colnames(heliotope_df) <- trimws(gsub("(; |[(]|)NS=not specified(|[)])|[(]NS = n
 
 initial_columns <-
   c(
+    "HBV protein",
     "Optimal amino acid sequence(s)",
     "HLA restriction(s)",
-    "HBV protein",
     "Database",
     "Authors",
     "Title",
     "Journal",
     "Publication year",
-    "DOI (NA=not available)"
+    "DOI"
   )
 
-## Reorder columns in dataframe by the initial_columns to ensure correct display in selectInput
-heliotope_df <- heliotope_df[,order(match(colnames(heliotope_df), initial_columns))]
+# ## Reorder columns in dataframe by the initial_columns to ensure correct display in selectInput
+# heliotope_df <- heliotope_df[,order(match(colnames(heliotope_df), initial_columns))]
 
-colnames(heliotope_df)
-# 
-# gsub("; NS=not specified","FOO",colnames(heliotope_df))
-# 
-# gsub("; NS=not specified|NS=not specified|[(]NS = not specified)","FOO",colnames(heliotope_df))
-# 
-# gsub("(; |[(]|)NS=not specified(|[)])|[(]NS = not specified[)]","",colnames(heliotope_df))
-# 
-# 
-# gsub("NS=not specified","FOO",colnames(heliotope_df))
 
 shinyServer(function(input, output) {
   
@@ -67,9 +57,10 @@ shinyServer(function(input, output) {
     heliotope_df[, selected_columns]},
     rownames = FALSE,
     filter = 'top',
+    selection = list(mode = "none"),
     escape = FALSE,
     extensions = c("Responsive","FixedHeader"),
-    options = list("language" = list("sSearch" = "Filter:"), fixedHeader = TRUE)
+    options = list("language" = list("sSearch" = "Filter:"), fixedHeader = list(header = TRUE))
   )
   
 })
