@@ -48,7 +48,8 @@ shinyServer(fluidPage(
     tabPanel(
       "Temporal Patterns of Online Work by Region",
       fluidPage(
-        uiOutput("selected_regions_UI"),
+        uiOutput("region_xts_group_by_UI"),
+        uiOutput("region_xts_selected_regions_UI"),
         bsTooltip(
           "selected_regions_UI",
           "Filter occupations by deleting/adding their names",
@@ -65,12 +66,12 @@ shinyServer(fluidPage(
         fluidRow(
           column(
             uiOutput("global_trends_group_by_UI"),
-            width = 6
-          ),
-          column(
-            uiOutput("global_trends_stack_by_UI"),
-            width = 6
+            width = 12
           )
+          # column(
+          #   uiOutput("global_trends_stack_by_UI"),
+          #   width = 6
+          # )
         ),
         highchartOutput("global_trends_stacked_bar_chart")
       )

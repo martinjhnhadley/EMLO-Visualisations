@@ -84,17 +84,52 @@ shinyServer(function(input, output, session) {
                        hc <<- hc %>% 
                          hc_add_series_xts(xts(filtered$count, filtered$date), name = x)
                      }))
-    hc
+    hc %>% hc_tooltip(valueDecimals = 0, 
+                      valueSuffix = "% (of 01/05/2016 value)"
+                      ) %>%
+      hc_xAxis(title = list("text" = "Index (Normalised to 100% on 01/05/2016)")) %>%
+      hc_rangeSelector(buttons = list(
+        list(type = 'month',
+             count = 1,
+             text= '1mth'
+        ), list(
+          type= 'month',
+          count= 3,
+          text= '3mth'
+        ), list(
+          type= 'month',
+          count= 6,
+          text= '6mth'
+        ), list(
+          type= 'ytd',
+          text= 'YTD'
+        ), list(
+          type= 'year',
+          count= 1,
+          text= '1y'
+        ), list(
+          type= 'all',
+          text= 'All'
+        )))
     
     
   })
   
-  output$selected_regions_UI <- renderUI({
+
+  
+  output$region_xts_group_by_UI <- renderUI({
+    selectInput("region_xts_group_by",
+                "Group By",
+                choices = list("Country Group (Otto: what should I be called)" = "country_group","Individual Countries (Otto: what should I be called)" = "country"),
+                width = "100%")
+  })
+  
+  output$region_xts_selected_regions_UI <- renderUI({
     selectInput(
-      "selected_region",
+      "region_xts_selected_region",
       label = "Selected Region",
-      choices = unique(gig_economy_by_boundary$country_group),
-      selected = unique(gig_economy_by_boundary$country_group),
+      choices = unique(gig_economy_by_boundary[[input$region_xts_group_by]]),
+      selected = unique(gig_economy_by_boundary[[input$region_xts_group_by]]),
       multiple = TRUE,
       width = "100%"
     )
@@ -102,19 +137,65 @@ shinyServer(function(input, output, session) {
   
   output$region_xts_highchart <- renderHighchart({
     
-    selected_categories <- input$selected_region
-    print(selected_categories)
+    selected_categories <- input$region_xts_selected_region
+    
+    normalit<-function(m){
+      (m - min(m))/(max(m)-min(m))
+    }
+    
+    # gig_economy_by_boundary <- filter(gig_economy_by_boundary, country_group %in% selected_categories) %>%
+    #   group_by(country_group) %>%
+    #   mutate(count = normalit(count))
+    # print(gig_economy_by_boundary)
+    gig_economy_by_boundary <- gig_economy_by_boundary %>% filter_(
+           input$region_xts_group_by %in% selected_categories) %>% {
+             filtered <- .
+             aggregate(
+               gig_economy_by_boundary$count,
+               by = list(
+                 date = gig_economy_by_boundary$timestamp,
+                 region = gig_economy_by_boundary[[input$region_xts_group_by]]
+               ),
+               FUN = sum
+             )
+           } %>%
+      group_by(region) %>%
+      mutate(x = 100*normalit(x))
     
     hc <- highchart()
     
     invisible(lapply(selected_categories,
                      function(x){
-                       filtered <- gig_economy_by_boundary[gig_economy_by_boundary$country_group == x,]
-                       aggregated <- aggregate(filtered$count, by=list(date=filtered$timestamp, region = filtered$country_group), FUN=sum)
+                       filtered <- gig_economy_by_boundary[gig_economy_by_boundary$region == x,]
                        hc <<- hc %>% 
-                         hc_add_series_xts(xts(aggregated$x, aggregated$date), name = x)
+                         hc_add_series_xts(xts(filtered$x, filtered$date), name = x)
                      }))
-    hc
+    hc %>%
+      hc_tooltip(valueDecimals = 0, valueSuffix = "% (by region/country)") %>%
+      hc_xAxis(title = list("text" = "Index (Normalised within groups)")) %>%
+      hc_rangeSelector(buttons = list(
+        list(type = 'month',
+             count = 1,
+             text= '1mth'
+        ), list(
+          type= 'month',
+          count= 3,
+          text= '3mth'
+        ), list(
+          type= 'month',
+          count= 6,
+          text= '6mth'
+        ), list(
+          type= 'ytd',
+          text= 'YTD'
+        ), list(
+          type= 'year',
+          count= 1,
+          text= '1y'
+        ), list(
+          type= 'all',
+          text= 'All'
+        )))
     
     
   })
@@ -122,7 +203,8 @@ shinyServer(function(input, output, session) {
   output$global_trends_group_by_UI <- renderUI({
     selectInput("global_trends_group_by",
                 "Group By",
-                choices = list("region" = "country_group","occupation" = "occupation"))
+                choices = list("region/country" = "country_group","occupation" = "occupation"),
+                width = "100%")
   })
   
   output$global_trends_stack_by_UI <- renderUI({
@@ -151,7 +233,7 @@ shinyServer(function(input, output, session) {
       data = prepared_data,
       categories_column = "x_axis",
       measure_columns = setdiff(colnames(prepared_data), c("x_axis")),
-      stacking_type = input$global_trends_stack_by
+      stacking_type = "percent"
     )
     
     
