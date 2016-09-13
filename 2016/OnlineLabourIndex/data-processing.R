@@ -12,6 +12,10 @@
 ## ==============================================================================
 library(readr)
 
+## ==== The data for this visualisation is deposited in Figshare and updated every 24h
+## ==== However, loading the data from Figshare takes 10+ seconds.
+## ==== Therefore the code for obtaining the data from Figshare is commented out and
+## ==== the data is obtained directly from the academic's department server.
 # fs_deposit_id <- 3761562
 # deposit_details <- fs_details(fs_deposit_id)
 # 
@@ -41,7 +45,6 @@ library(readr)
 # 
 # timeseries_download <- deposit_details[deposit_details$name == timeseries_most_recent_file,]$download_url
 # 
-# 
 # txt_import <- read.table(timeseries_download,sep = ",",stringsAsFactors = F, header = T)
 
 txt_import <- read_csv("http://linux.oii.ox.ac.uk/~otto.kassi/OLI/OLIdata.txt")
@@ -57,6 +60,10 @@ gig_economy_by_occupation <- gig_economy_by_occupation %>%
 ## =========================== Boundary Data ========================================
 ## ==============================================================================
 
+## ==== The data for this visualisation is deposited in Figshare and updated every 24h
+## ==== However, loading the data from Figshare takes 10+ seconds.
+## ==== Therefore the code for obtaining the data from Figshare is commented out and
+## ==== the data is obtained directly from the academic's department server.
 # boundary_file_name <- deposit_details %>%
 #   filter(name %in% deposit_details$name[grepl("bcountrydata_",deposit_details$name)]) %>%
 #   filter(size == max(size)) %>%
@@ -66,102 +73,14 @@ gig_economy_by_occupation <- gig_economy_by_occupation %>%
 # # boundary_import <- read.table(boundary_file_name,sep = ",",stringsAsFactors = F, header = T)
 # 
 # boundary_import <- read.table(boundary_file_name,sep = ",",stringsAsFactors = F)
-boundary_import <- read_csv("http://linux.oii.ox.ac.uk/~otto.kassi/OLI/bcountrydata.txt")
 
-# colnames(boundary_import) <- c("timestamp","count","country_group","country","occupation")
+boundary_import <- read_csv("http://linux.oii.ox.ac.uk/~otto.kassi/OLI/bcountrydata.txt")
 
 boundary_import$timestamp <- as.Date(boundary_import$timestamp)
 gig_economy_by_boundary <- boundary_import
 
-str(gig_economy_by_boundary)
-
-
-
 ## =========================== Experiment ========================================
 ## ==============================================================================
-# 
-# str(gig_economy_by_boundary)
-# 
-# unique(gig_economy_by_boundary$country_group)
-# 
-# selected_categories = unique(gig_economy_by_boundary$country_group)
-# 
-# normalit<-function(m){
-#   (m - min(m))/(max(m)-min(m))
-# }
-# 
-# rep(letters[1:4], 2, 4*4)
-# round(runif(12, min = 10, max = 40))
-# 
-# selected_categories <- c(letters[1:4])
-# 
-# df <- data.frame(
-#   "date" = rep(1:4, 2, 4*4),
-#   "country_group" = rep(letters[1:4], 2, 4*4),
-#   "count" = round(runif(16, min = 10, max = 40))
-# )
-# df
-# filter(df,
-#        country_group %in% selected_categories) %>%
-#   group_by(country_group) %>%
-#   mutate(count = normalit(count))
-# 
-# 
-# 
-# 
-# unique(gig_economy_by_boundary$country_group)
-# 
-# selected_categories = unique(gig_economy_by_boundary$country_group)
-# 
-# filter(gig_economy_by_boundary,
-#        country_group %in% selected_categories) %>%{
-#          filtered <- .
-#          aggregate(
-#            gig_economy_by_boundary$count,
-#            by = list(
-#              date = gig_economy_by_boundary$timestamp,
-#              region = gig_economy_by_boundary$country_group
-#            ),
-#            FUN = sum
-#          )
-#        } %>%
-#   group_by(region) %>%
-#   mutate(x = 100*normalit(x))
-# 
-# 
-# group_normalised <- filter(gig_economy_by_boundary,
-#        country_group %in% selected_categories) %>%
-#   group_by(country_group) %>%
-#   mutate(count = normalit(count)) %>% {
-#     group_normalised <- .
-#     aggregate(
-#       group_normalised$count,
-#       by = list(
-#         date = group_normalised$timestamp,
-#         region = group_normalised$country_group
-#       ),
-#       FUN = sum
-#     )
-#   }
-# 
-# group_normalised[group_normalised$date == "2016-09-06",]$x %>% sum()
-# 
-# 
-# 
-# str(foo_group_normalised)
-# 
-# foo_group_normalised$count %>% max()
-# 
-# invisible(lapply(selected_categories,
-#                  function(x){
-#                    filtered <- gig_economy_by_boundary[gig_economy_by_boundary$country_group == x,]
-#                    aggregated <- aggregate(filtered$count, by=list(date=filtered$timestamp, region = filtered$country_group), FUN=sum)
-#                    aggregated
-#                  }))
-# 
-# 
-# 
-# 
-# 
-# 
-# 
+
+gig_economy_by_boundary$country_group %>% unique()
+
