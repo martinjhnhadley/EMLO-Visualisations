@@ -27,12 +27,16 @@ shinyServer(fluidPage(
                     }
                     "))
     ),
-  wellPanel(includeMarkdown(knitr::knit(
-    "App_Description.Rmd"
-  ))),
+  # wellPanel(includeMarkdown(knitr::knit(
+  #   "App_Description.Rmd"
+  # ))),
+  HTML('<img src = "oii_thumbnail.png" style="max-width:270;float:right;margin-right:20px"/>
+
+       <h1>Online Labour Index <a href="https://twitter.com/ilabourproject" class="twitter-follow-button" data-size="large" data-show-count="false">Follow @ilabourproject</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></h1>
+       '),
   tabsetPanel(
     tabPanel(
-      "Temporal Patterns of Online Work by Occupation",
+      "By occupation",
       fluidPage(
         wellPanel("Add/remove occupations from the box below to change the data shown in the chart beneath."),
         uiOutput("selected_occupation_UI"),
@@ -47,7 +51,7 @@ shinyServer(fluidPage(
       )
     ),
     tabPanel(
-      "Temporal Patterns of Online Work by Region",
+      "By employer country",
       fluidPage(
         wellPanel("Add/remove regions from the box below to change the data shown in the chart beneath."),
         uiOutput("region_xts_group_by_UI"),
@@ -63,7 +67,7 @@ shinyServer(fluidPage(
       )
     ),
     tabPanel(
-      "Geography of Demand for Online Work",
+      "Occupation x employer country",
       fluidPage(
         wellPanel("Zoom into the chart by selecting an area of interest, pan around in the chart by holding SHIFT."),
         fluidRow(
@@ -78,7 +82,16 @@ shinyServer(fluidPage(
         ),
         highchartOutput("global_trends_stacked_bar_chart")
       )
-    ),type = "pill"
+    ),
+    tabPanel(
+      "About",
+      fluidPage(
+        wellPanel(includeMarkdown(knitr::knit(
+          "App_Description.Rmd"
+        )))
+      )
+    ),
+    type = "pill"
   )
   
 ))

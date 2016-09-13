@@ -63,9 +63,9 @@ shinyServer(function(input, output, session) {
   output$selected_occupation_UI <- renderUI({
     selectInput(
       "selected_occupation",
-      label = "Selected Occupation",
+      label = "Selected Occupations",
       choices = unique(gig_economy_by_occupation$occupation),
-      selected = unique(gig_economy_by_occupation$occupation),
+      selected = setdiff(unique(gig_economy_by_occupation$occupation),"Total"),
       multiple = TRUE,
       width = "100%"
     )
@@ -86,7 +86,7 @@ shinyServer(function(input, output, session) {
     hc %>% hc_tooltip(valueDecimals = 0
                     
                       ) %>%
-      hc_yAxis("opposite" = FALSE, title = list("text" = "Index (Normalised to 100 through 05/2016)")) %>%
+      hc_yAxis("opposite" = FALSE, title = list("text" = "Online Labour Index")) %>%
       hc_rangeSelector(buttons = list(
         list(type = 'month',
              count = 1,
@@ -217,6 +217,10 @@ shinyServer(function(input, output, session) {
   # })
   
   output$global_trends_stacked_bar_chart <- renderHighchart({
+    
+    if(is.null(input$global_trends_group_by)){
+      return()
+    }
     
     x_axis <- input$global_trends_group_by
     y_axis <- "occupation"
