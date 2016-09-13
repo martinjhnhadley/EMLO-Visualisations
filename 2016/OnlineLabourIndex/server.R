@@ -127,7 +127,7 @@ shinyServer(function(input, output, session) {
     print(gig_economy_by_boundary[["country_group"]])
     selectInput(
       "region_xts_selected_region",
-      label = "Selected Country Groups (YES)",
+      label = "Selected Country Groups",
       choices = unique(gig_economy_by_boundary[["country_group"]]),
       selected = unique(gig_economy_by_boundary[["country_group"]]),
       multiple = TRUE,

@@ -34,6 +34,7 @@ shinyServer(fluidPage(
     tabPanel(
       "Temporal Patterns of Online Work by Occupation",
       fluidPage(
+        wellPanel("Add/remove occupations from the box below to change the data shown in the chart beneath."),
         uiOutput("selected_occupation_UI"),
         bsTooltip(
           "selected_occupation_UI",
@@ -48,6 +49,7 @@ shinyServer(fluidPage(
     tabPanel(
       "Temporal Patterns of Online Work by Region",
       fluidPage(
+        wellPanel("Add/remove regions from the box below to change the data shown in the chart beneath."),
         uiOutput("region_xts_group_by_UI"),
         uiOutput("region_xts_selected_regions_UI"),
         bsTooltip(
@@ -63,6 +65,7 @@ shinyServer(fluidPage(
     tabPanel(
       "Geography of Demand for Online Work",
       fluidPage(
+        wellPanel("Zoom into the chart by selecting an area of interest, pan around in the chart by holding SHIFT."),
         fluidRow(
           column(
             uiOutput("global_trends_group_by_UI"),
