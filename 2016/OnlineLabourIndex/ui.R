@@ -30,10 +30,10 @@ shinyServer(fluidPage(
   # wellPanel(includeMarkdown(knitr::knit(
   #   "App_Description.Rmd"
   # ))),
-  HTML('<img src = "oii_thumbnail.png" style="max-width:270;float:right;margin-right:20px"/>
-
-       <h1>Online Labour Index <a href="https://twitter.com/ilabourproject" class="twitter-follow-button" data-size="large" data-show-count="false">Follow @ilabourproject</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></h1>
-       '),
+  # HTML('<img src = "oii_thumbnail.png" style="max-width:270;float:right;margin-right:20px"/>
+  # 
+  #      <h1>Online Labour Index <a href="https://twitter.com/ilabourproject" class="twitter-follow-button" data-size="large" data-show-count="false">Follow @ilabourproject</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></h1>
+  #      '),
   tabsetPanel(
     tabPanel(
       "By occupation",

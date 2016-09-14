@@ -12,7 +12,6 @@
 ## ==============================================================================
 library(readr)
 
-
 fs_deposit_id <- 3761562
 deposit_details <- fs_details(fs_deposit_id)
 
@@ -33,6 +32,17 @@ region_import$timestamp <- as.Date(region_import$timestamp)
 ## Make symbol for visualising:
 gig_economy_by_boundary <- region_import
 
+
+str(gig_economy_by_boundary)
+
+## ===== Experiment
+
+x_axis <- "country"
+y_axis <- "occupation"
+
+
+x_axis <- "occupation"
+y_axis <- "country"
 
 
 
