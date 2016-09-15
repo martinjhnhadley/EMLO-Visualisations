@@ -73,6 +73,19 @@ shinyServer(function(input, output, session) {
     )
   })
   
+  output$occupation_rollmean_k_UI <- renderUI({
+    radioButtons(
+      "occupation_rollmean_k",
+      label = "",
+      choices = list(
+        "Show actual value" = 1,
+        "Show 28 day moving average" = 28
+      ),
+      selected = 1,
+      inline = TRUE
+    )
+  })
+  
   output$occupation_xts_highchart <- renderHighchart({
     selected_categories <- input$selected_occupation
     
@@ -81,9 +94,12 @@ shinyServer(function(input, output, session) {
     invisible(lapply(selected_categories,
                      function(x) {
                        filtered <-
-                         gig_economy_by_occupation[gig_economy_by_occupation$occupation == x, ]
+                         gig_economy_by_occupation[gig_economy_by_occupation$occupation == x,]
                        hc <<- hc %>%
-                         hc_add_series_xts(xts(filtered$count, filtered$date), name = x)
+                         hc_add_series_xts(rollmean(
+                           xts(filtered$count, filtered$date),
+                           k = as.numeric(input$occupation_rollmean_k)
+                         ), name = x)
                      }))
     hc %>% hc_tooltip(valueDecimals = 0) %>%
       hc_yAxis("opposite" = FALSE,
@@ -243,89 +259,119 @@ shinyServer(function(input, output, session) {
     
     ## Sum by occupation and region
     
-    switch (x_axis,
-            "country" = {
-              
-              
-              y_axis_order <- gig_economy_by_boundary %>%
-                group_by_(x_axis) %>%
-                summarise(total = sum(count)) %>%
-                arrange(desc(total)) %>%
-                select_(x_axis) %>%
-                unlist(use.names = FALSE) %>%
-                .[1:20]
-              
-              prepared_data <- gig_economy_by_boundary %>% 
-                filter(country %in% y_axis_order) %>%
-                group_by_(x_axis, y_axis) %>%
-                summarise(total = sum(count)) %>%
-                spread_(y_axis, "total") %>%
-                rename(x_axis = country) %>%
-                as.data.frame()
-              
-              stacked_bar_chart(
-                data = prepared_data[match(y_axis_order, prepared_data$x_axis),],
-                categories_column = "x_axis",
-                measure_columns = setdiff(colnames(prepared_data), c("x_axis")),
-                stacking_type = "percent"
-              ) %>% hc_chart(zoomType = "x",
-                             panning = TRUE,
-                             panKey = 'shift') %>%
-                hc_tooltip(
-                  formatter = JS("function() {return '<b>'+ this.series.name +'</b>: '+ Highcharts.numberFormat(this.percentage, 0) +' %';}"))
-            },
-            "occupation" = {
-              y_axis_order <- gig_economy_by_boundary %>%
-                group_by_(x_axis) %>%
-                summarise(total = sum(count)) %>%
-                arrange(desc(total)) %>%
-                select_(x_axis) %>%
-                unlist(use.names = FALSE)
-              
-              prepared_data <- gig_economy_by_boundary %>% 
-                group_by_(x_axis, y_axis) %>%
-                summarise(total = sum(count)) %>%
-                spread_(y_axis, "total") %>%
-                rename_("x_axis" = x_axis) %>%
-                as.data.frame()
-              
-              stacked_bar_chart(
-                data = prepared_data[match(y_axis_order, prepared_data$x_axis),],
-                categories_column = "x_axis",
-                measure_columns = setdiff(colnames(prepared_data), c("x_axis")),
-                stacking_type = "percent"
-              ) %>% hc_chart(zoomType = "x",
-                             panning = TRUE,
-                             panKey = 'shift') %>%
-                hc_tooltip(
-                  formatter = JS("function() {return '<b>'+ this.series.name +'</b>: '+ Highcharts.numberFormat(this.percentage, 0) +' %';}"))
-            }, 
-            "country_group" = {
-              # y_axis_order <- gig_economy_by_boundary %>%
-              #   group_by_(x_axis) %>%
-              #   summarise(total = sum(count)) %>%
-              #   arrange(desc(total)) %>%
-              #   select_(x_axis) %>%
-              #   unlist(use.names = FALSE)
-              
-              prepared_data <- gig_economy_by_boundary %>% 
-                group_by_(x_axis, y_axis) %>%
-                summarise(total = sum(count)) %>%
-                spread_(y_axis, "total") %>%
-                rename_("x_axis" = x_axis) %>%
-                as.data.frame()
-              
-              stacked_bar_chart(
-                data = prepared_data[match(c("United Kingdom","Germany","other Europe","India","other Asia and Oceania","United States","other Americas","all Africa"), prepared_data$x_axis),],
-                categories_column = "x_axis",
-                measure_columns = setdiff(colnames(prepared_data), c("x_axis")),
-                stacking_type = "percent"
-              ) %>% hc_chart(zoomType = "x",
-                             panning = TRUE,
-                             panKey = 'shift') %>%
-                hc_tooltip(
-                  formatter = JS("function() {return '<b>'+ this.series.name +'</b>: '+ Highcharts.numberFormat(this.percentage, 0) +' %';}"))
-            }
+    switch (
+      x_axis,
+      "country" = {
+        y_axis_order <- gig_economy_by_boundary %>%
+          group_by_(x_axis) %>%
+          summarise(total = sum(count)) %>%
+          arrange(desc(total)) %>%
+          select_(x_axis) %>%
+          unlist(use.names = FALSE) %>%
+          .[1:20]
+        
+        prepared_data <- gig_economy_by_boundary %>%
+          filter(country %in% y_axis_order) %>%
+          group_by_(x_axis, y_axis) %>%
+          summarise(total = sum(count)) %>%
+          spread_(y_axis, "total") %>%
+          rename(x_axis = country) %>%
+          as.data.frame()
+        
+        
+        
+        stacked_bar_chart(
+          data = prepared_data[match(y_axis_order, prepared_data$x_axis), ],
+          categories_column = "x_axis",
+          measure_columns = setdiff(colnames(prepared_data), c("x_axis")),
+          stacking_type = "percent"
+        ) %>% hc_chart(zoomType = "x",
+                       panning = TRUE,
+                       panKey = 'shift') %>%
+          hc_tooltip(
+            formatter = JS(
+              "function() {return '<b>'+ this.series.name +'</b>: '+ Highcharts.numberFormat(this.percentage, 0) +' %';}"
+            )
+          )
+      },
+      "occupation" = {
+        y_axis_order <- gig_economy_by_boundary %>%
+          group_by_(y_axis) %>%
+          summarise(total = sum(count)) %>%
+          arrange(desc(total)) %>%
+          select_(y_axis) %>%
+          unlist(use.names = FALSE)
+        
+        
+        prepared_data <- gig_economy_by_boundary %>%
+          group_by_(x_axis, y_axis) %>%
+          summarise(total = sum(count)) %>%
+          spread_(y_axis, "total") %>%
+          rename_("x_axis" = x_axis) %>%
+          as.data.frame()
+        
+        print(str(prepared_data))
+        print(match(y_axis_order, setdiff(colnames(prepared_data), "x_axis")))
+        
+        
+        
+        stacked_bar_chart(
+          data = prepared_data,
+          categories_column = "x_axis",
+          measure_columns = setdiff(colnames(prepared_data), c("x_axis")),
+          stacking_type = "percent",
+          # ordering_function = var
+          explicit_order = rev(match(y_axis_order, setdiff(colnames(prepared_data), "x_axis")))
+        ) %>% hc_chart(zoomType = "x",
+                       panning = TRUE,
+                       panKey = 'shift') %>%
+          hc_tooltip(
+            formatter = JS(
+              "function() {return '<b>'+ this.series.name +'</b>: '+ Highcharts.numberFormat(this.percentage, 0) +' %';}"
+            )
+          )
+      },
+      "country_group" = {
+        # y_axis_order <- gig_economy_by_boundary %>%
+        #   group_by_(x_axis) %>%
+        #   summarise(total = sum(count)) %>%
+        #   arrange(desc(total)) %>%
+        #   select_(x_axis) %>%
+        #   unlist(use.names = FALSE)
+        
+        prepared_data <- gig_economy_by_boundary %>%
+          group_by_(x_axis, y_axis) %>%
+          summarise(total = sum(count)) %>%
+          spread_(y_axis, "total") %>%
+          rename_("x_axis" = x_axis) %>%
+          as.data.frame()
+        
+        stacked_bar_chart(
+          data = prepared_data[match(
+            c(
+              "United Kingdom",
+              "Germany",
+              "other Europe",
+              "India",
+              "other Asia and Oceania",
+              "United States",
+              "other Americas",
+              "all Africa"
+            ),
+            prepared_data$x_axis
+          ), ],
+          categories_column = "x_axis",
+          measure_columns = setdiff(colnames(prepared_data), c("x_axis")),
+          stacking_type = "percent"
+        ) %>% hc_chart(zoomType = "x",
+                       panning = TRUE,
+                       panKey = 'shift') %>%
+          hc_tooltip(
+            formatter = JS(
+              "function() {return '<b>'+ this.series.name +'</b>: '+ Highcharts.numberFormat(this.percentage, 0) +' %';}"
+            )
+          )
+      }
     )
     
   })

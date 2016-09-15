@@ -38,7 +38,7 @@ shinyServer(fluidPage(
     tabPanel(
       "By occupation",
       fluidPage(
-        wellPanel("Add/remove occupations from the box below to change the data shown in the chart beneath."),
+        wellPanel("Add/remove occupations in the box below to change the data shown in the chart"),
         uiOutput("selected_occupation_UI"),
         bsTooltip(
           "selected_occupation_UI",
@@ -46,6 +46,7 @@ shinyServer(fluidPage(
           "top",
           options = list(container = "body")
         ),
+        uiOutput("occupation_rollmean_k_UI"),
         highchartOutput("occupation_xts_highchart", width = "100%"),
         width = "100%"
       )
@@ -53,7 +54,7 @@ shinyServer(fluidPage(
     tabPanel(
       "By employer country",
       fluidPage(
-        wellPanel("Add/remove regions from the box below to change the data shown in the chart beneath."),
+        wellPanel("Add/remove regions in the box below to change the data shown in the chart"),
         uiOutput("region_xts_group_by_UI"),
         uiOutput("region_xts_selected_regions_UI"),
         bsTooltip(
@@ -62,6 +63,7 @@ shinyServer(fluidPage(
           "top",
           options = list(container = "body")
         ),
+        uiOutput("region_rollmean_k_UI"),
         highchartOutput("region_xts_highchart", width = "100%"),
         width = "100%"
       )
