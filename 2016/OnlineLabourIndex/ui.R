@@ -38,17 +38,30 @@ shinyServer(fluidPage(
     tabPanel(
       "By occupation",
       fluidPage(
-        wellPanel("Add/remove occupations in the box below to change the data shown in the chart"),
-        uiOutput("selected_occupation_UI"),
-        bsTooltip(
-          "selected_occupation_UI",
-          "Filter occupations by deleting/adding their names",
-          "top",
-          options = list(container = "body")
-        ),
-        uiOutput("occupation_rollmean_k_UI"),
-        highchartOutput("occupation_xts_highchart", width = "100%"),
-        width = "100%"
+        
+        tabsetPanel(
+          tabPanel(
+            "28-day average",
+            fluidPage(
+              wellPanel("Add/remove occupations in the box below to change the data shown in the chart"),
+              uiOutput("selected_occupation_UI"),
+              bsTooltip(
+                "selected_occupation_UI",
+                "Filter occupations by deleting/adding their names",
+                "top",
+                options = list(container = "body")
+              ),
+              uiOutput("occupation_rollmean_k_UI"),
+              highchartOutput("occupation_xts_highchart", width = "100%")
+            )
+          ),
+          tabPanel(
+            "Daily Values",
+            fluidPage(
+              
+            )
+          )
+        )
       )
     ),
     tabPanel(
