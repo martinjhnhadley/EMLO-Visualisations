@@ -34,3 +34,32 @@ gig_economy_by_boundary <- region_import
 
 
 ## ===== Experiment
+
+# vect <- 1:10
+# 
+# foo <- gig_economy_by_occupation %>%
+#   filter(occupation == "Total") %>%
+#   select(date, count)
+# 
+# foo <- xts(foo$count, foo$date)
+# 
+# 
+# rollapply(as.zoo(foo), width = 28, FUN = mean, align = "center", partial = TRUE)
+# 
+# 
+# stackoverflow_ma <- function(x, n=5, sides = 1){stats::filter(x,rep(1/n,n), sides = sides)} # http://stackoverflow.com/a/4862334/1659890
+# 
+# 
+# foo[index(foo)] <- as.vector(my_ma(as.vector(foo), n = 28))
+# 
+# na.omit(foo) %>% head()
+
+# 
+# foo %>% class()
+# 
+# as.xts(stackoverflow_ma(foo, n = 28), index(foo)) %>% class()
+
+
+
+
+

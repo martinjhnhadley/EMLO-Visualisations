@@ -22,6 +22,8 @@ library(tidyr)
 
 source("data-processing.R", local = T)
 
+stackoverflow_ma <- function(x, n=5, sides = 1){stats::filter(x,rep(1/n,n), sides = sides)} # http://stackoverflow.com/a/4862334/1659890
+
 stacked_bar_chart <- function(data = NA,
                               categories_column = NA,
                               measure_columns = NA,
@@ -65,9 +67,7 @@ shinyServer(function(input, output, session) {
       "selected_occupation",
       label = "Selected Occupations",
       choices = unique(gig_economy_by_occupation$occupation),
-      selected = setdiff(unique(
-        gig_economy_by_occupation$occupation
-      ), "Total"),
+      selected = "Total",
       multiple = TRUE,
       width = "100%"
     )
@@ -81,7 +81,7 @@ shinyServer(function(input, output, session) {
         "Show actual value" = 1,
         "Show 28 day moving average" = 28
       ),
-      selected = 1,
+      selected = 28,
       inline = TRUE
     )
   })
@@ -89,17 +89,27 @@ shinyServer(function(input, output, session) {
   output$occupation_xts_highchart <- renderHighchart({
     selected_categories <- input$selected_occupation
     
+    legend_order <- gig_economy_by_occupation %>%
+      filter(occupation %in% selected_categories) %>%
+      group_by(occupation) %>%
+      mutate(total = sum(count)) %>%
+      select(occupation, total) %>%
+      arrange(desc(total)) %>%
+      select(occupation) %>%
+      unique() %>%
+      unlist(use.names = F)
+    
     hc <- highchart()
     
     invisible(lapply(selected_categories,
                      function(x) {
                        filtered <-
                          gig_economy_by_occupation[gig_economy_by_occupation$occupation == x,]
+                       xts_data <- xts(filtered$count, filtered$date)
+                       xts_data[index(xts_data)] <- as.vector(stackoverflow_ma(as.vector(xts_data), n = as.numeric(input$occupation_rollmean_k)))
+                       print(xts_data)
                        hc <<- hc %>%
-                         hc_add_series_xts(rollmean(
-                           xts(filtered$count, filtered$date),
-                           k = as.numeric(input$occupation_rollmean_k)
-                         ), name = x)
+                         hc_add_series_xts(na.omit(xts_data), name = x, index = which(legend_order == x) - 1)
                      }))
     hc %>% hc_tooltip(valueDecimals = 0) %>%
       hc_yAxis("opposite" = FALSE,
@@ -158,40 +168,33 @@ shinyServer(function(input, output, session) {
   output$region_xts_highchart <- renderHighchart({
     selected_categories <- input$region_xts_selected_region
     
-    normalit <- function(m) {
-      (m - min(m)) / (max(m) - min(m))
-    }
+    tallied_data <- gig_economy_by_boundary %>%
+      group_by(country_group, timestamp) %>%
+      mutate(total = sum(count)) %>%
+      select(-count) %>%
+      distinct(total) %>% # keep ONLY total and groups
+      group_by(timestamp) %>% 
+      mutate(total = 100 * {total / sum(total)})
     
-    # gig_economy_by_boundary <- filter(gig_economy_by_boundary, country_group %in% selected_categories) %>%
-    #   group_by(country_group) %>%
-    #   mutate(count = normalit(count))
-    # print(gig_economy_by_boundary)
-    gig_economy_by_boundary %<>% {
-      filtered <- .
-      aggregate(
-        gig_economy_by_boundary$count,
-        by = list(
-          date = gig_economy_by_boundary$timestamp,
-          country_group = gig_economy_by_boundary$country_group
-        ),
-        FUN = sum
-      )
-    } %>%
-      group_by(date) %>%
-      mutate(x = 100 * {
-        x / sum(x)
-      })
-    
-    
+    legend_order <- tallied_data %>%
+      ungroup() %>%
+      arrange(desc(total)) %>%
+      select(country_group) %>%
+      unique() %>%
+      unlist(use.names = F)
     
     hc <- highchart()
     
     invisible(lapply(selected_categories,
                      function(x) {
                        filtered <-
-                         gig_economy_by_boundary[gig_economy_by_boundary$country_group == x, ]
+                         tallied_data[tallied_data$country_group == x,]
                        hc <<- hc %>%
-                         hc_add_series_xts(xts(filtered$x, filtered$date), name = x)
+                         hc_add_series_xts(
+                           xts(filtered$total, filtered$timestamp),
+                           name = x,
+                           index = which(legend_order == x) - 1
+                         )
                      }))
     hc %>%
       hc_tooltip(valueDecimals = 2, valueSuffix = "%") %>%
@@ -231,7 +234,7 @@ shinyServer(function(input, output, session) {
       "global_trends_group_by",
       "Group By",
       choices = list(
-        "Top four countries (others aggregated by region)" = "country_group",
+        "Top 5 countries (others aggregated by region)" = "country_group",
         "Occupation" = "occupation",
         "Top 20 countries" = "country"
       ),
