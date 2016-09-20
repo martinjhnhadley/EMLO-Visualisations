@@ -22,14 +22,17 @@ library(tidyr)
 
 source("data-processing.R", local = T)
 
-stackoverflow_ma <- function(x, n=5, sides = 1){stats::filter(x,rep(1/n,n), sides = sides)} # http://stackoverflow.com/a/4862334/1659890
+stackoverflow_ma <-
+  function(x, n = 5, sides = 1) {
+    stats::filter(x, rep(1 / n, n), sides = sides)
+  } # http://stackoverflow.com/a/4862334/1659890
 
 stacked_bar_chart <- function(data = NA,
                               categories_column = NA,
                               measure_columns = NA,
                               stacking_type = NA,
                               ordering_function = c,
-                              explicit_order = NA) {
+                              explicit_order = NULL) {
   ordered_measure <-
     order(unlist(lapply(measure_columns, function(x) {
       ordering_function(data[, x])
@@ -47,7 +50,7 @@ stacked_bar_chart <- function(data = NA,
         name = measure_columns[colNumber],
         data = data[, measure_columns[colNumber]],
         index = {
-          if (is.na(explicit_order)) {
+          if (is.null(explicit_order)) {
             ordered_measure[colNumber]
           } else
             explicit_order[colNumber]
@@ -59,18 +62,104 @@ stacked_bar_chart <- function(data = NA,
     hc_chart(type = "bar") %>%
     hc_plotOptions(series = list(stacking = as.character(stacking_type))) %>%
     hc_legend(reversed = TRUE)
-}
+} %>%
+  hc_credits(text = 'Source: Online Labour Index',
+             enabled = TRUE,
+             href = 'http://ilabour.oii.ox.ac.uk/online-labour-index/',
+             position = list(align = "right"))
 
 shinyServer(function(input, output, session) {
   output$selected_occupation_UI <- renderUI({
     selectInput(
       "selected_occupation",
-      label = "Selected Occupations",
-      choices = unique(gig_economy_by_occupation$occupation),
-      selected = "Total",
+      label = HTML("Selected Occupations <span class='glyphicon glyphicon-info-sign' aria-hidden='true'></span>"),
+      choices = c(unique(
+        gig_economy_by_occupation$occupation
+      ), "Total"),
+      selected = setdiff(unique(
+        gig_economy_by_occupation$occupation
+      ), "Total"),
       multiple = TRUE,
       width = "100%"
     )
+  })
+  
+  output$landing_rollmean_k_UI <- renderUI({
+    radioButtons(
+      "landing_rollmean_k",
+      label = "",
+      choices = list(
+        "Show daily value" = 1,
+        "Show 28-day moving average" = 28
+      ),
+      selected = 28,
+      inline = TRUE
+    )
+  })
+  
+  output$landing_xts_highchart <- renderHighchart({
+    selected_categories <- "Total"
+    
+    
+    
+    
+    # invisible(lapply(selected_categories,
+    #                  function(x) {
+    #                    filtered <-
+    #                      gig_economy_by_occupation[gig_economy_by_occupation$occupation == x,]
+    #                    xts_data <- xts(filtered$count, filtered$date)
+    #                    xts_data[index(xts_data)] <- as.vector(stackoverflow_ma(as.vector(xts_data), n = as.numeric(input$landing_rollmean_k_UI)))
+    #                    print(xts_data)
+    #                    hc <<- hc %>%
+    #                      hc_add_series_xts(na.omit(xts_data), name = x, index = which(legend_order == x) - 1)
+    #                  }))
+    #
+    #
+    
+    filtered <-
+      gig_economy_by_occupation[gig_economy_by_occupation$occupation == "Total", ]
+    xts_data <- xts(filtered$count, filtered$date)
+    xts_data[index(xts_data)] <-
+      as.vector(stackoverflow_ma(as.vector(xts_data), n = as.numeric(input$landing_rollmean_k)))
+    
+    highchart() %>%
+      hc_add_series_xts(na.omit(xts_data), name = "Total") %>%
+      hc_tooltip(valueDecimals = 0) %>%
+      hc_yAxis("opposite" = FALSE,
+               title = list("text" = "Online Labour Index")) %>%
+      hc_rangeSelector(buttons = list(
+        list(
+          type = 'month',
+          count = 1,
+          text = '1mth'
+        ),
+        list(
+          type = 'month',
+          count = 3,
+          text = '3mth'
+        ),
+        list(
+          type = 'month',
+          count = 6,
+          text = '6mth'
+        ),
+        list(type = 'ytd',
+             text = 'YTD'),
+        list(
+          type = 'year',
+          count = 1,
+          text = '1y'
+        ),
+        list(type = 'all',
+             text = 'All')
+      )) %>%
+      hc_credits(text = 'Source: Online Labour Index',
+                 enabled = TRUE,
+                 href = 'http://ilabour.oii.ox.ac.uk/online-labour-index/',
+                 position = list(align = "right"))
+    
+    
+    
   })
   
   output$occupation_rollmean_k_UI <- renderUI({
@@ -78,13 +167,14 @@ shinyServer(function(input, output, session) {
       "occupation_rollmean_k",
       label = "",
       choices = list(
-        "Show actual value" = 1,
-        "Show 28 day moving average" = 28
+        "Show daily value" = 1,
+        "Show 28-day moving average" = 28
       ),
       selected = 28,
       inline = TRUE
     )
   })
+  
   
   output$occupation_xts_highchart <- renderHighchart({
     selected_categories <- input$selected_occupation
@@ -104,12 +194,15 @@ shinyServer(function(input, output, session) {
     invisible(lapply(selected_categories,
                      function(x) {
                        filtered <-
-                         gig_economy_by_occupation[gig_economy_by_occupation$occupation == x,]
-                       xts_data <- xts(filtered$count, filtered$date)
-                       xts_data[index(xts_data)] <- as.vector(stackoverflow_ma(as.vector(xts_data), n = as.numeric(input$occupation_rollmean_k)))
-                       print(xts_data)
+                         gig_economy_by_occupation[gig_economy_by_occupation$occupation == x, ]
+                       xts_data <-
+                         xts(filtered$count, filtered$date)
+                       xts_data[index(xts_data)] <-
+                         as.vector(stackoverflow_ma(as.vector(xts_data), n = as.numeric(input$occupation_rollmean_k)))
                        hc <<- hc %>%
-                         hc_add_series_xts(na.omit(xts_data), name = x, index = which(legend_order == x) - 1)
+                         hc_add_series_xts(na.omit(xts_data),
+                                           name = x,
+                                           index = which(legend_order == x) - 1)
                      }))
     hc %>% hc_tooltip(valueDecimals = 0) %>%
       hc_yAxis("opposite" = FALSE,
@@ -139,7 +232,11 @@ shinyServer(function(input, output, session) {
         ),
         list(type = 'all',
              text = 'All')
-      ))
+      )) %>%
+      hc_credits(text = 'Source: Online Labour Index',
+                 enabled = TRUE,
+                 href = 'http://ilabour.oii.ox.ac.uk/online-labour-index/',
+                 position = list(align = "right"))
     
     
   })
@@ -152,16 +249,49 @@ shinyServer(function(input, output, session) {
   #               choices = list("Country Group (Otto: what should I be called)" = "country_group","Individual Countries (Otto: what should I be called)" = "country"),
   #               width = "100%")
   # })
-  #
+  
   output$region_xts_selected_regions_UI <- renderUI({
-    print(gig_economy_by_boundary[["country_group"]])
     selectInput(
       "region_xts_selected_region",
-      label = "Selected Country Groups",
-      choices = unique(gig_economy_by_boundary[["country_group"]]),
-      selected = unique(gig_economy_by_boundary[["country_group"]]),
+      label = HTML("Selected Countries/Regions <span class='glyphicon glyphicon-info-sign' aria-hidden='true'></span>"),
+      # choices = unique(gig_economy_by_boundary[["country_group"]]),
+      choices = c(
+        "United States",
+        "Canada",
+        "other Americas",
+        "United Kingdom",
+        "other Europe",
+        "Australia",
+        "India",
+        "other Asia and Oceania",
+        "all Africa"
+      ),
+      selected = c(
+        "United States",
+        "Canada",
+        "other Americas",
+        "United Kingdom",
+        "other Europe",
+        "Australia",
+        "India",
+        "other Asia and Oceania",
+        "all Africa"
+      ),
       multiple = TRUE,
       width = "100%"
+    )
+  })
+  
+  output$region_rollmean_k_UI <- renderUI({
+    radioButtons(
+      "region_rollmean_k",
+      label = "",
+      choices = list(
+        "Show daily value" = 1,
+        "Show 28-day moving average" = 28
+      ),
+      selected = 28,
+      inline = TRUE
     )
   })
   
@@ -173,8 +303,22 @@ shinyServer(function(input, output, session) {
       mutate(total = sum(count)) %>%
       select(-count) %>%
       distinct(total) %>% # keep ONLY total and groups
-      group_by(timestamp) %>% 
-      mutate(total = 100 * {total / sum(total)})
+      group_by(timestamp) %>%
+      mutate(total = total / sum(total)) %>%
+      as.data.frame()
+    
+    
+    total_count <- gig_economy_by_occupation %>%
+      filter(occupation == "Total") %>%
+      select(date, count) %>%
+      as.data.frame()
+    total_count <- total_count[total_count$date %in% tallied_data$timestamp,]
+    
+    invisible(lapply(total_count$date, function(x){
+      tallied_data[tallied_data$timestamp == x,"total"] <<- tallied_data[tallied_data$timestamp == x,"total"] * total_count[total_count$date == x, "count"]
+    }))
+    
+    tallied_data <- as_data_frame(tallied_data)
     
     legend_order <- tallied_data %>%
       ungroup() %>%
@@ -188,17 +332,20 @@ shinyServer(function(input, output, session) {
     invisible(lapply(selected_categories,
                      function(x) {
                        filtered <-
-                         tallied_data[tallied_data$country_group == x,]
+                         tallied_data[tallied_data$country_group == x, ]
+                       xts_data <-
+                         xts(filtered$total, filtered$timestamp)
+                       xts_data[index(xts_data)] <-
+                         as.vector(stackoverflow_ma(as.vector(xts_data), n = as.numeric(input$region_rollmean_k)))
                        hc <<- hc %>%
-                         hc_add_series_xts(
-                           xts(filtered$total, filtered$timestamp),
-                           name = x,
-                           index = which(legend_order == x) - 1
-                         )
+                         hc_add_series_xts(na.omit(xts_data),
+                                           name = x,
+                                           index = which(legend_order == x) - 1)
+                       
                      }))
     hc %>%
-      hc_tooltip(valueDecimals = 2, valueSuffix = "%") %>%
-      hc_yAxis(title = list("text" = "Share"),  "opposite" = FALSE) %>%
+      hc_tooltip(valueDecimals = 0) %>%
+      hc_yAxis(title = list("text" = "Online Labour Index"),  "opposite" = FALSE) %>%
       hc_rangeSelector(buttons = list(
         list(
           type = 'month',
@@ -224,7 +371,11 @@ shinyServer(function(input, output, session) {
         ),
         list(type = 'all',
              text = 'All')
-      ))
+      )) %>%
+      hc_credits(text = 'Source: Online Labour Index',
+                 enabled = TRUE,
+                 href = 'http://ilabour.oii.ox.ac.uk/online-labour-index/',
+                 position = list(align = "right"))
     
     
   })
@@ -248,6 +399,18 @@ shinyServer(function(input, output, session) {
   #               choices = c("percent","number"))
   # })
   
+  
+  output$global_trends_stack_by_UI <- renderUI({
+    radioButtons(
+      "global_trends_stack_by",
+      "",
+      choices = c("Within group" = "percent", "Market share" = "normal"),
+      selected = "Market share",
+      width = "100%",
+      inline = TRUE
+    )
+  })
+  
   output$global_trends_stacked_bar_chart <- renderHighchart({
     if (is.null(input$global_trends_group_by)) {
       return()
@@ -266,6 +429,7 @@ shinyServer(function(input, output, session) {
       x_axis,
       "country" = {
         y_axis_order <- gig_economy_by_boundary %>%
+          filter(timestamp == max(timestamp)) %>%
           group_by_(x_axis) %>%
           summarise(total = sum(count)) %>%
           arrange(desc(total)) %>%
@@ -274,20 +438,42 @@ shinyServer(function(input, output, session) {
           .[1:20]
         
         prepared_data <- gig_economy_by_boundary %>%
-          filter(country %in% y_axis_order) %>%
+          filter(timestamp == max(timestamp)) %>%
+          
           group_by_(x_axis, y_axis) %>%
-          summarise(total = sum(count)) %>%
+          summarise(total = sum(count)) %>% {
+            
+            
+            foo <- .
+            foo$total <- 100 * {foo$total / sum(foo$total)}
+            as_data_frame(foo)
+            
+          } %>%
+          filter(country %in% y_axis_order) %>%
           spread_(y_axis, "total") %>%
           rename(x_axis = country) %>%
           as.data.frame()
         
+        bar_order <- gig_economy_by_boundary %>%
+          filter(timestamp == max(timestamp)) %>%
+          filter(country %in% y_axis_order) %>%
+          group_by_(y_axis) %>%
+          mutate(mean = mean(count)) %>%
+          select(occupation, mean) %>%
+          group_by(occupation) %>%
+          arrange(mean) %>%
+          select(occupation) %>%
+          ungroup() %>%
+          unique() %>%
+          unlist(use.names = F)
         
         
-        stacked_bar_chart(
-          data = prepared_data[match(y_axis_order, prepared_data$x_axis), ],
+        hc <- stacked_bar_chart(
+          data = prepared_data[match(y_axis_order, prepared_data$x_axis),],
           categories_column = "x_axis",
           measure_columns = setdiff(colnames(prepared_data), c("x_axis")),
-          stacking_type = "percent"
+          stacking_type = input$global_trends_stack_by,
+          explicit_order = {match(setdiff(colnames(prepared_data),"x_axis"), bar_order)-1}
         ) %>% hc_chart(zoomType = "x",
                        panning = TRUE,
                        panKey = 'shift') %>%
@@ -296,43 +482,83 @@ shinyServer(function(input, output, session) {
               "function() {return '<b>'+ this.series.name +'</b>: '+ Highcharts.numberFormat(this.percentage, 0) +' %';}"
             )
           )
+        
+        if(input$global_trends_stack_by == "percent"){
+          hc %>% hc_yAxis(max = 100)
+        } else {
+          hc
+        }
       },
       "occupation" = {
-        y_axis_order <- gig_economy_by_boundary %>%
-          group_by_(y_axis) %>%
-          summarise(total = sum(count)) %>%
-          arrange(desc(total)) %>%
-          select_(y_axis) %>%
-          unlist(use.names = FALSE)
-        
-        
         prepared_data <- gig_economy_by_boundary %>%
+          filter(timestamp == max(timestamp)) %>%
           group_by_(x_axis, y_axis) %>%
-          summarise(total = sum(count)) %>%
+          summarise(total = sum(count)) %>% {
+            
+            
+            foo <- .
+            foo$total <- 100 * {foo$total / sum(foo$total)}
+            as_data_frame(foo)
+            
+          } %>%
           spread_(y_axis, "total") %>%
           rename_("x_axis" = x_axis) %>%
-          as.data.frame()
+          as.data.frame(., stringAsFactors = FALSE)
         
-        print(str(prepared_data))
-        print(match(y_axis_order, setdiff(colnames(prepared_data), "x_axis")))
+        y_axis_order <- prepared_data %>%
+          colnames() %>%
+          setdiff("x_axis")
         
         
         
-        stacked_bar_chart(
-          data = prepared_data,
+        
+        occupation_axis_order <- prepared_data %>% gather(x_axis, x) %>% .[,c(1,3)] %>%
+          group_by(x_axis) %>%
+          mutate(total = sum(x)) %>%
+          arrange(desc(total)) %>%
+          ungroup() %>%
+          select(x_axis) %>%
+          unique() %>%
+          unlist(use.names = F)
+        
+        hc <- stacked_bar_chart(
+          data = prepared_data[match(occupation_axis_order, prepared_data$x_axis),],
           categories_column = "x_axis",
           measure_columns = setdiff(colnames(prepared_data), c("x_axis")),
-          stacking_type = "percent",
-          # ordering_function = var
-          explicit_order = rev(match(y_axis_order, setdiff(colnames(prepared_data), "x_axis")))
+          stacking_type = input$global_trends_stack_by,
+          ordering_function = mean,
+          explicit_order = match(y_axis_order, rev(
+            c(
+              "United States",
+              "Canada",
+              "other Americas",
+              "United Kingdom",
+              "other Europe",
+              "Australia",
+              "India",
+              "other Asia and Oceania",
+              "all Africa"
+            )
+          )) - 1
+          # explicit_order = 0:8
         ) %>% hc_chart(zoomType = "x",
                        panning = TRUE,
                        panKey = 'shift') %>%
+          # hc_yAxis(max = 100) %>%
           hc_tooltip(
             formatter = JS(
               "function() {return '<b>'+ this.series.name +'</b>: '+ Highcharts.numberFormat(this.percentage, 0) +' %';}"
             )
           )
+        
+          if(input$global_trends_stack_by == "percent"){
+            hc %>% hc_yAxis(max = 100)
+          } else {
+            hc
+          }
+        
+        
+        
       },
       "country_group" = {
         # y_axis_order <- gig_economy_by_boundary %>%
@@ -343,29 +569,52 @@ shinyServer(function(input, output, session) {
         #   unlist(use.names = FALSE)
         
         prepared_data <- gig_economy_by_boundary %>%
+          filter(timestamp == max(timestamp)) %>%
           group_by_(x_axis, y_axis) %>%
-          summarise(total = sum(count)) %>%
+          summarise(total = sum(count)) %>% {
+            
+            
+            foo <- .
+            foo$total <- 100 * {foo$total / sum(foo$total)}
+            as_data_frame(foo)
+            
+          } %>%
           spread_(y_axis, "total") %>%
           rename_("x_axis" = x_axis) %>%
           as.data.frame()
         
-        stacked_bar_chart(
+        bar_order <- gig_economy_by_boundary %>%
+          filter(timestamp == max(timestamp)) %>%
+          group_by_(y_axis) %>%
+          mutate(mean = mean(count)) %>%
+          select(occupation, mean) %>%
+          group_by(occupation) %>%
+          arrange(mean) %>%
+          select(occupation) %>%
+          ungroup() %>%
+          unique() %>%
+          unlist(use.names = F)
+        
+        hc <- stacked_bar_chart(
           data = prepared_data[match(
             c(
+              "United States",
+              "Canada",
+              "other Americas",
               "United Kingdom",
-              "Germany",
               "other Europe",
+              "Australia",
               "India",
               "other Asia and Oceania",
-              "United States",
-              "other Americas",
               "all Africa"
             ),
+            
             prepared_data$x_axis
-          ), ],
+          ),],
           categories_column = "x_axis",
           measure_columns = setdiff(colnames(prepared_data), c("x_axis")),
-          stacking_type = "percent"
+          stacking_type = input$global_trends_stack_by,
+          explicit_order = {match(setdiff(colnames(prepared_data),"x_axis"), bar_order)-1}
         ) %>% hc_chart(zoomType = "x",
                        panning = TRUE,
                        panKey = 'shift') %>%
@@ -374,6 +623,12 @@ shinyServer(function(input, output, session) {
               "function() {return '<b>'+ this.series.name +'</b>: '+ Highcharts.numberFormat(this.percentage, 0) +' %';}"
             )
           )
+        
+        if(input$global_trends_stack_by == "percent"){
+          hc %>% hc_yAxis(max = 100)
+        } else {
+          hc
+        }
       }
     )
     
