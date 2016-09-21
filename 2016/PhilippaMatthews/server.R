@@ -1,3 +1,13 @@
+## =============================== License ========================================
+## ================================================================================
+## This work is distributed under the MIT license, included in the parent directory
+## Copyright Owner: University of Oxford
+## Date of Authorship: 2016
+## Author: Martin John Hadley (orcid.org/0000-0002-3039-6849)
+## Academic Contact: Mireia Borrell-Porta 
+## Data Source: local file
+## ================================================================================
+
 library(DT)
 library(shiny)
 
@@ -35,7 +45,6 @@ initial_columns <-
 
 # ## Reorder columns in dataframe by the initial_columns to ensure correct display in selectInput
 # heliotope_df <- heliotope_df[,order(match(colnames(heliotope_df), initial_columns))]
-
 
 shinyServer(function(input, output) {
   
