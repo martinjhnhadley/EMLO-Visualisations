@@ -37,10 +37,22 @@ initial_columns <- c(
   "Type.of.Policy",
   "Name.of.Policy",
   "Year.a.",
-  "Focus.of.Amendments.to.Policy",
   "Valid.from.b.",
-  "Valid.until.c."
+  "Valid.until.c.",
+  "General.Functioning.Structure"
 )
+
+match(initial_columns, long_colnames_replacements)
+
+colnames(timeline_data)[match(initial_columns, long_colnames_replacements)]
+
+
+cols_to_show <- match(initial_columns, long_colnames_replacements)
+cols_not_to_show <- setdiff(1:ncol(timeline_data), cols_to_show)
+
+cols_not_to_show - 1
+
+
 # 
 # displayable_columns <- c(
 #   "Type.of.policy",
@@ -60,5 +72,32 @@ initial_columns <- c(
 #   "Territorial.application"
 # )
 
+date_of_childbirth_tickbox <- c("Valid.from.childbirth.related.date.d.", "Valid.until.childbirth.related.date.e.")
 
 
+
+medium_and_long_columns <- list(
+  "Focus of Amendments to Policy" = "medium",
+  "Legislative Basis" = "medium",
+  "General Functioning Structure" = "long",
+  "NON MONETARY ENTITLEMENTS: Types of entitlement (f)" = "long",
+  "NON MONETARY ENTITLEMENTS: Period of entitlement (g)" = "long",
+  "NON MONETARY ENTITLEMENTS: Length of entitlement (h)" = "long",
+  "NON MONETARY ENTITLEMENTS: Conditions of entitlement Employment related conditions" = "long",
+  "NON MONETARY ENTITLEMENTS: Conditions of entitlement Conditions related to relationship to other family members" = "long",
+  "NON MONETARY ENTITLEMENTS Conditions of entitlement Other entitlement conditions" = "long",
+  "NON MONETARY ENTITLEMENTS Other details" = "long",
+  "MONETARY ENTITLEMENTS Types of entitlement (f)" = "long",
+  "MONETARY ENTITLEMENTS Period of entitlement" = "long",
+  "MONETARY ENTITLEMENTS Length of entitlement" = "long",
+  "MONETARY ENTITLEMENTS Rate of entitlement" = "long",
+  "MONETARY ENTITLEMENTS Other details" = "long",
+  "MONETARY ENTITLEMENTS Conditions of entitlement Age related conditions" = "long",
+  "MONETARY ENTITLEMENTS Conditions of entitlement Employment related conditions" = "long",
+  "MONETARY ENTITLEMENTS Conditions of entitlement Earnings related conditions" = "long",
+  "MONETARY ENTITLEMENTS Conditions of entitlement Income related conditions" = "long",
+  "MONETARY ENTITLEMENTS Conditions of entitlement Assets savings related conditions" = "long",
+  "MONETARY ENTITLEMENTS Conditions of entitlement Conditions related to the relationship to other family members" = "long",
+  "MONETARY ENTITLEMENTS Conditions of entitlement Other entitlement conditions" = "long",
+  "Territorial application" = "medium"
+)

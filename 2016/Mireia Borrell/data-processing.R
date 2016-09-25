@@ -4,7 +4,7 @@
 ## Copyright Owner: University of Oxford
 ## Date of Authorship: 2016
 ## Author: Martin John Hadley (orcid.org/0000-0002-3039-6849)
-## Academic Contact: Mireia Borrell-Porta 
+## Academic Contact: Mireia Borrell-Porta (orcid.org/0000-0003-2328-1258)
 ## Data Source: local file
 ## ================================================================================
 
@@ -127,7 +127,6 @@ timeline_data$Valid.until.childbirth.related.date.e. <-
 ## =========================== Sort by earliest date ====================================
 ## ==============================================================================
 
-aggregate(data = timeline_data, Name.of.Policy ~ Valid.from.b., FUN = sort)
 ## Find earliest date for each policy
 earliest_date_by_Name_of_Policy <-
   timeline_data[timeline_data$Valid.from.b. == ave(timeline_data$Valid.from.b.,
