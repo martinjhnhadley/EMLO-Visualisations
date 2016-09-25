@@ -134,9 +134,10 @@ shinyServer(function(input, output, session) {
                    )
       )  +
       scale_x_date(
-        breaks = date_breaks("12 month"),
-        labels = date_format("%b %Y"),
-        # minor_breaks = date_breaks("6 month"),
+        breaks = seq(as.Date("1997/01/01"), as.Date(paste0(year(
+          max(cutoff_timeline_data$Valid.until.c.)
+        ) + 1, "-01-01")), "years"),
+        labels = date_format("%Y"),
         limits = c(as.Date("1997/01/01"), as.Date(max(cutoff_timeline_data$Valid.until.c.)))
       ) + 
       xlab("") + ylab("") + scale_colour_brewer(name = "Type of Policy",
