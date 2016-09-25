@@ -20,11 +20,12 @@ shinyUI(navbarPage(
       tags$style(type = "text/css", "#map {height: calc(85vh - 100px) !important;}"),
       fluidRow(
         column(
-          selectInput(
+          div(id = "marker",
+              selectInput(
             "plot_marker",
             label = "Plot Markers",
             choices = c("Shipwreck Icon", "Circles")
-          ),
+          ),style = "position:relative;z-index:10000;"), # see http://stackoverflow.com/questions/1287439/ie7-z-index-layering-issues
           div(id = "mapStyle",
           selectInput(
             "selected_map_tile",
@@ -37,7 +38,7 @@ shinyUI(navbarPage(
               "Esri.OceanBasemap"
             ),
             selected = "Hydda.Base"
-          ), style = "position:relative;z-index:10000;"), # see http://stackoverflow.com/questions/1287439/ie7-z-index-layering-issues
+          ), style = "position:relative;z-index:9000;"), # see http://stackoverflow.com/questions/1287439/ie7-z-index-layering-issues
           width = 4
         ),
         column(
