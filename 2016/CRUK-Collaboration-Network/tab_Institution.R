@@ -63,24 +63,40 @@ output$institution_displayed_network <- renderVisNetwork({
   switch (
     input$institution_people_or_departments,
     "individuals" = {
-      invisible(
-        network <- visIgraph(
-          institution_graph,
-          idToLabel = FALSE,
-          randomSeed = 1,
-          layout = "layout.forceatlas2",
-          directed = FALSE,
-          k = 500, # repulsion
-          delta = 30, # attraction
-          ks = 10, # speed constant
-          ksmax = 20, # limits speed
-          # autostab parameters can't be found
-          gravity = 30,
-          iterations = 200,
-          nohubs = FALSE
-          # linlog = TRUE
-        )
-      )
+      # invisible(
+      #   network <- visIgraph(
+      #     institution_graph,
+      #     idToLabel = FALSE,
+      #     randomSeed = 1,
+      #     layout = "layout.forceatlas2",
+      #     directed = FALSE,
+      #     k = 500, # repulsion
+      #     delta = 30, # attraction
+      #     ks = 10, # speed constant
+      #     ksmax = 20, # limits speed
+      #     # autostab parameters can't be found
+      #     gravity = 30,
+      #     iterations = 200,
+      #     nohubs = FALSE
+      #     # linlog = TRUE
+      #   )
+      # )
+      invisible(network <- visIgraph(
+        # as.undirected(departments_g),
+        as.undirected(institution_graph),
+        layout = "layout.forceatlas2",
+        directed = FALSE,
+        k = 200, # repulsion
+        delta = 5, # attraction
+        ks = 10, # speed constant
+        ksmax = 20, # limits speed
+        # autostab parameters can't be found
+        gravity = 0.1,
+        iterations = 400,
+        nohubs = FALSE,
+        randomSeed = 8
+        # linlog = TRUE
+      ))
     },
     "departments" = {
       invisible(
