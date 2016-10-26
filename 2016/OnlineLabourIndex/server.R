@@ -5,7 +5,7 @@
 ## Date of Authorship: 2016
 ## Author: Martin John Hadley (orcid.org/0000-0002-3039-6849)
 ## Academic Contact: otto.kassi@oii.ox.ac.uk
-## Data Source: https://dx.doi.org/10.6084/m9.figshare.3761562.v56
+## Data Source: https://dx.doi.org/10.6084/m9.figshare.3761562
 ## ================================================================================
 
 # library(magrittr)
@@ -18,8 +18,9 @@ library(dygraphs)
 library(xts)
 library(htmltools)
 library(tidyverse)
-library(oidnChaRts)
+# library(oidnChaRts)
 
+source("oidnChaRts.R")
 source("data-processing.R", local = T)
 
 xts_ma <- function(xts_data = NA,
@@ -103,6 +104,9 @@ shinyServer(function(input, output, session) {
   })
   
   output$landing_xts_highchart <- renderHighchart({
+    
+    show(id = "loading-content", anim = TRUE, animType = "fade")
+    
     selected_categories <- "Total"
     
     filtered <-
@@ -121,6 +125,8 @@ shinyServer(function(input, output, session) {
                title = list("text" = "Online Labour Index")) %>%
       custom_ts_selector %>%
       iLabour_branding
+    
+    hide(id = "loading-content", anim = TRUE, animType = "fade")
     
   })
   
