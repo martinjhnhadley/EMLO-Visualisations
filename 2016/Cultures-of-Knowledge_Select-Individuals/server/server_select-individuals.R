@@ -79,7 +79,7 @@ output$neighbor_degree_UI <- renderUI({
   }
   sliderInput(
     "neighbor.degree",
-    label = "Neighbor Degree",
+    label = "Neighbour Degree",
     min = 1,
     max = 3,
     value = 1,

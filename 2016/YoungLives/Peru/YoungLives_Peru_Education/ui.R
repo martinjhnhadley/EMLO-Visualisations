@@ -15,7 +15,7 @@ library(htmltools)
 shinyUI(
   navbarPage(
     theme = "young-lives.css",
-    title = "Young Lives: Vietnam",
+    title = "Young Lives: Peru",
     tabPanel(
       "Education Comparison",
       fluidPage(

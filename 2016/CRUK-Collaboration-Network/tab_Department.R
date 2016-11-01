@@ -67,7 +67,7 @@ output$department_app_collapsile_info <- renderUI({
   width = 6),
   column(p(
     paste0("Average Degree: ", round(mean(
-      degree(department_graph())
+      degree(department_graph)
     ))), digits = 2
   ),
   p(
