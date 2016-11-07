@@ -43,10 +43,23 @@ shinyServer(function(input, output){
       select(category) %>%
       unique() %>%
       unlist(use.names = F)
+    non_empty_categories <- categories_list[categories_list %in% non_empty_categories]
     
-    selectInput("selected_category", label = "Selected indicator",
-                choices = categories_list[categories_list %in% non_empty_categories])
+    if(is.null(input$selected_category)){
+      already_selected <- NA
+    } else {
+      already_selected <- input$selected_category
+    }
     
+    if(already_selected %in% non_empty_categories){
+      selectInput("selected_category", label = "Selected indicator",
+                  choices = categories_list[categories_list %in% non_empty_categories],
+                  selected = already_selected)
+    } else {
+      selectInput("selected_category", label = "Selected indicator",
+                  choices = categories_list[categories_list %in% non_empty_categories])
+    }
+  
   })
   
   output$no_data_warning <- renderUI({
