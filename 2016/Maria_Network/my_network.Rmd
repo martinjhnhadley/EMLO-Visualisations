@@ -1,0 +1,40 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## My Network
+
+```{r}
+library(readr)
+
+with_japense <- read_csv("data/modlabelsall.csv")
+modesedges <- read_csv("data/modesedges.csv")
+bigModLables <- read_csv("data/bigModLables.csv")
+
+library(dplyr)
+
+rescaled_sizes <- log(with_japense$Size + 5)
+
+with_japense %>%
+  rename(id = OSLOM.ID,
+         label = Label) %>%
+  select(-Size) %>%
+  mutate(size = rescaled_sizes,
+         title = label) -> nodes
+
+edges <- modesedges
+
+## www.datastorm-open.github.io/visNetwork/
+library(visNetwork)
+visNetwork(nodes, edges) %>%
+  visLayout(improvedLayout = TRUE) %>%
+  visEdges(arrows = "to") %>%
+  visOptions(highlightNearest = TRUE)
+
+```
+
