@@ -14,35 +14,35 @@ legend.df <- emre_data %>%
 ## ===== Tooltip
 
 emre_event_labeller <- function(
-  no..individuals,
+  no.individuals,
   species,
   camera.id,
   time,
-  no..males,
-  no..females,
-  no..unknown,
-  no..sa,
-  no..juv){
+  no.males,
+  no.females,
+  no.unknown,
+  no.sa,
+  no.juv){
   paste0(
-    no..individuals," ",species," by ", camera.id, " at ", time,
+    no.individuals," ",species," by ", camera.id, " at ", time,
     " ",
-    no..males, " males, ", no..females, " females, ", no..unknown, " unknown.",
+    no.males, " males, ", no.females, " females, ", no.unknown, " unknown.",
     " ",
-    no..sa, " small adults, ", no..juv, " small animals."
+    no.sa, " small adults, ", no.juv, " small animals."
   )
 }
 
 emre_data <- emre_data %>%
   mutate(title = emre_event_labeller(
-    no..individuals,
+    no.individuals,
     species,
     camera.id,
     time,
-    no..males,
-    no..females,
-    no..unknown,
-    no..sa,
-    no..juv)
+    no.males,
+    no.females,
+    no.unknown,
+    no.sa,
+    no.juv)
   )
 
 ## ==== Filter out missing dates

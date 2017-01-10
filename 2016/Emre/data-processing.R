@@ -1,10 +1,7 @@
-library(readr)
-library(plyr)
-library(dplyr)
-library(lubridate)
-library(viridis)
 
 
+## ==== emre_data
+## ==============
 emre_data <- read_csv(read_csv("data/secret_events_url.csv") %>%
                         select(events_url) %>%
                         unlist(use.names = F))
@@ -15,8 +12,6 @@ unique_species <- emre_data %>%
   select(species) %>%
   unique() %>%
   unlist(use.names = F)
-
-seconds_to_period(emre_data$time)
 
 emre_data <- emre_data %>%
   mutate(station_id = plyr::mapvalues(camera.id, from = unique_species, to = 1:length(unique_species))) %>%
@@ -29,7 +24,8 @@ emre_data <- emre_data %>%
   mutate(color = substr(color,1,nchar(color)-2)) %>%
   filter(!species %in% c("Humans with or without domestic animals", "Humans", "Domestic animals", ""))
 
-
+## ==== emre_locations
+## ==============
 emre_locations <- read_csv(read_csv("data/secret_locations.csv") %>%
                         select(events_url) %>%
                         unlist(use.names = F))
@@ -59,6 +55,13 @@ all_locations <- all_locations %>%
 
 emre_data <- emre_data %>%
   mutate(place_id = as.numeric(gsub("Station_", "", station)) - 1)
+
+## ===== Legend
+
+legend.df <- emre_data %>%
+  select(species, color) %>%
+  rename(description = species) %>%
+  unique()
 
 
 
