@@ -1,6 +1,5 @@
 ## Code for cleansing the raw-data and generating the datafiles in data/
-library(plyr)
-library(dplyr)
+
 library(readr)
 library(lubridate)
 
