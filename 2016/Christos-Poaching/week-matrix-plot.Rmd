@@ -1,0 +1,330 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Week Matrix Plot
+
+This is what I was asked for
+
+"The first one will use not the attached data, but rather the 3*4 months data that we looked at yesterday, be a heat map, with XYZ being rainfall (total mm in a week) - shots(mean/sensor/day) – patrol (km). The data are summarized in the Excel file per week (so ~17 weeks per year * 3 years * 12 sensors…the total number of rows) and the options of the end user for the heat map could be to select subset of sensors, select Yr1/Yr2/Yr3, and whether the mean shots/day/sensor are only for diurnal or nocturnal shots and if the patrols are total patrol around the specific sensors selected or the overall survey grid""
+
+Process data:
+
+```{r}
+weekly_rainfall_patrol_shots <- weekly_patrols_and_gunshots %>%
+  select(rainfall, shotstotalpday, patrol.grid.total)
+
+weekly_rainfall_patrol_shots[is.na(weekly_rainfall_patrol_shots)] <- 0
+
+## Bin rainfall and patrol
+weekly_rainfall_patrol_shots <- weekly_rainfall_patrol_shots %>%
+  unique() %>%
+  mutate(rainfall.range = cut(
+    rainfall,
+    breaks = seq(0, 130, 10),
+    labels = paste0(seq(0, 120, 10), "-", seq(10, 130, 10)),
+    include.lowest = TRUE
+  )) %>%
+  mutate(
+    patrol.range = cut(
+      patrol.grid.total,
+      breaks = seq(0, 120000, 10000),
+      labels = paste0(format(seq(0, 110000, 10000)), "-", format(seq(10000, 120000, 10000))),
+      include.lowest = TRUE
+    )
+  ) %>%
+  select(shotstotalpday, rainfall.range, patrol.range)
+
+hc_rainfall_patrol_shots <- weekly_rainfall_patrol_shots
+hc_rainfall_patrol_shots <- hc_rainfall_patrol_shots %>%
+  group_by(rainfall.range, patrol.range) %>%
+  mutate(mean.shots = mean(shotstotalpday)) %>%
+  select(shotstotalpday) %>%
+  ungroup() %>%
+  unique()
+
+
+
+
+```
+
+
+```{r}
+
+hchart(hc_rainfall_patrol_shots, "heatmap", hcaes(x = rainfall.range, y = patrol.range, value = shotstotalpday)) %>%
+  hc_plotOptions(
+           series = list(
+             boderWidth = 0,
+             dataLabels = list(enabled = TRUE, valueDecimals = 2, 
+                               format = "{point.value:.2f}"
+          )
+    )) %>%
+  hc_xAxis(gridLineWidth = 1) %>%
+  hc_tooltip(
+      formatter = JS(
+        "function () {
+                return '<b>' + 'Rainfall (mm):</b> ' + this.series.xAxis.categories[this.point.x] + '<br>' +
+        '<b>Patrol (km): </b>' + this.series.yAxis.categories[this.point.y] + '<br>' +
+        '<b>Mean gunshots: </b>' + Highcharts.numberFormat(this.point.value,4);
+}"
+      )
+      ) %>%
+  hc_legend(align = "right", layout = "vertical") %>%
+  hc_title(text = "Mean gunshots") %>%
+  hc_credits(
+      text = 'Data from WildCRU',
+      enabled = TRUE,
+      href = 'https://wildcru.org'
+    )
+```
+
+
+# Temporal Heatmap/Surface
+
+"The second set of graphs uses the two attached Excel files and would contain a heatmap showing in the three axes XYZ the time (date), mean gunshots per sensor that day, and time of the day. The options available would be to deselect sensors, and select the period for which the graph displays the data. A total number of animals killed could be calculated with a simple formula… (multiplying the mean shots/day for all days of the period selected, time the number of the sensors selected, time a kill success rate – 0.72). I believe this surface or heatmap graph should suffice. The only addition could be a simple line graph with weekdays/proportion of shots made figure in addition, as the weekday info would not be contained in the heatmap/surface map, but time may not be there to develop that one as well.""
+
+Let's try and create curves for day/night transition:
+
+
+
+
+```{r}
+colnames(knp_gunshots_intgraph_shiny)
+
+
+time_of_day_heatmap <- knp_gunshots_intgraph_shiny %>%
+  select(gunscore, date_formatted, tod) %>%
+  group_by(tod, date_formatted) %>%
+  mutate(gunscore = sum(gunscore)) %>%
+  unique() %>%
+  ungroup() %>%
+  mutate(date_formatted = dmy(date_formatted))
+
+hchart(time_of_day_heatmap, "heatmap", hcaes(x = date_formatted, y = tod, value = gunscore)) %>%
+  hc_tooltip(
+      formatter = JS(
+        "function () {
+                return '<b>' + 'Date: </b> ' + this.series.xAxis.categories[this.point.x] + '<br>' +
+        '<b>Time of day: </b>' + this.point.y + ':00' + '<br>' +
+        '<b>Gunscore: </b>' + this.point.value;
+}"
+      )
+      ) %>%
+  hc_legend(align = "right", layout = "vertical") %>%
+  hc_yAxis(
+    min = 0,
+        max = 23,
+        title = list(text = "Time of Dat")
+          ) %>%
+  hc_xAxis(
+    title = list(text = "Date")
+  ) %>%
+  hc_chart(zoomType = "xy", pinchType = "xy")
+
+```
+
+Weekdays comparison
+
+```{r}
+weekdays_barchart <- knp_gunshots_intgraph_shiny %>%
+  select(gunscore, weekday) %>%
+  group_by(weekday) %>%
+  mutate(shots.per.weekday = n()) %>%
+  ungroup() %>%
+  select(-gunscore) %>%
+  unique() %>%
+  mutate(shots.per.weekday = 100 * {shots.per.weekday / sum(shots.per.weekday)})
+
+
+weekdays_barchart <- weekdays_barchart[order(as.numeric(mapvalues(
+  weekdays_barchart$weekday,
+  c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"),
+  1:7
+  ))), ]
+
+
+hchart(weekdays_barchart, "bar", hcaes(x = weekday, y = shots.per.weekday)) %>%
+  hc_tooltip(
+      formatter = JS(
+        "function () {
+        return '<b>' + 'Day of Week:</b> ' + this.point.name + '<br>' +
+        '<b>% of shots fired on this day: </b>' + Highcharts.numberFormat(this.point.y,2) + '%';
+}"
+      )
+      ) %>%
+  hc_yAxis(title = list(text = "% of gunshots")) %>%
+  hc_xAxis(title = list(text = ""))
+
+```
+
+
+
+
+
+# OLD
+
+```{r}
+
+
+weekly_patrols_and_gunshots$sensor %>% unique()
+
+## Compute mean shotperday for each set of conditions and spread ready for conversion to matrix
+weekly_rainfall_patrol_shots <- weekly_rainfall_patrol_shots %>%
+  unique() %>%
+  group_by(rainfall.range, patrol.range) %>%
+  mutate(mean.shots.for.conditions = mean(shotstotalpday)) %>%
+  select(-shotstotalpday) %>%
+  ungroup() %>%
+  unique() %>%
+  spread(patrol.range, mean.shots.for.conditions)
+
+weekly_rainfall_patrol_shots[is.na(weekly_rainfall_patrol_shots)] <- 0
+## tibbles don't allow rownames
+weekly_rainfall_patrol_shots <- as.data.frame(weekly_rainfall_patrol_shots)
+## format preserves 45.0 rather than 45
+rownames(weekly_rainfall_patrol_shots) <- weekly_rainfall_patrol_shots$rainfall.range
+## Drop now unnecessary column
+weekly_rainfall_patrol_shots <- weekly_rainfall_patrol_shots %>%
+  select(-rainfall.range)
+```
+
+```{r}
+
+
+
+
+## create matrix
+weekly_matrix_rainfall_patrol_shots <- weekly_rainfall_patrol_shots %>%
+  as.matrix()
+```
+
+This is a heatmap:
+
+```{r}
+plot_ly(
+  y = rownames(weekly_matrix_rainfall_patrol_shots),
+  x = colnames(weekly_matrix_rainfall_patrol_shots),
+  z = weekly_matrix_rainfall_patrol_shots
+) %>%
+  # add_heatmap(zsmooth = "fast",
+  #             dx = 1000,
+  #             connectgaps = FALSE) %>%
+  add_heatmap() %>%
+  layout(xaxis = list(title = "patrols",
+                      range = c(0, 10000),
+  autorange = TRUE,
+  showgrid = FALSE,
+  zeroline = TRUE,
+  linecolor =  'black',
+  showticklabels = TRUE,
+  ticks = ''),
+                      yaxis = list(title = "rainfall"))
+
+```
+
+
+
+## No bin
+
+```{r}
+weekly_rainfall_patrol_shots <- weekly_patrols_and_gunshots %>%
+  select(rainfall, shotstotalpday, patrol.grid.total)
+
+weekly_rainfall_patrol_shots[is.na(weekly_rainfall_patrol_shots)] <- 0
+
+## Compute mean shotperday for each set of conditions and spread ready for conversion to matrix
+weekly_rainfall_patrol_shots <- weekly_rainfall_patrol_shots %>%
+  unique() %>%
+  group_by(rainfall, patrol.grid.total) %>%
+  mutate(mean.shots.for.conditions = mean(shotstotalpday)) %>% # mean shots calculated
+  select(-shotstotalpday) %>%
+  ungroup() %>%
+  unique() %>%
+  spread(patrol.grid.total, mean.shots.for.conditions)
+
+weekly_rainfall_patrol_shots[is.na(weekly_rainfall_patrol_shots)] <- 0
+## tibbles don't allow rownames
+weekly_rainfall_patrol_shots <- as.data.frame(weekly_rainfall_patrol_shots)
+## format preserves 45.0 rather than 45
+rownames(weekly_rainfall_patrol_shots) <- trimws(format(round(weekly_rainfall_patrol_shots$rainfall,2)))
+## Drop now unnecessary column
+weekly_rainfall_patrol_shots <- weekly_rainfall_patrol_shots %>%
+  select(-rainfall)
+```
+
+
+```{r}
+## create matrix
+weekly_matrix_rainfall_patrol_shots <- weekly_rainfall_patrol_shots %>%
+  as.matrix()
+```
+
+
+This is a heatmap:
+
+```{r}
+plot_ly(
+  y = rownames(weekly_matrix_rainfall_patrol_shots),
+  x = colnames(weekly_matrix_rainfall_patrol_shots),
+  z = weekly_matrix_rainfall_patrol_shots
+) %>%
+  add_heatmap(zsmooth = "fast",
+              dx = 1000,
+              connectgaps = FALSE) %>%
+  layout(xaxis = list(title = "rainfall",
+                      range = c(0, 10000),
+  autorange = TRUE,
+  showgrid = FALSE,
+  zeroline = TRUE,
+  linecolor =  'black',
+  showticklabels = TRUE,
+  ticks = ''),
+                      yaxis = list(title = "patrols"))
+
+```
+
+
+
+```{r}
+weekly_matrix <- weekly_patrols_and_gunshots %>%
+  select(rainfall, shotstotalpday, patrol.s.total)
+
+weekly_matrix[is.na(weekly_matrix)] <- 0
+
+weekly_matrix <- weekly_matrix %>%
+  unique() %>%
+  group_by(rainfall, patrol.s.total) %>%
+  mutate(shots = n()) %>%
+  select(-shotstotalpday) %>%
+  ungroup() %>%
+  unique() %>%
+  spread(patrol.s.total, shots)
+weekly_matrix[is.na(weekly_matrix)] <- 0
+
+weekly_matrix <- as.data.frame(weekly_matrix)
+
+weekly_matrix$rainfall
+
+rownames(weekly_matrix) <- weekly_matrix$rainfall
+
+weekly_shots_matrix <- weekly_matrix %>%
+  select(-rainfall) %>%
+  as.matrix()
+
+plot_ly(
+  y = rownames(weekly_shots_matrix),
+  x = colnames(weekly_shots_matrix),
+  z = weekly_shots_matrix
+) %>%
+  add_heatmap() %>%
+  layout(scene = list(xaxis = list(title = "rainfall"),
+                      yaxis = list(title = "patrols"),
+                      zaxis = list(title = "Total Gunshots")))
+
+```
+

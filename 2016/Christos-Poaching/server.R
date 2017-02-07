@@ -15,6 +15,12 @@ source("data-processing.R", local = T)
 source("calendar_heatmap.R", local = T)
 
 shinyServer(function(input, output, session) {
+  
+  source("weekheatmap.R", local = TRUE)$value
+  
+  source("calendarheatmap.R", local = TRUE)$value
+  
+  
   calheatmap_data <- eventReactive({
     input$calendar_shots_or_patrols
   },
