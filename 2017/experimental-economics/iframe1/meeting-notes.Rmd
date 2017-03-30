@@ -1,0 +1,98 @@
+---
+title: "MEETING NOTES"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## IFRAME 1
+
+
+### Color switch from country to citations
+
+So a different colour (but with resampling from colour vector) for each citation.
+
+Note that this is almost finished
+
+### Remove the legend for Figure 1
+
+### Figure 1 additional filters
+
+REMOVE INCENTIVE RANGE SLIDER
+
+Repeated vs. One-shot Reporting, [repeated], radio buttons: “Both”, [repeated==1] “Only Repeated”, [repeated==0] “Only One-Shot”
+
+In the Lab vs. Online/Telephone, [remote], radio buttons: “Both”, [remote==0] “Only Lab”, [remote==1] “Only Online/Telephone”
+
+Control Rolls Suggested, [control_rolls], radio buttons: “Both”, [control_rolls==1], “Experimenter Suggested Control Rolls”, [control_rolls==0], “Experimenter did not Suggest Control Rolls”
+
+Reporting Random Draw or State of Mind, [internal_lying], “Both”, [internal_lying==0] “Reporting Random Draw”, [internal_lying==1] “Reporting State of Mind”
+
+True Distribution, [true_distribution_text],  selectize with all options selected as default (this will be about six options)
+
+Radio Button:
+
+```{r}
+data_figure1$remote
+```
+
+Selectize:
+
+```{r}
+data_figure1$true_distribution_text %>% unique()
+```
+
+### Figure 1 control tooltips
+
+Add a tooltip similar to that on the ilabour site
+
+"Filter contintents by deleting/adding their names" etc
+
+### Rename "Additional Filters"
+
+"Click here for more filters"
+
+### "Drag to zoom note"
+
+Make it smaller, also add a note that clicking on the bubbles will open the study.
+
+Then remove the tip from the tooltip as wasting space :)
+
+### Figure 2 (Distribution of...)
+
+Change tooltip to be Quartile 1...
+
+y-axis title "Percent"
+
+Remove title of chart (as in the tabPanel)
+
+
+
+
+
+
+
+
+
+
+
+
+# 20th March 2017
+
+## iframe 1
+
+Drop continents from the filter, just use country and bring out of the fold.
+
+Order all selectize alphabetically
+
+# In the modal
+
+Have:
+
+- Citation
+- Paper Title (new column being added)
+- Country
+- Number of subjects
+- Weblink

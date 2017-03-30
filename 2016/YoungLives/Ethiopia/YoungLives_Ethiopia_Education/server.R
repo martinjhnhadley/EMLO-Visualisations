@@ -90,9 +90,9 @@ shinyServer(function(input, output){
     
     bar_chart <- stacked_bar_chart(data = data_to_viz,
                                    library = "highcharter",
-                                   categories.column = "Property",
-                                   subcategories.column = "Cohort", 
-                                   value.column = "value",
+                                   categories.column = ~Property,
+                                   subcategories.column = ~Cohort, 
+                                   value.column = ~value,
                                    subcategories.order = c("Younger Cohort (age 12 in 2013)",
                                                            "Older Cohort (age 12 in 2006)")) %>%
       hc_plotOptions("series" = list("minPointLength" = 3))

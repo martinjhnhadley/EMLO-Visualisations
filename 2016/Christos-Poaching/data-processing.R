@@ -1,7 +1,7 @@
-kmp_gunshots <- read_csv("data/kmp_gunshots.csv") %>%
+knp_gunshots <- read_csv("data/knp_gunshots.csv") %>%
   arrange(date)
 
-kmp_patrols <- read_csv("data/kmp_patrols.csv")
+knp_patrols <- read_csv("data/knp_patrols.csv")
 
 
 sensor_locations <- read_csv("data/sensor-locations.csv")

@@ -1,0 +1,35 @@
+---
+title: "Meeting Notes"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Thursday 9th February
+
+## iframe1
+
+### Figure 1
+
+#### Colour by Study (citation column)
+
+Don't include a legend
+
+#### Tooltip everything
+
+Lean on iLabour
+
+#### Link to study
+
+Try to get double-clicking on a bubble to link to the study
+
+### Figure A2
+
+Make the x-axis go c(-1, -.6, -.2, .2, .6, 1)
+
+### Add a datatable tab
+
+Think 
+

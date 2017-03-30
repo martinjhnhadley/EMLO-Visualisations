@@ -2,11 +2,11 @@ library(shiny)
 library(plotly)
 library(highcharter)
 library(googleVis)
+library(shinyjs)
 
 
-
-fluidPage(navbarPage(
-  "KMP Poaching",
+shinyUI(navbarPage(
+  "KNP Poaching",
   tabPanel(
     "Rainfall / Patrol / Gunshots (weekly)",
     fluidPage(
@@ -23,22 +23,37 @@ fluidPage(navbarPage(
   tabPanel(
     "Date / Time of Day / Gunshots",
     fluidPage(
+      useShinyjs(),
+      includeCSS("www/animate.min.css"),
+      # provides pulsating effect
+      includeCSS("www/loading-content.css"),
       sidebarLayout(
         sidebarPanel(
           uiOutput("calendar_heatmap_timeperiod_UI"),
           uiOutput("calendar_heatmap_animals_killed_UI")
         ),
         mainPanel(tabsetPanel(
+          tabPanel("Surface",
+                   fluidPage(
+                     plotlyOutput("calendar_surface_plotly", width = "100%", height = "100%")
+                     )),
           tabPanel(
             "Heatmap",
             fluidPage(
+              div(id = "loading-calendar_heatmap_hc",
+                  fillPage(
+                    h2(class = "animated infinite pulse", "Loading data...")
+                  )),
               highchartOutput("calendar_heatmap_hc", height = "500px")
             )
           ),
           tabPanel("Weekday comparison",
                    fluidPage(
                      highchartOutput("calendar_weekdays_hc")
-                   ))
+                   )),
+          tabPanel("Monthly Comparison",
+                   fluidPage(wellPanel("Note the controls to the left do not affect this chart"),
+                             plotlyOutput("month_by_hour_gunshots_surface", width = "100%", height = "100%")))
         ))
       )
     )
@@ -65,13 +80,6 @@ fluidPage(navbarPage(
           style = "min-width:600px"
         )
       )
-    )
-  ),
-  
-  tabPanel(
-    "Gunshot surface",
-    fluidPage(
-      plotlyOutput("gunshots_surface")
     )
   ),
   

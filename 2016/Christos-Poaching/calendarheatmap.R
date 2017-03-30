@@ -17,11 +17,15 @@ output$calendar_heatmap_animals_killed_UI <- renderUI({
   gunshots <- knp_gunshots_intgraph_shiny %>%
     filter(date >= input$calendar_heatmap_timeperiod[1] & 
              date <= input$calendar_heatmap_timeperiod[2]) %>%
-    select(gunscore) %>%
-    .[[1]]
+    select(gunscore, date, tod) %>%
+    group_by(tod, date) %>%
+    mutate(number.of.shots = n()) %>%
+    ungroup() %>%
+    select(number.of.shots) %>%
+    sum()
   
   wellPanel(
-    paste("Total Animals killed in selected time period (72% accuracy assumed):", round(0.72 * sum(gunshots)))
+    paste("Total Animals killed in selected time period (73.9% accuracy assumed):", round(0.739 * sum(gunshots)))
   )
   
 })
@@ -33,33 +37,59 @@ output$calendar_heatmap_hc <- renderHighchart({
   }
   
   time_of_day_heatmap <- knp_gunshots_intgraph_shiny %>%
-    select(gunscore, date, tod) %>%
     filter(date >= input$calendar_heatmap_timeperiod[1] & 
              date <= input$calendar_heatmap_timeperiod[2]) %>%
+    select(gunscore, date, tod) %>%
     group_by(tod, date) %>%
-    mutate(gunscore = sum(gunscore)) %>%
+    mutate(number.of.shots = n()) %>%
+    select(-gunscore) %>%
+    # mutate(gunscore = sum(gunscore)) %>%
     unique() %>%
     ungroup()
   
-  hchart(time_of_day_heatmap, "heatmap", hcaes(x = date, y = tod, value = gunscore)) %>%
+  time_of_day_heatmap <- time_of_day_heatmap %>%
+    mutate(time = as.integer(tod * 60 * 60 * 1000))
+  
+  time_of_day_heatmap
+  
+  
+  hchart(time_of_day_heatmap, "heatmap", 
+         hcaes(x = date, y = time, value = number.of.shots)) %>%
+    hc_yAxis(
+      # tickPixelInterval = 50,
+      # min = JS("Date.UTC(2015, 4, 1)"),
+      # max = JS("Date.UTC(2015, 4, 30)"),
+      # type = "datetime",
+      # dateTimeLabelFormats = list( ##force all formats to be hour:minute:second
+      #   second = '%H:%M:%S',
+      #   minute = '%H:%M:%S',
+      #   hour = '%H:%M:%S',
+      #   day = '%H:%M:%S',
+      #   week = '%H:%M:%S',
+      #   month = '%H:%M:%S',
+      #   year = '%H:%M:%S'
+      # ),
+      title = list(text = "Time of Day")
+    ) %>%
+    hc_xAxis(
+      type = "datetime",
+      title = list(text = "Date")
+    ) %>%
+    hc_chart(zoomType = "xy", pinchType = "xy")
+  # hc_colorAxis(
+  #   min = 0,
+  #   minColor = "#FFFFFF",
+  #   maxColor = "#B22222") %>%
     hc_tooltip(
       formatter = JS(
         "function () {
         return '<b>' + 'Date: </b> ' + this.series.xAxis.categories[this.point.x] + '<br>' +
         '<b>Time of day: </b>' + this.point.y + ':00' + '<br>' +
-        '<b>Gunscore: </b>' + this.point.value;
+        '<b>Number of gunshots: </b>' + this.point.value;
 }"
       )
       ) %>%
     hc_legend(align = "right", layout = "vertical") %>%
-    hc_yAxis(
-      min = 0,
-      max = 23,
-      title = list(text = "Time of Dat")
-    ) %>%
-    hc_xAxis(
-      title = list(text = "Date")
-    ) %>%
     hc_chart(zoomType = "xy", pinchType = "xy")
 
 })

@@ -1,0 +1,62 @@
+---
+title: "Meeting Notes"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Kill legend
+
+# Further highlight selected series
+
+Thickness, halo of buttons...
+
+Look to deemphasise the other series.
+
+# Marker size dependent on subjects
+
+.... might have to use two series, steal from iframe1
+
+
+# x-axis
+
+Tidy the name
+
+# y-axis
+
+Percent
+
+# Drop gridlines
+
+# Add dashed-line at 16.7
+
+# Replicate iframe1 filters 
+
+Don't need to filter by "true distribution"
+
+# Don't remove incentive range slider
+
+# Add average line (weighted by the number of subjects)
+
+This can be done via `fit`
+
+Black bold line
+
+# Rename tab:
+
+Distribution of reports: 6 states
+
+# Three additional tabs
+
+2, 3, 10 states
+
+
+
+
+
+
+
+
+

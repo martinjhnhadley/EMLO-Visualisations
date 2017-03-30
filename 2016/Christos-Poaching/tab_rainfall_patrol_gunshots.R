@@ -1,3 +1,5 @@
+## Rainfall / Patrol / Gunshots
+
 output$weekheatmap_selected_sensors_UI <- renderUI(
   checkboxGroupInput(
     "weekheatmap_selected_sensors",
@@ -108,7 +110,12 @@ output$weekheatmap_hc <- renderHighchart({
         '<b>Mean gunshots: </b>' + Highcharts.numberFormat(this.point.value,4);
 }"
       )
-      ) %>%
+    ) %>%
+    hc_colorAxis(
+      min = 0,
+      # type = "logarithmic",
+      minColor = "#fff5f0",
+      maxColor = "#67000d") %>%
     hc_legend(align = "right", layout = "vertical") %>%
     hc_xAxis(title = list(text = "Rainfall (mm)")) %>%
     hc_yAxis(title = list(text = "Total patrols across the survey grid (km)")) %>%
@@ -117,7 +124,7 @@ output$weekheatmap_hc <- renderHighchart({
                href = 'https://wildcru.org') %>%
     hc_title(text = "Mean gunshots/sensor/day") %>%
     hc_xAxis(gridLineWidth = 1)
-  })
+})
 
 output$weekheatmap_hc_display <- renderUI({
   weekheatmap_data <- weekheatmap_data()

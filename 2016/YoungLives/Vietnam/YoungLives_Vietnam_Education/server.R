@@ -87,17 +87,13 @@ shinyServer(function(input, output) {
       select(Property, Cohort, value) %>%
       mutate(value = ifelse(is.na(value), 0, value))
     
-    bar_chart <- stacked_bar_chart(
-      data = data_to_viz,
-      library = "highcharter",
-      categories.column = "Property",
-      subcategories.column = "Cohort",
-      value.column = "value",
-      subcategories.order = c(
-        "Younger Cohort (age 12 in 2013)",
-        "Older Cohort (age 12 in 2006)"
-      )
-    ) %>%
+    bar_chart <- stacked_bar_chart(data = data_to_viz,
+                                   library = "highcharter",
+                                   categories.column = ~Property,
+                                   subcategories.column = ~Cohort, 
+                                   value.column = ~value,
+                                   subcategories.order = c("Younger Cohort (age 12 in 2013)",
+                                                           "Older Cohort (age 12 in 2006)")) %>%
       hc_plotOptions("series" = list("minPointLength" = 3))
     
     if (input$selected_category %in% percentage_categories) {

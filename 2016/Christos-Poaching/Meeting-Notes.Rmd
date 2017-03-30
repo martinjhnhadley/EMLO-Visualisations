@@ -7,3 +7,26 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# February 10th
+
+## Weekly Heatmap
+
+### Red-white
+
+### Format the total number of animals killed to be X,XXX,XXX,XXX
+
+
+## Time/Date/Gunscore
+
+### Red-white
+
+### y-axis time axis (centre)
+
+## Me coming to talk at WildCRU 
+
+Write some words for Christos for advertising the talk.
+
+Reproducability, IDN, on-site training
+
+
+
