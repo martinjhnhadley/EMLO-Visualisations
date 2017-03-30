@@ -17,6 +17,12 @@
 # PDFs
 *.pdf
 
+# Other files
+*.pptx
+*.ppt
+*.doc
+*.docx
+
 # Ignore all xlsx files
 *.xlsx
 *.xls
